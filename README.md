@@ -5,5 +5,3 @@ Granny`s Skirmish v0.3
 
 Язык: Python 3.8
 Библиотеки: tkinter, pygame, pillow, json, time, random, os, platform.
-	
-Для редактирования data.json рекомендуется использовать Notepad++
