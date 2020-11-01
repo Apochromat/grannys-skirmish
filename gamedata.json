@@ -1,11 +1,16 @@
 {
     "title": "Granny`s Skirmish",
-    "version": "v0.8",
-    "windowsize":  [640, 525],
+    "version": "v0.8.4",
+    "windowsize":  [640, 520],
 	"canvassize":  [640, 480],
-	"statusbarwidth":90,
-	"hidwidth": 22,
-	"effectwidth":4,
+	"backgroung": "thistle2",
+	"buttoncolor": "khaki",
+	"font": "Helvetica",
+	"fontsize": 20,
+	"statusbarwidth":80,
+	"hidwidth": 19,
+	"effectwidth":5,
+	"timerwidth":6,
 	"aboutmessage": "'Granny`s Skirmish' \nversion: %s\n\nСмысл игры состоит в собирании котиков и попытках не умереть. \nУправление: W/↑- наверх, S/↓ - вниз, A/← - влево, D/→ - вправо, Space - удар",
     "authorsmessage": "Игра разработана: \nУстименко Степаном \nЯрцевой Ульяной",
 	"grannyspeed": {
@@ -13,6 +18,7 @@
             "slow": 2.5,
 			"fast": 10
         },
+	"savagespeed": 1,
 	"gravity": {
             "normal": 2.5,
             "inverted": -2.5
@@ -22,13 +28,20 @@
 	"ScoreAddBonus": 15,
 	"ScoreMax": 1000,
 	"effectduration":  3,
-	"animationduration":  0.15,
+	"animationGrannyduration":  0.15,
+	"animationSavageduration":  0.10,
+	"frametime": 0.015,
+	"levelamount": 2,
 	
 	"globals":["Hero", "Base", "Exit", "CatAmountAll", "CatAmountReal", "alphaPlatform", "betaPlatform", "gammaPlatform", "deltaPlatform", "epsilonPlatform", "zetaPlatform", "etaPlatform", "thetaPlatform", "iotaPlatform", "alphaCat", "betaCat", "gammaCat", "deltaCat", "epsilonCat", "zetaCat", "alphaBonus", "betaBonus", "gammaBonus", "deltaBonus", "epsilonBonus", "zetaBonus", "alphaLadder", "betaLadder", "gammaLadder", "deltaLadder", "epsilonLadder", "zetaLadder", "alphaWall", "betaWall", "gammaWall", "deltaWall", "epsilonWall", "zetaWall", "alphaSavage", "betaSavage", "gammaSavage", "deltaSavage", "alphaFastroom", "betaFastroom", "alphaSlowroom", "betaSlowroom", "alphaGravroom", "betaGravroom"],
 	
     "levels": [
         {
             "level": 0,
+			
+			"limited" : false,
+			"limittype" : "NEXT",
+			"time" :0,
 			
 			"exitCoords": [0,0],
 			"spawnCoords": [60, 400],
@@ -109,12 +122,16 @@
 			
 			"alphaSavageFlag": false,
 			"alphaSavageCoords": [0,0],
+			"alphaSavagePlatform": "base",
 			"betaSavageFlag": false,
 			"betaSavageCoords": [0,0],
+			"betaSavagePlatform": "base",
 			"gammaSavageFlag": false,
 			"gammaSavageCoords": [0,0],
+			"gammaSavagePlatform": "base",
 			"deltaSavageFlag": false,
 			"deltaSavageCoords": [0,0],
+			"deltaSavagePlatform": "base",
 			
 			"alphaFastroomFlag": false,
 			"alphaFastroomCoords": [0,0],
@@ -134,8 +151,12 @@
         {
             "level": 1,
 			
+			"limited" : false,
+			"limittype" : "NEXT",
+			"time" :0,
+			
 			"exitCoords": [400,390],
-			"spawnCoords": [60, 400],
+			"spawnCoords": [200, 270],
 			
 			"CatAmountAll": 1,
 			"CatAmountReal": 0,
@@ -211,14 +232,19 @@
 			"zetaWallFlag": false,
 			"zetaWallCoords": [0,0],
 			
-			"alphaSavageFlag": false,
-			"alphaSavageCoords": [0,0],
+			"alphaSavageFlag": true,
+			"alphaSavageCoords": [350,418],
+			"alphaSavagePlatform": "base",
 			"betaSavageFlag": false,
 			"betaSavageCoords": [0,0],
+			"betaSavagePlatform": "base",
 			"gammaSavageFlag": false,
 			"gammaSavageCoords": [0,0],
+			"gammaSavagePlatform": "base",
 			"deltaSavageFlag": false,
 			"deltaSavageCoords": [0,0],
+			"deltaSavagePlatform": "base",
+			
 			
 			"alphaFastroomFlag": false,
 			"alphaFastroomCoords": [0,0],
@@ -238,6 +264,10 @@
         },
 		{
             "level": 2,
+			
+			"limited" : false,
+			"limittype" : "NEXT",
+			"time" :0,
 			
 			"exitCoords": [400, 270],
 			"spawnCoords": [60, 400],
@@ -279,8 +309,8 @@
 			
 			"alphaBonusFlag": true,
 			"alphaBonusCoords": [380,414],
-			"betaBonusFlag": false,
-			"betaBonusCoords": [0,0],
+			"betaBonusFlag": true,
+			"betaBonusCoords": [280,414],
 			"gammaBonusFlag": false,
 			"gammaBonusCoords": [0,0],
 			"deltaBonusFlag": false,
@@ -318,12 +348,16 @@
 			
 			"alphaSavageFlag": false,
 			"alphaSavageCoords": [0,0],
+			"alphaSavagePlatform": "base",
 			"betaSavageFlag": false,
 			"betaSavageCoords": [0,0],
+			"betaSavagePlatform": "base",
 			"gammaSavageFlag": false,
 			"gammaSavageCoords": [0,0],
+			"gammaSavagePlatform": "base",
 			"deltaSavageFlag": false,
 			"deltaSavageCoords": [0,0],
+			"deltaSavagePlatform": "base",
 			
 			"alphaFastroomFlag": true,
 			"alphaFastroomCoords": [450,426],
