@@ -1,6 +1,6 @@
 {
     "title": "Granny`s Skirmish",
-    "version": "v0.9",
+    "version": "v0.9.1 prerelease",
     "windowsize":  [640, 520],
 	"canvassize":  [640, 480],
 	"backgroung": "thistle2",

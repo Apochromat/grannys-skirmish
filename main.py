@@ -1,5 +1,5 @@
 # Granny`s Skirmish
-# version 0.9
+# version 0.9.1
 
 """Импорт"""
 import time
@@ -37,6 +37,8 @@ animationSavageduration = settings['animationSavageduration']  # Задержк�
 
 backgroundcolor = settings["backgroung"]                    # Цвет фона
 
+direction = ["left", "right"]                               # Массив с вариантами начального направления Дикаря
+
 lastanimation = "None"                                      # Переменная последней проигранной анимации
 lastWalkRightImage = 0  # Последнее использованное изображение для анимации шага вправо(т.к. анимация в массиве)
 lastWalkLeftImage = 0   # Последнее использованное изображение для анимации шага влево(т.к. анимация в массиве)
@@ -72,15 +74,13 @@ fpsGlobal = 0           # Частота кадров
 limitedFlag = False     # Ограничен ли уровень по времени
 limitedtime = 0         # Время включения ограничения
 
-livesNormal = settings['livesnormal']   # Нормальное количество жизней
-lives = livesNormal     # Переменное количество жизней на уровне
+lives = settings['livesnormal']     # Переменное количество жизней на уровне
 Globallives = lives
 level = 0               # Уровень
 GlobalScore = 0         # Счет
 Score = 0               # Счет уровня
-ScoreAddCat = settings["ScoreAddCat"]       # Очки за кота
-ScoreAddBonus = settings["ScoreAddBonus"]   # Очки за цветки
-ScoreMax = settings["ScoreMax"]             # Максимум очков за игру
+
+
 
 """Построение окна"""
 root = Tk()  # Создаем окно
@@ -121,14 +121,14 @@ def newgame():
     if level != 0:
         ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать новую игру?")
         if ask:
-            lives = livesNormal
+            lives = settings['livesnormal']
             level = 0
             Score = 0
             GlobalScore = 0
             clearbutt()
             LevelAdd()
     else:
-        lives = livesNormal
+        lives = settings['livesnormal']
         level = 0
         Score = 0
         GlobalScore = 0
@@ -238,9 +238,11 @@ grannyHit = [imgload(os.path.join('assets', 'graphics', 'granny', 'granny_hit_1.
 """Функции окон"""
 # Открытие главного меню
 def mainmenu_open():  # Открытие главного меню
-    global labelLevel, labelLives, labelCats, labelScore, level, lives
+    global labelLevel, labelLives, labelCats, labelScore, level, lives, Score, GlobalScore
     level = 0
-    lives = livesNormal
+    lives = settings['livesnormal']
+    Score = 0
+    GlobalScore = 0
     canvas.create_image(320, 240, image=mainmenuBackgroung, tag="mainmenu")
     labelLevelText = " "
     labelLevel.config(text=labelLevelText)
@@ -293,16 +295,21 @@ def status():
         labelLives.config(text=labelLivesText)
 
     if debugmode.get() == 1:
-        message = "Fall:%s; Head:%s; Ladd:%s; Vent:%s; Barr:%s; Side:%s; Flow:%s; Grii:%s; Savi:%s;" % (
-            fall, head, ladd, vent, barr, wallside, flow, grii[0], savi)
+        message = "Plat:%s; Head:%s; Ladd:%s; Barr:%s; Side:%s; GraHitSav:%s; SavHitGra:%s;" % (
+            plat, head, ladd, barr, wallside, GraHitSav[0], SavHitGra)
         if level == 0:
             message = "Готов"
     elif debugmode.get() == 2:
+        message = "Vent:%s; Flow:%s; Carr:%s; Fast:%s; Slow:%s; Grav:%s; ExitActive:%s;" % (
+            vent, flow, carr, fast, slow, grav, isExitActive)
+        if level == 0:
+            message = "Готов"
+    elif debugmode.get() == 3:
         message = "GrannyPos:%s; alphaPos:%s; betaPos:%s; gammaPos:%s; deltaPos:%s;" % (
             GrannyPos, alphaPos, betaPos, gammaPos, deltaPos)
         if level == 0:
             message = "Готов"
-    elif debugmode.get() == 3:
+    elif debugmode.get() == 4:
         message = "FPS:%i; Time:%i; KeySpeed:%i; Cheat:%s" % (fpsGlobal, lastframetime, KeySpeed, settings["cheatmode"])
         if level == 0:
             message = "Готов"
@@ -372,7 +379,7 @@ class Granny():  # Класс персонажа, которым мы управ
                 self.y -= grannyWalkSpeed                               # Обновляем координату
         if self.action == "turn_down":                                  # Если нужно стуститься вниз
             isClimbingDown = True                                       # Ставим флаг, что спускаемся
-            if fall & (antigrav == False) & (simpgrav == False):        # Если не на платформе, нет антигравитации, и двигается не под действием гравитации
+            if (plat == False) & (antigrav == False) & (simpgrav == False):        # Если не на платформе, нет антигравитации, и двигается не под действием гравитации
                 canvas.move(self.id, 0, grannyWalkSpeed)                # Двигаемся вниз на значение скорости
                 self.y += grannyWalkSpeed                               # Обновляем координату
         if self.action == "hit_enemy":                                  # Если нужно ударить
@@ -461,24 +468,24 @@ class Granny():  # Класс персонажа, которым мы управ
                 isHitEnemy = False
                 lastanimation = "Hit"
                                                                         # Забирание и спуск по лестнице
-            if (ladd == True) & fall:
+            if (ladd == True) & (plat == False):
                 if isClimbingUp:
                     if lastClimbUpImage == 3: lastClimbUpImage = 0
                     canvas.itemconfig(self.id, image=grannyClimbUp[lastClimbUpImage])
                     lastClimbUpImage += 1
                     isClimbingUp = False
                     lastanimation = "Climbing"
-                    if (ladd == False) | (fall == False):
+                    if (ladd == False) | (plat == True):
                         lastanimation = "Stand"
 
                 if isClimbingDown:
                     canvas.itemconfig(self.id, image=grannyClimbDown)
                     isClimbingDown = False
                     lastanimation = "Climbing"
-                    if (ladd == False) | (fall == False):
+                    if (ladd == False) | ((plat == True)):
                         lastanimation = "Stand"
                                                                         # Падение
-            if fall & (ladd == False):
+            if (plat == False) & (ladd == False):
                 canvas.itemconfig(self.id, image=grannyFall)
                 isWalkingLeft = False
                 isWalkingRight = False
@@ -496,7 +503,7 @@ class Savage():
         self.avaible = True
         self.action = ""
         self.way = [0, 640]
-        self.direction = ""
+        self.direction = random.choice(direction)
         self.lastWalkRightImage = 0
         self.lastWalkLeftImage = 0
         self.isWalkingLeft = False
@@ -624,7 +631,7 @@ class Cat():  # Класс котика, которых мы спасаем
     def collect(self):  # Собрать котика
         global Score
         self.avaible = False
-        Score += ScoreAddCat  # Зачисляем очки
+        Score += settings["ScoreAddCat"]     # Зачисляем очки
         canvas.delete(self.id)
 
 # Бонусный цветок
@@ -643,7 +650,7 @@ class BonusFlower():
     def rise(self):
         global Score
         self.avaible = False
-        Score += ScoreAddBonus
+        Score += settings["ScoreAddBonus"]
         canvas.itemconfig(self.id, image=random.choice(bonus))
 
 # Быстромор
@@ -928,18 +935,13 @@ def LevelInit():
 # Обработка выбора уровня
 def LevelShoose():
     global level
-    lvl = sd.askinteger(title="Выбор уровня",
+    ask = sd.askinteger(title="Выбор уровня",
                         prompt="Введите номер уровня.\nМаксимальный уровень: %i" % settings["levelamount"], minvalue=1,
                         maxvalue=settings["levelamount"])
-    if type(lvl) == int:
+    if type(ask)==int:
         if (level ==0)|settings["cheatmode"]:
-            level = lvl
+            level = ask
             LevelInit()
-        elif level != 0:
-            if level == lvl:
-                LevelRestart()
-            elif lvl != level:
-                mb.showwarning(title="Внимание" , message="Вы не можете переключиться на другой уровень во время игры!")
 
 # Переход на следующий уровень или победа
 def LevelAdd():  # Логика переключения
@@ -977,20 +979,19 @@ def action_check(Grannyzone, Actionzone, Index):  # Проверка выход�
             solution = True
     return solution
 
-
 # Платформа
 # Над платформой
 def grannyoverplatform():  # Определение платформ на уровнях !!!Не забывать добавлять!!!
-    globalsolution = True
-    solutionAlpha = True
-    solutionBeta = True
-    solutionGamma = True
-    solutionDelta = True
-    solutionEpsilon = True
-    solutionZeta = True
-    solutionEta = True
-    solutionTheta = True
-    solutionIota = True
+    globalsolution = False
+    solutionAlpha = False
+    solutionBeta = False
+    solutionGamma = False
+    solutionDelta = False
+    solutionEpsilon = False
+    solutionZeta = False
+    solutionEta = False
+    solutionTheta = False
+    solutionIota = False
     GrannyTouch = Hero.touch_place()
     BaseTouch = Base.touch_place()
     solutionBase = ground_check(GrannyTouch, BaseTouch)
@@ -1022,19 +1023,19 @@ def grannyoverplatform():  # Определение платформ на уро
         IotaTouch = iotaPlatform.touch_place()
         solutionIota = ground_check(GrannyTouch, IotaTouch)
 
-    if (solutionBase == False) | (solutionAlpha == False) | (solutionBeta == False) | (solutionGamma == False) | (
-            solutionDelta == False) | (solutionEpsilon == False) | (solutionZeta == False) | (solutionEta == False) | (
-            solutionTheta == False) | (solutionIota == False):
-        globalsolution = False
+    if (solutionBase == True) | (solutionAlpha == True) | (solutionBeta == True) | (solutionGamma == True) | (
+        solutionDelta == True) | (solutionEpsilon == True) | (solutionZeta == True) | (solutionEta == True) | (
+        solutionTheta == True) | (solutionIota == True):
+        globalsolution = True
     return globalsolution
 
 def ground_check(GrannyTouch, PlatformTouch):  # Проверка земли под ногами по массивам
-    solution = True
+    solution = False
     if PlatformTouch[0] == GrannyTouch[0]:
         if (GrannyTouch[1] >= PlatformTouch[1]) & (GrannyTouch[1] <= PlatformTouch[2]):
-            solution = False
+            solution = True
         if (GrannyTouch[2] >= PlatformTouch[1]) & (GrannyTouch[2] <= PlatformTouch[2]):
-            solution = False
+            solution = True
     return solution
 
 # Под платформой
@@ -1408,7 +1409,7 @@ def wall_check(Grannyzone, Wallzone):  # Проверка стен по масс
 # Гравитация
 def gravity():  # Если персонаж не на платформн и не на лестнице, на нее действует гравитация
     global simpgrav
-    if (fall | (antigrav == True)) & (ladd == False):
+    if ((plat == False) | (antigrav == True)) & (ladd == False):
         simpgrav = True
         Hero.gravitymove()
     else:
@@ -1455,23 +1456,23 @@ def effects():
 # Убийства
 def savageKill():
     global alphaSavage, betaSavage, gammaSavage, deltaSavage
-    if grii[0]:
-        if (alphaSavage.avaible) & grii[1]:
+    if GraHitSav[0]:
+        if (alphaSavage.avaible) & GraHitSav[1]:
             canvas.delete(alphaSavage.id)
             alphaSavage = Empty()
-        if (betaSavage.avaible) & grii[2]:
+        if (betaSavage.avaible) & GraHitSav[2]:
             canvas.delete(betaSavage.id)
             betaSavage = Empty()
-        if (gammaSavage.avaible) & grii[3]:
+        if (gammaSavage.avaible) & GraHitSav[3]:
             canvas.delete(gammaSavage.id)
             gammaSavage = Empty()
-        if (deltaSavage.avaible) & grii[4]:
+        if (deltaSavage.avaible) & GraHitSav[4]:
             canvas.delete(deltaSavage.id)
             deltaSavage = Empty()
 
 def grannyKill():
     global lives, Hero
-    if savi:
+    if SavHitGra:
         canvas.delete(Hero.id)
         lives -= 1
         if lives < 0:
@@ -1628,22 +1629,16 @@ def levelLimit():
 
 # Организация конца игры, вывод сообщений о выйгрыше/проигрыше
 def endgame(win):
-    global level, Score, GlobalScore
+    global GlobalScore
     if win:
-        level = 0
         GlobalScore += Score
-        message = "Поздравляем с победой! \nВы набрали %i из %i очков" % (GlobalScore, ScoreMax)
+        message = "Поздравляем с победой! \nВы набрали %i из %i очков" % (GlobalScore, settings["ScoreMax"])
         mb.showinfo(title="Победа", message=message)
-        Score = 0
-        GlobalScore = 0
         mainmenu_open()
     else:
-        level = 0
         GlobalScore += Score
-        message = "К сожалению, Вы проиграли. \nВы набрали %i из %i очков" % (GlobalScore, ScoreMax)
+        message = "К сожалению, Вы проиграли. \nВы набрали %i из %i очков" % (GlobalScore, settings["ScoreMax"])
         mb.showinfo(title="Проигрыш", message=message)
-        Score = 0
-        GlobalScore = 0
         mainmenu_open()
 
 # Подсчет кликов и кадров
@@ -1663,8 +1658,27 @@ def color():
     backgroundcolor = newbackground[1]
     reloadScreen()
 
+# Включение и отключение кнопок меню сверху
+def buttonstate():
+    if level == 0:
+        gamemenu.entryconfig("Выход в меню", state = "disabled")
+        gamemenu.entryconfig("Начать уровень заново", state="disabled")
+        gamemenu.entryconfig("Выбор уровня", state="normal")
+    else:
+        gamemenu.entryconfig("Выход в меню", state="normal")
+        gamemenu.entryconfig("Начать уровень заново", state="normal")
+        if settings["cheatmode"] == False:
+            gamemenu.entryconfig("Выбор уровня", state="disabled")
+
+# Опрос выхода в главное меню
+def on_mainmenu():
+    ask = mb.askyesno(title="Выход в меню", message="Вы действительно хотите выйти в меню?")
+    if ask:
+        mainmenu_open()
+
 # Составление меню
 def menu():  # Описание меню(сверху полоска)
+    global gamemenu
     mainmenu = Menu(root)
     gamemenu = Menu(mainmenu, tearoff=0, bg=backgroundcolor)
     gamemenu.add_command(label="Новая игра", command=newgame)
@@ -1674,13 +1688,15 @@ def menu():  # Описание меню(сверху полоска)
     optionmenu = Menu(gamemenu, tearoff=1, bg=backgroundcolor)
     debugmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
     debugmenu.add_radiobutton(label="Отключена", value=0, variable=debugmode)
-    debugmenu.add_radiobutton(label="Флаги", value=1, variable=debugmode)
-    debugmenu.add_radiobutton(label="Положение", value=2, variable=debugmode)
-    debugmenu.add_radiobutton(label="Системное", value=3, variable=debugmode)
+    debugmenu.add_radiobutton(label="Флаги персонажа", value=1, variable=debugmode)
+    debugmenu.add_radiobutton(label="Флаги обьектов", value=2, variable=debugmode)
+    debugmenu.add_radiobutton(label="Положение", value=3, variable=debugmode)
+    debugmenu.add_radiobutton(label="Системное", value=4, variable=debugmode)
     gamemenu.add_cascade(label="Настройки", menu=optionmenu)
     optionmenu.add_command(label="Выбрать цвет фона", command=color)
     optionmenu.add_cascade(label="Отладка", menu=debugmenu)
     gamemenu.add_separator()
+    gamemenu.add_command(label="Выход в меню", command=on_mainmenu)
     gamemenu.add_command(label="Выход", command=on_closing)
     aboutmenu = Menu(mainmenu, tearoff=0, bg=backgroundcolor)
     aboutmenu.add_command(label="Авторы", command=lambda: mb.showinfo(title="Авторы", message=authorsmessage))
@@ -1712,8 +1728,8 @@ root.protocol("WM_DELETE_WINDOW", on_closing)  # Обработка выхода
 while run:
     if (time.time() - lastframetime) >= settings["frametime"]:
         fps += 1
-        if level != 0:                   # Если игра идет
-            fall = grannyoverplatform()  # Не стоит ли персонаж на платформе
+        if level != 0:                   # Если игра идеn
+            plat = grannyoverplatform()  # Cтоит ли персонаж на платформе
             ladd = grannyonladder()  # Стоит ли персонаж на лестнице
             carr = grannycarrycat()  # Подбирает ли персонаж котенка
             vent = grannyinexit()    # Стоит ли персонаж у выходв
@@ -1723,8 +1739,8 @@ while run:
             grav = grannygravroom()  # Стоит ли персонаж у Вверхшенки
             slow = grannyslowroom()  # Стоит ли персонаж у Медлянки
             head = grannyunderplatform()  # Стоит ли персонаж под платформой
-            savi = savagehitgranny()  # Может ли Дикарь убить персонажа
-            grii = grannyhitsavage()  # Может ли персонаж убить Дикаря
+            SavHitGra = savagehitgranny()  # Может ли Дикарь убить персонажа
+            GraHitSav = grannyhitsavage()  # Может ли персонаж убить Дикаря
             grannyKill()  # Проверка смерти персонажа
             effects()     # Применение эффектов от грибов
             levelLimit()  # Применение временных ограничений
@@ -1737,6 +1753,7 @@ while run:
                 Hero.action_queue()     # Выполнение очереди действий
                 gravity()               # Применяем к персонажу фактор графитации
                 Hero.animate()          # Анимируем персонажа
+        buttonstate()
         timer()
         root.update_idletasks()         # Обновляем объекты окна
         root.update()
