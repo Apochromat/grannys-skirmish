@@ -1,5 +1,5 @@
 # Granny`s Skirmish
-# version 0.9.1
+# version 0.9.2
 
 """Импорт"""
 import time
@@ -10,6 +10,7 @@ from tkinter import *
 from tkinter import colorchooser as cc
 from tkinter import messagebox as mb
 from tkinter import simpledialog as sd
+from pygame import mixer
 from PIL import Image, ImageTk
 
 """Файл настроек"""
@@ -65,6 +66,8 @@ antigrav = False        # Включена ли антигравитация
 simpgrav = False        # Двигается ли персонаж под действием гравитации
 wallside = "0"          # Сторона стенки в которую уперся персонаж
 
+isMusicOn = False
+
 keytime = time.time()   # Время последнего нажатия на клавиши
 key = 0                 # Счетчик нажатий
 KeySpeed = 0            # Скорость нажатий за секунду
@@ -80,7 +83,7 @@ level = 0               # Уровень
 GlobalScore = 0         # Счет
 Score = 0               # Счет уровня
 
-
+typeMusic = 0
 
 """Построение окна"""
 root = Tk()  # Создаем окно
@@ -88,6 +91,48 @@ root.title(settings['title'])                               # Заголовок
 root.configure(bg=backgroundcolor)                          # Фон окна
 root.geometry("%ix%i" % (windowSize[0], windowSize[1]))     # Размеры окна
 root.resizable(0, 0)                                        # Запрет на изменение размеров окна
+
+"""Музыка"""
+mixer.init()
+
+def music_stop():
+    global isMusicOn
+    mixer.music.stop()
+    isMusicOn = False
+
+def music_start():
+    global isMusicOn, typeMusic
+    if musicmode.get()==False:
+        music_stop()
+    if level==0:
+        if typeMusic == 1:
+            isMusicOn = False
+        typeMusic = 0
+    else:
+        if typeMusic == 0:
+            isMusicOn = False
+        typeMusic = 1
+
+    if (musicmode.get()==True)&(typeMusic==0)&(isMusicOn == False):
+        music_stop()
+        mixer.music.load(os.path.join('assets', 'music','mainmenu.mp3'))
+        mixer.music.play(loops=200)
+        isMusicOn = True
+
+    if (musicmode.get()==True)&(typeMusic==1)&(isMusicOn == False):
+        music_stop()
+        mixer.music.load(os.path.join('assets', 'music','level.mp3'))
+        mixer.music.play(loops=1000)
+        isMusicOn = True
+
+
+
+def music_next_level():
+    global isMusicOn
+    music_stop()
+    mixer.music.load(os.path.join('assets', 'music', 'finishlevel.mp3'))
+    mixer.music.play()
+    isMusicOn = False
 
 """Элементы окна"""
 statusbar = Label(root, justify=LEFT, text="Готов", width=settings["statusbarwidth"], height=1,
@@ -162,7 +207,8 @@ def loadScreen():
 
 loadScreen()
 
-# Переменная для режимов отладки
+# Переменная для режимов отладки и музыки
+musicmode = BooleanVar()
 debugmode = IntVar()
 """Изображения"""
 # Функция загрузки изображений
@@ -392,7 +438,6 @@ class Granny():  # Класс персонажа, которым мы управ
         if key <= settings["keyboardLimit"]:
             key += 1
             self.action = "turn_left"
-
 
     def turn_right(self, event):                                        # Движение вправо
         global key
@@ -1686,6 +1731,9 @@ def menu():  # Описание меню(сверху полоска)
     gamemenu.add_command(label="Выбор уровня", command=LevelShoose)
     gamemenu.add_separator()
     optionmenu = Menu(gamemenu, tearoff=1, bg=backgroundcolor)
+    musicmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
+    musicmenu.add_radiobutton(label="Отключена", value=0, variable=musicmode)
+    musicmenu.add_radiobutton(label="Включена", value=1, variable=musicmode)
     debugmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
     debugmenu.add_radiobutton(label="Отключена", value=0, variable=debugmode)
     debugmenu.add_radiobutton(label="Флаги персонажа", value=1, variable=debugmode)
@@ -1693,6 +1741,7 @@ def menu():  # Описание меню(сверху полоска)
     debugmenu.add_radiobutton(label="Положение", value=3, variable=debugmode)
     debugmenu.add_radiobutton(label="Системное", value=4, variable=debugmode)
     gamemenu.add_cascade(label="Настройки", menu=optionmenu)
+    optionmenu.add_cascade(label="Музыка", menu=musicmenu)
     optionmenu.add_command(label="Выбрать цвет фона", command=color)
     optionmenu.add_cascade(label="Отладка", menu=debugmenu)
     gamemenu.add_separator()
@@ -1728,6 +1777,7 @@ root.protocol("WM_DELETE_WINDOW", on_closing)  # Обработка выхода
 while run:
     if (time.time() - lastframetime) >= settings["frametime"]:
         fps += 1
+        music_start()
         if level != 0:                   # Если игра идеn
             plat = grannyoverplatform()  # Cтоит ли персонаж на платформе
             ladd = grannyonladder()  # Стоит ли персонаж на лестнице
