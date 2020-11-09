@@ -1,97 +1,78 @@
 # Granny`s Skirmish
-# version 0.9.2
+# version 0.9.4
 
 """Импорт"""
-import time
-import random
-import os
 import json
 from tkinter import *
 from tkinter import colorchooser as cc
 from tkinter import messagebox as mb
 from tkinter import simpledialog as sd
 from pygame import mixer
-from PIL import Image, ImageTk
+from images import *
+from objects import *
+
 
 """Файл настроек"""
-with open("data.json", 'r', encoding="utf-8") as file:      # Открываем файл с настройками
-    settings = json.load(file)                              # Записываем как словарь в переменную
+with open("data.json", 'r', encoding="utf-8") as file:  # Открываем файл с настройками
+    settings = json.load(file)  # Записываем как словарь в переменную
 
 """Переменные"""
-run = True                                                  # Флаг работы приложения
-version = settings['version']                               # Загрузка номера версии
-windowSize = settings["windowsize"]                         # Размер окна
-canvasSize = settings["canvassize"]                         # Размер области рисования
-aboutmessage = settings["aboutmessage"] % version           # Формирование сообщения об игре
-authorsmessage = settings["authorsmessage"]                 # Формирование сообщения об авторах
-grannyWalkSpeedNormal = settings['grannyspeed']['normal']   # Нормальная скорость персонажа
-grannyWalkSpeed = grannyWalkSpeedNormal                     # Переменная скорость персонажа
-grannyWalkSpeedFast = settings['grannyspeed']['fast']       # Быстрая скорость персонажа
-grannyWalkSpeedSlow = settings['grannyspeed']['slow']       # Медленная скорость персонажа
-savageSpeed = settings["savagespeed"]                       # Скорость Дикаря
-gravitySpeedNormal = settings['gravity']['normal']          # Нормальная скорость гравитации (да, не ускорение)
-gravitySpeedInvert = settings['gravity']['inverted']        # Инвертированная скорость гравитации
-gravitySpeed = gravitySpeedNormal                           # Переменная скорость гравитации
-effectduration = settings['effectduration']                 # Длительность эффектов грибов
+objectsVariable = VariableHeap()
+run = True  # Флаг работы приложения
+version = settings['version']  # Загрузка номера версии
+windowSize = settings["windowsize"]  # Размер окна
+canvasSize = settings["canvassize"]  # Размер области рисования
+aboutmessage = settings["aboutmessage"] % version  # Формирование сообщения об игре
+authorsmessage = settings["authorsmessage"]  # Формирование сообщения об авторах
+grannyWalkSpeedNormal = settings['grannyspeed']['normal']  # Нормальная скорость персонажа
+grannyWalkSpeed = grannyWalkSpeedNormal  # Переменная скорость персонажа
+grannyWalkSpeedFast = settings['grannyspeed']['fast']  # Быстрая скорость персонажа
+grannyWalkSpeedSlow = settings['grannyspeed']['slow']  # Медленная скорость персонажа
+savageSpeed = settings["savagespeed"]  # Скорость Дикаря
+gravitySpeedNormal = settings['gravity']['normal']  # Нормальная скорость гравитации (да, не ускорение)
+gravitySpeedInvert = settings['gravity']['inverted']  # Инвертированная скорость гравитации
+gravitySpeed = gravitySpeedNormal  # Переменная скорость гравитации
+effectduration = settings['effectduration']  # Длительность эффектов грибов
 animationGrannyduration = settings['animationGrannyduration']  # Задержки анимации персонажа
 animationSavageduration = settings['animationSavageduration']  # Задержки анимации Дикаря
 
-backgroundcolor = settings["backgroung"]                    # Цвет фона
+backgroundcolor = settings["backgroung"]  # Цвет фона
 
-direction = ["left", "right"]                               # Массив с вариантами начального направления Дикаря
+lasteffecttime = time.time()  # Время последней активации эффекта
+lastframetime = time.time()  # Последнее время кадра
 
-lastanimation = "None"                                      # Переменная последней проигранной анимации
-lastWalkRightImage = 0  # Последнее использованное изображение для анимации шага вправо(т.к. анимация в массиве)
-lastWalkLeftImage = 0   # Последнее использованное изображение для анимации шага влево(т.к. анимация в массиве)
-lastClimbUpImage = 0    # Последнее использованное изображение для анимации забирания (т.к. анимация в массиве)
-lastHitEnemyImage = 0   # Последнее использованное изображение для анимации удара (т.к. анимация в массиве)
+isExitActive = False  # Доступен ли выход с уровня
+avoidEffects = False  # Необходимо ли сбросить эффекты
 
-isWalkingLeft = False   # Идет ли персонаж влево
-isWalkingRight = False  # Идет ли персонаж вправо
-isClimbingUp = False    # Забирается ли персонаж
-isClimbingDown = False  # Спускается ли персонаж
-isHitEnemy = False      # Бьет ли персонаж
-
-lasteffecttime = time.time()        # Время последней активации эффекта
-lastframetime = time.time()         # Последнее время кадра
-lastanimationtime = time.time()     # Время последнего анимирования
-
-isFastEffect = False    # Устанавливается ли эффект быстроты
-isSlowEffect = False    # Устанавливается ли эффект медленности
-isGravEffect = False    # Устанавливается ли эффект антигравитации
-isExitActive = False    # Доступен ли выход с уровня
-avoidEffects = False    # Необходимо ли сбросить эффекты
-
-antigrav = False        # Включена ли антигравитация
-simpgrav = False        # Двигается ли персонаж под действием гравитации
-wallside = "0"          # Сторона стенки в которую уперся персонаж
+antigrav = False  # Включена ли антигравитация
+simpgrav = False  # Двигается ли персонаж под действием гравитации
+wallside = "0"  # Сторона стенки в которую уперся персонаж
 
 isMusicOn = False
 
-keytime = time.time()   # Время последнего нажатия на клавиши
-key = 0                 # Счетчик нажатий
-KeySpeed = 0            # Скорость нажатий за секунду
-fps = 0                 # Моментальная частота кадров
-fpsGlobal = 0           # Частота кадров
+keytime = time.time()  # Время последнего нажатия на клавиши
+key = 0  # Счетчик нажатий
+KeySpeed = 0  # Скорость нажатий за секунду
+fps = 0  # Моментальная частота кадров
+fpsGlobal = 0  # Частота кадров
 
-limitedFlag = False     # Ограничен ли уровень по времени
-limitedtime = 0         # Время включения ограничения
+limitedFlag = False  # Ограничен ли уровень по времени
+limitedtime = 0  # Время включения ограничения
 
-lives = settings['livesnormal']     # Переменное количество жизней на уровне
-Globallives = lives
-level = 0               # Уровень
-GlobalScore = 0         # Счет
-Score = 0               # Счет уровня
+objectsVariable.lives = settings['livesnormal']  # Переменное количество жизней на уровне
+objectsVariable.Globallives = objectsVariable.lives
+level = 0  # Уровень
 
 typeMusic = 0
+volumeMusic = settings["musicvolume"]
 
 """Построение окна"""
 root = Tk()  # Создаем окно
-root.title(settings['title'])                               # Заголовок окна
-root.configure(bg=backgroundcolor)                          # Фон окна
-root.geometry("%ix%i" % (windowSize[0], windowSize[1]))     # Размеры окна
-root.resizable(0, 0)                                        # Запрет на изменение размеров окна
-
+root.title(settings['title'])  # Заголовок окна
+root.configure(bg=backgroundcolor)  # Фон окна
+root.geometry("%ix%i" % (windowSize[0], windowSize[1]))  # Размеры окна
+root.resizable(0, 0)  # Запрет на изменение размеров окна
+image = ImageHeap()
 """Музыка"""
 mixer.init()
 
@@ -100,11 +81,12 @@ def music_stop():
     mixer.music.stop()
     isMusicOn = False
 
-def music_start():
+def music():
     global isMusicOn, typeMusic
-    if musicmode.get()==False:
+    mixer.music.set_volume(volumeMusic / 100)
+    if musicmode.get() is False:
         music_stop()
-    if level==0:
+    if level == 0:
         if typeMusic == 1:
             isMusicOn = False
         typeMusic = 0
@@ -113,38 +95,29 @@ def music_start():
             isMusicOn = False
         typeMusic = 1
 
-    if (musicmode.get()==True)&(typeMusic==0)&(isMusicOn == False):
+    if (musicmode.get() is True) & (typeMusic == 0) & (isMusicOn is False):
         music_stop()
-        mixer.music.load(os.path.join('assets', 'music','mainmenu.mp3'))
+        mixer.music.load(os.path.join('assets', 'music', 'mainmenu.mid'))
         mixer.music.play(loops=200)
         isMusicOn = True
 
-    if (musicmode.get()==True)&(typeMusic==1)&(isMusicOn == False):
+    if (musicmode.get() is True) & (typeMusic == 1) & (isMusicOn is False):
         music_stop()
-        mixer.music.load(os.path.join('assets', 'music','level.mp3'))
+        mixer.music.load(os.path.join('assets', 'music', 'level.mid'))
         mixer.music.play(loops=1000)
         isMusicOn = True
 
-
-
-def music_next_level():
-    global isMusicOn
-    music_stop()
-    mixer.music.load(os.path.join('assets', 'music', 'finishlevel.mp3'))
-    mixer.music.play()
-    isMusicOn = False
-
 """Элементы окна"""
 statusbar = Label(root, justify=LEFT, text="Готов", width=settings["statusbarwidth"], height=1,
-                  bg=backgroundcolor, anchor=W)             # Статусбар
+                  bg=backgroundcolor, anchor=W)  # Статусбар
 labelLevel = Label(root, justify=LEFT, text=" ", width=settings["hidwidth"], height=1, bg=backgroundcolor,
-                   anchor=W)                                # Отображение уровня
+                   anchor=W)  # Отображение уровня
 labelCats = Label(root, justify=LEFT, text=" ", width=settings["hidwidth"], height=1, bg=backgroundcolor,
-                  anchor=W)                                 # Отображение количества котов на уровне
+                  anchor=W)  # Отображение количества котов на уровне
 labelScore = Label(root, justify=LEFT, text=" ", width=settings["hidwidth"], height=1, bg=backgroundcolor,
-                   anchor=W)                                # Счет
+                   anchor=W)  # Счет
 labelLives = Label(root, justify=LEFT, text=" ", width=settings["hidwidth"], height=1, bg=backgroundcolor,
-                   anchor=W)                                # Отображение количества жизней
+                   anchor=W)  # Отображение количества жизней
 canvas = Canvas(root, width=canvasSize[0], height=canvasSize[1], bd=0, highlightthickness=0, bg=backgroundcolor)
 
 # Отображние эффектов, их длительности, ограничений по времени
@@ -155,30 +128,33 @@ labelEffect = Label(root, text=" ", width=settings["effectwidth"], height=1, bg=
 labelTime = Label(root, text="Time", width=settings["effectwidth"], height=1, bg="lightcoral")
 labelTimer = Label(root, text="Timer", width=settings["timerwidth"], height=1, bg="lightcoral")
 
+
 # Удаление кнопок с главного меню
 def clearbutt():
     newgameButt.place_forget()
     exitgameButt.place_forget()
 
+
 # Начало новой игры
 def newgame():
-    global Score, level, lives, GlobalScore
+    global level
     if level != 0:
         ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать новую игру?")
         if ask:
-            lives = settings['livesnormal']
+            objectsVariable.lives = settings['livesnormal']
             level = 0
-            Score = 0
-            GlobalScore = 0
+            objectsVariable.Score = 0
+            objectsVariable.GlobalScore = 0
             clearbutt()
             LevelAdd()
     else:
-        lives = settings['livesnormal']
+        objectsVariable.lives = settings['livesnormal']
         level = 0
-        Score = 0
-        GlobalScore = 0
+        objectsVariable.Score = 0
+        objectsVariable.GlobalScore = 0
         clearbutt()
         LevelAdd()
+
 
 # Опрос закрытия программы
 def on_closing():  # Опрос закрытия
@@ -187,6 +163,7 @@ def on_closing():  # Опрос закрытия
         print("Выход")
         run = False
         root.destroy()
+
 
 # Кнопки главного меню
 newgameButt = Button(root, text="Новая игра", bg=settings["buttoncolor"], width=16, height=1,
@@ -205,99 +182,55 @@ def loadScreen():
     canvas.grid(row=1, column=0, columnspan=4)
     statusbar.place(x=0, y=500)
 
+
 loadScreen()
 
 # Переменная для режимов отладки и музыки
 musicmode = BooleanVar()
+musicmode.set(settings["musicswitch"])
 debugmode = IntVar()
-"""Изображения"""
-# Функция загрузки изображений
-def imgload(path):  # Функция загрузки изображений
-    img = Image.open(path)
-    output = ImageTk.PhotoImage(img)
-    return output
+scalevolume = IntVar()
+scalevolume.set(volumeMusic)
 
-# Загрузка изображений
-mainmenuBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'menu_background.jpg'))  # Главное меню
-jungleBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'jungle_background.jpg'))  # Фон джунглей
-baseplatform = imgload(os.path.join('assets', 'graphics', 'platformbase.png'))  # Базовая платформа
-ladder = imgload(os.path.join('assets', 'graphics', 'ladder.png'))  # Лестница
-wallImage = imgload(os.path.join('assets', 'graphics', 'wall.png'))  # Стена
+"""Окно выбора громкости звука"""
+def setvolume():
+    global volumeWindow
+    volumeWindow = Toplevel()
+    volumeWindow.title("Громкость музыки")  # Заголовок окна
+    volumeWindow.configure(bg=backgroundcolor)  # Фон окна
+    volumeWindow.geometry("%ix%i" % (200, 120))  # Размеры окна
+    volumeWindow.resizable(0, 0)  # Запрет на изменение размеров окна
+    Label(volumeWindow, bg=backgroundcolor, text="Выберите подходящую громкость").grid(row=0, column=0, columnspan=2)
+    Label(volumeWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeMusic).grid(
+        row=1, column=0, columnspan=2)
+    Scale(volumeWindow, variable=scalevolume, bg=backgroundcolor, orient=HORIZONTAL, length=180).grid(
+        row=3, column=0, columnspan=2)
+    Button(volumeWindow, text="Сохранить", bg=backgroundcolor, command=savevolume).grid(
+        row=4, column=0, pady=10)
+    Button(volumeWindow, text="Отменить", bg=backgroundcolor, command=undovolume).grid(
+        row=4, column=1, pady=10)
 
-cats = [imgload(os.path.join('assets', 'graphics', 'cat', 'cat1.png')),  # Массив с котами
-        imgload(os.path.join('assets', 'graphics', 'cat', 'cat2.png')),
-        imgload(os.path.join('assets', 'graphics', 'cat', 'cat3.png'))]
+def savevolume():
+    global volumeMusic
+    volumeMusic = scalevolume.get()
+    volumeWindow.destroy()
 
-mushroom = [imgload(os.path.join('assets', 'graphics', 'mushroom', 'fastroom.png')),
-            imgload(os.path.join('assets', 'graphics', 'mushroom', 'slowroom.png')),
-            imgload(os.path.join('assets', 'graphics', 'mushroom', 'gravroom.png'))]
-
-bonusSeed = imgload(os.path.join('assets', 'graphics', 'bonus', 'bonusSeed.png'))
-
-bonus = [imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus0.png')),
-         imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus1.png')),
-         imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus2.png'))]
-
-exitImage = [imgload(os.path.join('assets', 'graphics', 'exitflower_inactive.png')),  # Массив с цветком-выходом
-             imgload(os.path.join('assets', 'graphics', 'exitflower_active.png'))]
-
-savageImage = imgload(os.path.join('assets', 'graphics', 'savage', 'savage_stand.png'))
-savageWalkLeft = [imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_left_1.png')),
-                  imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_left_2.png')),
-                  imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_left_3.png')),
-                  imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_left_4.png')),
-                  imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_left_5.png')),
-                  imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_left_6.png')),
-                  imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_left_7.png'))]
-savageWalkRight = [imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_right_1.png')),
-                   imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_right_2.png')),
-                   imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_right_3.png')),
-                   imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_right_4.png')),
-                   imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_right_5.png')),
-                   imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_right_6.png')),
-                   imgload(os.path.join('assets', 'graphics', 'savage', 'savage_walk_right_7.png'))]
-
-grannyImage = imgload(os.path.join('assets', 'graphics', 'granny', 'granny_stand_forward.png'))  # Персонаж стоя
-grannyFall = imgload(os.path.join('assets', 'graphics', 'granny', 'granny_fall.png'))  # Персонаж падая
-grannyStandRight = imgload(
-    os.path.join('assets', 'graphics', 'granny', 'granny_stand_right.png'))  # Персонаж стоя лицом вправо
-grannyStandLeft = imgload(
-    os.path.join('assets', 'graphics', 'granny', 'granny_stand_left.png'))  # Персонаж стоя лицом влево
-grannyWalkLeft = [imgload(os.path.join('assets', 'graphics', 'granny', 'granny_walk_left_1.png')),
-                  # Массив анимаций походки
-                  imgload(os.path.join('assets', 'graphics', 'granny', 'granny_walk_left_2.png')),
-                  # налево для персонажа
-                  imgload(os.path.join('assets', 'graphics', 'granny', 'granny_walk_left_3.png'))]
-grannyWalkRight = [imgload(os.path.join('assets', 'graphics', 'granny', 'granny_walk_right_1.png')),
-                   # Массив анимаций походки
-                   imgload(os.path.join('assets', 'graphics', 'granny', 'granny_walk_right_2.png')),
-                   # направо для персонажа
-                   imgload(os.path.join('assets', 'graphics', 'granny', 'granny_walk_right_3.png'))]
-grannyClimbUp = [imgload(os.path.join('assets', 'graphics', 'granny', 'granny_climb_up_1.png')),
-                 # Массив анимаций забирания
-                 imgload(os.path.join('assets', 'graphics', 'granny', 'granny_climb_up_2.png')),  # для персонажа
-                 imgload(os.path.join('assets', 'graphics', 'granny', 'granny_climb_up_3.png'))]
-grannyClimbDown = imgload(os.path.join('assets', 'graphics', 'granny', 'granny_climb_down.png'))  # Персонаж спускается
-grannyHit = [imgload(os.path.join('assets', 'graphics', 'granny', 'granny_hit_1.png')),
-             imgload(os.path.join('assets', 'graphics', 'granny', 'granny_hit_2.png'))]
-
+def undovolume():
+    volumeWindow.destroy()
+    scalevolume.set(volumeMusic)
 """Функции окон"""
 # Открытие главного меню
 def mainmenu_open():  # Открытие главного меню
-    global labelLevel, labelLives, labelCats, labelScore, level, lives, Score, GlobalScore
+    global level
     level = 0
-    lives = settings['livesnormal']
-    Score = 0
-    GlobalScore = 0
-    canvas.create_image(320, 240, image=mainmenuBackgroung, tag="mainmenu")
-    labelLevelText = " "
-    labelLevel.config(text=labelLevelText)
-    labelCatsText = " "
-    labelCats.config(text=labelCatsText)
-    labelScoreText = " "
-    labelScore.config(text=labelScoreText)
-    labelLivesText = " "
-    labelLives.config(text=labelLivesText)
+    objectsVariable.lives = settings['livesnormal']
+    objectsVariable.Score = 0
+    objectsVariable.GlobalScore = 0
+    canvas.create_image(320, 240, image=image.mainmenuBackgroung, tag="mainmenu")
+    labelLevel.config(text=" ")
+    labelCats.config(text=" ")
+    labelScore.config(text=" ")
+    labelLives.config(text=" ")
     newgameButt.place(x=195, y=260)
     exitgameButt.place(x=195, y=350)
     labelFast.place_forget()
@@ -310,10 +243,11 @@ def mainmenu_open():  # Открытие главного меню
 
 # Обновление статусбара
 def status():
-    global GrannyPos
-    CatStr = "%s из %s" % (CatAmountReal, CatAmountAll)
+    CatStr = "%s из %s" % (objectsVariable.CatAmountReal, objectsVariable.CatAmountAll)
     if Hero.avaible:
         GrannyPos = str(Hero.coords())
+    else:
+        GrannyPos = "None"
     if alphaSavage.avaible:
         alphaPos = str(alphaSavage.coords())
     else:
@@ -335,9 +269,9 @@ def status():
         labelLevel.config(text=labelLevelText)
         labelCatsText = "Коты: %s" % CatStr
         labelCats.config(text=labelCatsText)
-        labelScoreText = "Счет: %i" % (Score+GlobalScore)
+        labelScoreText = "Счет: %i" % (objectsVariable.Score + objectsVariable.GlobalScore)
         labelScore.config(text=labelScoreText)
-        labelLivesText = "Жизни: %i" % lives
+        labelLivesText = "Жизни: %i" % objectsVariable.lives
         labelLives.config(text=labelLivesText)
 
     if debugmode.get() == 1:
@@ -356,7 +290,8 @@ def status():
         if level == 0:
             message = "Готов"
     elif debugmode.get() == 4:
-        message = "FPS:%i; Time:%i; KeySpeed:%i; Cheat:%s" % (fpsGlobal, lastframetime, KeySpeed, settings["cheatmode"])
+        message = "FPS:%i; Time:%i; KeySpeed:%i; Cheat:%s; MusicState:%s; Volume:%i;" % (
+            fpsGlobal, lastframetime, KeySpeed, settings["cheatmode"], musicmode.get(), volumeMusic)
         if level == 0:
             message = "Готов"
     elif level != 0:
@@ -378,604 +313,391 @@ def clearcanvas():
     canvas.delete("savage")
     canvas.delete("exit")
 
-"""Классы"""
+
+"""Объекты"""
 # Персонаж
-class Granny():  # Класс персонажа, которым мы управляем
-    def __init__(self, spawncoords):
-        self.id = canvas.create_image(spawncoords[0], spawncoords[1], image=grannyImage, tag="granny")
-        self.x = spawncoords[0]                                         # Координата Х
-        self.y = spawncoords[1]                                         # Координата У
-        self.avaible = True                                             # Существует ли объект
-        self.action = ""                                                # Очередь действий
+class Granny:  # Класс персонажа, которым мы управляем
+    def __init__(self, spawncoords, canvas, image):
+        self.image = image
+        self.canvas = canvas
+        self.id = self.canvas.create_image(spawncoords[0], spawncoords[1], image=self.image["image"], tag="granny")
+        self.x = spawncoords[0]  # Координата Х
+        self.y = spawncoords[1]  # Координата У
+        self.avaible = True  # Существует ли объект
+        self.action = ""  # Очередь действий
         # Обработка нажатий
-        canvas.bind_all('<KeyPress-a>', self.turn_left)
-        canvas.bind_all('<KeyPress-d>', self.turn_right)
-        canvas.bind_all('<KeyPress-w>', self.turn_up)
-        canvas.bind_all('<KeyPress-s>', self.turn_down)
-        canvas.bind_all('<KeyPress-Left>', self.turn_left)
-        canvas.bind_all('<KeyPress-Right>', self.turn_right)
-        canvas.bind_all('<KeyPress-Up>', self.turn_up)
-        canvas.bind_all('<KeyPress-Down>', self.turn_down)
-        canvas.bind_all('<KeyPress-space>', self.hit_enemy)
+        self.canvas.bind_all('<KeyPress-a>', self.turn_left)
+        self.canvas.bind_all('<KeyPress-d>', self.turn_right)
+        self.canvas.bind_all('<KeyPress-w>', self.turn_up)
+        self.canvas.bind_all('<KeyPress-s>', self.turn_down)
+        self.canvas.bind_all('<KeyPress-Left>', self.turn_left)
+        self.canvas.bind_all('<KeyPress-Right>', self.turn_right)
+        self.canvas.bind_all('<KeyPress-Up>', self.turn_up)
+        self.canvas.bind_all('<KeyPress-Down>', self.turn_down)
+        self.canvas.bind_all('<KeyPress-space>', self.hit_enemy)
+        self.isWalkingLeft = False  # Идет ли персонаж влево
+        self.isWalkingRight = False  # Идет ли персонаж вправо
+        self.isClimbingUp = False  # Забирается ли персонаж
+        self.isClimbingDown = False  # Спускается ли персонаж
+        self.isHitEnemy = False  # Бьет ли персонаж
+        self.lastanimation = "None"  # Переменная последней проигранной анимации
+        self.lastWalkRightImage = 0  # Последнее использованное изображение для анимации шага вправо
+        self.lastWalkLeftImage = 0  # Последнее использованное изображение для анимации шага влево
+        self.lastClimbUpImage = 0  # Последнее использованное изображение для анимации забирания
+        self.lastHitEnemyImage = 0  # Последнее использованное изображение для анимации удара
+        self.lastanimationtime = time.time()  # Время последнего анимирования
 
-    def coords(self):                                                   # Массив с координатами
-        coordsArray = [self.x, self.y]
-        return coordsArray
+    def coords(self):  # Массив с координатами
+        return [self.x, self.y]
 
-    def actionzone(self):                                               # Зона действий
-        actionArray = [self.x - 25, self.x + 25, self.y - 30, self.y + 30]
-        return actionArray
+    def actionzone(self):  # Зона действий
+        return [self.x - 25, self.x + 25, self.y - 30, self.y + 30]
 
-    def action_queue(self):                                             # Сама очередь действий
-        global isWalkingLeft, isWalkingRight, isClimbingUp, isClimbingDown, isHitEnemy
-        if self.action == "turn_left":                                  # Если нужно повернуть налево
-            isWalkingLeft = True                                        # Ставим флаг, что поворачиваем (для анимации)
-            if (self.x > 30) & (wallside != "R"):                       # Если не у края и не уперлись в стену
-                canvas.move(self.id, -grannyWalkSpeed, 0)               # Двигаемся влево на значение скорости
-                self.x -= grannyWalkSpeed                               # Обновляем координату
-        if self.action == "turn_right":                                 # Если нужно повернуть направо
-            isWalkingRight = True                                       # Ставим флаг, что поворачиваем
-            if (self.x < 610) & (wallside != "L"):                      # Если не у края и не уперлись в стену
-                canvas.move(self.id, grannyWalkSpeed, 0)                # Двигаемся вправо на значение скорости
-                self.x += grannyWalkSpeed                               # Обновляем координату
-        if self.action == "turn_up":                                    # Если нужно подняться наверх
-            isClimbingUp = True                                         # Ставим флаг, что забираемся
-            if (self.y > 30) & ladd:                                    # Если не у края и на лестнице
-                canvas.move(self.id, 0, -grannyWalkSpeed)               # Двигаемся вверх на значение скорости
-                self.y -= grannyWalkSpeed                               # Обновляем координату
-        if self.action == "turn_down":                                  # Если нужно стуститься вниз
-            isClimbingDown = True                                       # Ставим флаг, что спускаемся
-            if (plat == False) & (antigrav == False) & (simpgrav == False):        # Если не на платформе, нет антигравитации, и двигается не под действием гравитации
-                canvas.move(self.id, 0, grannyWalkSpeed)                # Двигаемся вниз на значение скорости
-                self.y += grannyWalkSpeed                               # Обновляем координату
-        if self.action == "hit_enemy":                                  # Если нужно ударить
-            isHitEnemy = True                                           # Ставим флаг, что ударяем
-            savageKill()                                                # Обьявляем всех Дикарей в зоне действия мертвыми
-        self.action = ""                                                # Сбрасываем задачу
+    def action_queue(self):  # Сама очередь действий
+        if self.action == "turn_left":  # Если нужно повернуть налево
+            self.isWalkingLeft = True  # Ставим флаг, что поворачиваем (для анимации)
+            if (self.x > 30) & (wallside != "R"):  # Если не у края и не уперлись в стену
+                self.canvas.move(self.id, -grannyWalkSpeed, 0)  # Двигаемся влево на значение скорости
+                self.x -= grannyWalkSpeed  # Обновляем координату
+        if self.action == "turn_right":  # Если нужно повернуть направо
+            self.isWalkingRight = True  # Ставим флаг, что поворачиваем
+            if (self.x < 610) & (wallside != "L"):  # Если не у края и не уперлись в стену
+                self.canvas.move(self.id, grannyWalkSpeed, 0)  # Двигаемся вправо на значение скорости
+                self.x += grannyWalkSpeed  # Обновляем координату
+        if self.action == "turn_up":  # Если нужно подняться наверх
+            self.isClimbingUp = True  # Ставим флаг, что забираемся
+            if (self.y > 30) & ladd:  # Если не у края и на лестнице
+                self.canvas.move(self.id, 0, -grannyWalkSpeed)  # Двигаемся вверх на значение скорости
+                self.y -= grannyWalkSpeed  # Обновляем координату
+        if self.action == "turn_down":  # Если нужно стуститься вниз
+            self.isClimbingDown = True  # Ставим флаг, что спускаемся
+            if (plat is False) & (antigrav is False) & (simpgrav is False):
+                self.canvas.move(self.id, 0, grannyWalkSpeed)  # Двигаемся вниз на значение скорости
+                self.y += grannyWalkSpeed  # Обновляем координату
+        if self.action == "hit_enemy":  # Если нужно ударить
+            self.isHitEnemy = True  # Ставим флаг, что ударяем
+            savageKill()  # Обьявляем всех Дикарей в зоне мертвыми
+        self.action = ""  # Сбрасываем задачу
 
-    def turn_left(self, event):                                         # Движение влево
+    def turn_left(self, event):  # Движение влево
         global key
         if key <= settings["keyboardLimit"]:
             key += 1
             self.action = "turn_left"
 
-    def turn_right(self, event):                                        # Движение вправо
+    def turn_right(self, event):  # Движение вправо
         global key
         if key <= settings["keyboardLimit"]:
             key += 1
             self.action = "turn_right"
 
-    def turn_up(self, event):                                           # Движение вверх до потолка
+    def turn_up(self, event):  # Движение вверх до потолка
         global key
         if key <= settings["keyboardLimit"]:
             key += 1
             self.action = "turn_up"
 
-    def turn_down(self, event):                                         # Движение вниз
+    def turn_down(self, event):  # Движение вниз
         global key
         if key <= settings["keyboardLimit"]:
             key += 1
             self.action = "turn_down"
 
-    def hit_enemy(self, event):                                         # Удар
+    def hit_enemy(self, event):  # Удар
         global key
         if key <= settings["keyboardLimit"]:
             key += 1
             self.action = "hit_enemy"
 
-    def touch_place(self):                                              # Массив точек касания нижней линии
-        touch = [self.y + 30, self.x + 5, self.x - 5]
-        return touch
+    def touch_place(self):  # Массив точек касания нижней линии
+        return [self.y + 30, self.x + 5, self.x - 5]
 
-    def touch_head(self):                                               # Массив точек касания верхней линии
-        head = [self.y - 30, self.x + 5, self.x - 5]
-        return head
+    def touch_head(self):  # Массив точек касания верхней линии
+        return [self.y - 30, self.x + 5, self.x - 5]
 
-    def hit_area(self):                                                 # Массив зоны удара
-        area = [self.x - 60, self.x + 60, self.y - 30, self.y + 30]
-        return area
+    def hit_area(self):  # Массив зоны удара
+        return [self.x - 60, self.x + 60, self.y - 30, self.y + 30]
 
-    def gravitymove(self):                                              # Движение под действием гравитации
-        if ((self.y > 30) & (head == False)) | (gravitySpeed > 0):      # Если не бьемся головой или нормальная гравитация
-            canvas.move(self.id, 0, gravitySpeed)
+    def gravitymove(self):  # Движение под действием гравитации
+        if ((self.y > 30) & (head is False)) | (gravitySpeed > 0):  # Если не бьемся головой или нормальная гравитация
+            self.canvas.move(self.id, 0, gravitySpeed)
             self.y += gravitySpeed
 
-    def animate(self):                                                  # Анимирование
-        global lastanimation, lastanimationtime, lastWalkLeftImage, lastWalkRightImage, lastClimbUpImage, lastHitEnemyImage, \
-            isWalkingRight, isWalkingLeft, isClimbingUp, isClimbingDown, isHitEnemy
-        if (time.time() - lastanimationtime) > animationGrannyduration: # Если прошла задержка
-                                                                        # Анимации после движений
-            if lastanimation == "WalkRight":
-                canvas.itemconfig(self.id, image=grannyStandRight)
-            if lastanimation == "WalkLeft":
-                canvas.itemconfig(self.id, image=grannyStandLeft)
-            if (lastanimation == "Stand") | (lastanimation == "Hit"):
-                canvas.itemconfig(self.id, image=grannyImage)
-            if lastanimation == "Climbing":
-                canvas.itemconfig(self.id, image=grannyClimbUp[1])
-                                                                        # Анимации во время движений
-            if isWalkingRight:
-                if lastWalkRightImage == 3: lastWalkRightImage = 0
-                canvas.itemconfig(self.id, image=grannyWalkRight[lastWalkRightImage])
-                lastWalkRightImage += 1
-                isWalkingRight = False
-                lastanimation = "WalkRight"
-            if isWalkingLeft:
-                if lastWalkLeftImage == 3: lastWalkLeftImage = 0
-                canvas.itemconfig(self.id, image=grannyWalkLeft[lastWalkLeftImage])
-                lastWalkLeftImage += 1
-                isWalkingLeft = False
-                lastanimation = "WalkLeft"
-            if isHitEnemy:
-                if lastHitEnemyImage == 2: lastHitEnemyImage = 0
-                canvas.itemconfig(self.id, image=grannyHit[lastHitEnemyImage])
-                lastHitEnemyImage += 1
-                isHitEnemy = False
-                lastanimation = "Hit"
-                                                                        # Забирание и спуск по лестнице
-            if (ladd == True) & (plat == False):
-                if isClimbingUp:
-                    if lastClimbUpImage == 3: lastClimbUpImage = 0
-                    canvas.itemconfig(self.id, image=grannyClimbUp[lastClimbUpImage])
-                    lastClimbUpImage += 1
-                    isClimbingUp = False
-                    lastanimation = "Climbing"
-                    if (ladd == False) | (plat == True):
-                        lastanimation = "Stand"
-
-                if isClimbingDown:
-                    canvas.itemconfig(self.id, image=grannyClimbDown)
-                    isClimbingDown = False
-                    lastanimation = "Climbing"
-                    if (ladd == False) | ((plat == True)):
-                        lastanimation = "Stand"
-                                                                        # Падение
-            if (plat == False) & (ladd == False):
-                canvas.itemconfig(self.id, image=grannyFall)
-                isWalkingLeft = False
-                isWalkingRight = False
-                lastanimation = "Stand"
-                                                                        # Обновляем таймер анимации
-            lastanimationtime = time.time()
-
-# Дикарь
-class Savage():
-    # Ширина 48 Высота 64
-    def __init__(self, spawncoords):
-        self.id = canvas.create_image(spawncoords[0], spawncoords[1], image=savageImage, tag="savage")
-        self.x = spawncoords[0]
-        self.y = spawncoords[1]
-        self.avaible = True
-        self.action = ""
-        self.way = [0, 640]
-        self.direction = random.choice(direction)
-        self.lastWalkRightImage = 0
-        self.lastWalkLeftImage = 0
-        self.isWalkingLeft = False
-        self.isWalkingRight = False
-        self.lastSavageanimationtime = time.time()
-
-    def coords(self):  # Массив с координатами
-        coordsArray = [self.x, self.y]
-        return coordsArray
-
-    def actionzone(self):  # Зона действий
-        actionArray = [self.x - 30, self.x + 30, self.y - 32, self.y + 32]
-        return actionArray
-
-    def action_queue(self):
-        if self.action == "turn_left":
-            self.isWalkingLeft = True
-            self.animate()
-            if (self.x > 30):
-                canvas.move(self.id, -savageSpeed, 0)
-                self.x -= savageSpeed
-        if self.action == "turn_right":
-            self.isWalkingRight = True
-            self.animate()
-            if (self.x < 610):
-                canvas.move(self.id, savageSpeed, 0)
-                self.x += savageSpeed
-        self.action = ""
-
-    def turn_left(self):  # Движение влево
-        self.action = "turn_left"
-
-    def turn_right(self):  # Движение вправо
-        self.action = "turn_right"
-
     def animate(self):  # Анимирование
-        if (time.time() - self.lastSavageanimationtime) > animationSavageduration:  # Если прошла задержка
-            # Анимации во время движений
-            if (self.isWalkingRight) | (self.direction == "right"):
-                if self.lastWalkRightImage == 7: self.lastWalkRightImage = 0
-                canvas.itemconfig(self.id, image=savageWalkRight[self.lastWalkRightImage])
+        if (time.time() - self.lastanimationtime) > animationGrannyduration:  # Если прошла задержка
+            # Анимации после движений
+            if self.lastanimation == "WalkRight":
+                self.canvas.itemconfig(self.id, image=self.image["grannyStandRight"])
+            if self.lastanimation == "WalkLeft":
+                self.canvas.itemconfig(self.id, image=self.image["grannyStandLeft"])
+            if (self.lastanimation == "Stand") | (self.lastanimation == "Hit"):
+                self.canvas.itemconfig(self.id, image=self.image["image"])
+            if self.lastanimation == "Climbing":
+                self.canvas.itemconfig(self.id, image=self.image["grannyClimbUp"][1])
+                # Анимации во время движений
+            if self.isWalkingRight:
+                if self.lastWalkRightImage == 3:
+                    self.lastWalkRightImage = 0
+                self.canvas.itemconfig(self.id, image=self.image["grannyWalkRight"][self.lastWalkRightImage])
                 self.lastWalkRightImage += 1
                 self.isWalkingRight = False
-            if (self.isWalkingLeft) | (self.direction == "left"):
-                if self.lastWalkLeftImage == 7: self.lastWalkLeftImage = 0
-                canvas.itemconfig(self.id, image=savageWalkLeft[self.lastWalkLeftImage])
+                self.lastanimation = "WalkRight"
+            if self.isWalkingLeft:
+                if self.lastWalkLeftImage == 3:
+                    self.lastWalkLeftImage = 0
+                self.canvas.itemconfig(self.id, image=self.image["grannyWalkLeft"][self.lastWalkLeftImage])
                 self.lastWalkLeftImage += 1
                 self.isWalkingLeft = False
-            # Обновляем таймер кадра
-            self.lastSavageanimationtime = time.time()
+                self.lastanimation = "WalkLeft"
+            if self.isHitEnemy:
+                if self.lastHitEnemyImage == 2:
+                    self.lastHitEnemyImage = 0
+                self.canvas.itemconfig(self.id, image=self.image["grannyHit"][self.lastHitEnemyImage])
+                self.lastHitEnemyImage += 1
+                self.isHitEnemy = False
+                self.lastanimation = "Hit"
+            # Забирание и спуск по лестнице
+            if (ladd is True) & (plat is False):
+                if self.isClimbingUp:
+                    if self.lastClimbUpImage == 3:
+                        self.lastClimbUpImage = 0
+                    self.canvas.itemconfig(self.id, image=self.image["grannyClimbUp"][self.lastClimbUpImage])
+                    self.lastClimbUpImage += 1
+                    self.isClimbingUp = False
+                    self.lastanimation = "Climbing"
+                    if (ladd is False) | (plat is True):
+                        self.lastanimation = "Stand"
 
-# Базовая платформа
-class PlatformBase():  # Класс базовой платформы, которая присутствует на всех уровнях
-    def __init__(self):
-        self.avaible = True
-        self.id = canvas.create_image(320, 465, image=baseplatform, tag="platform")
-
-    def border(self):
-        bord = [30, 610]
-        return bord
-
-    def touch_place(self):  # Массив точек касания верхней линии
-        touch = [450, 0, 640]
-        return touch
-
-# Платформа
-class PlatformSimple():  # Класс обычной платформы, масштабируется и изменяется для каждого уровня
-    def __init__(self, coordsArray):
-        self.coords = coordsArray
-        self.avaible = True
-        self.id = canvas.create_rectangle(self.coords[1], self.coords[0], self.coords[2], self.coords[0] + 30,
-                                          fill="#a2653e", tag="platform")
-
-    def border(self):
-        bord = [self.coords[1] + 15, self.coords[2] - 15]
-        return bord
-
-    def touch_place(self):  # Массив точек касания верхней линии
-        touch = [self.coords[0], self.coords[1], self.coords[2]]
-        return touch
-
-    def touch_head(self):  # Массив точек касания нижней линии
-        head = [self.coords[0] + 30, self.coords[1], self.coords[2]]
-        return head
-
-# Стена
-class Wall():
-    # Ширина 32, Высота 64
-    def __init__(self, coordsArray):
-        self.coords = coordsArray
-        self.avaible = True
-        self.centre = [self.coords[0] + 16, self.coords[1] + 32]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=wallImage, tag="wall")
-
-    def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 30, self.centre[0] + 30, self.centre[1] - 32, self.centre[1] + 32]
-        return actionArray
-
-# Лестница
-class Ladder():  # Класс лестницы, позволяет забираться на верх
-    # Ширина 50, Высота 120
-    def __init__(self, coordsArray):  # ax by (Верхний левый угол)
-        self.coords = coordsArray
-        self.avaible = True
-        self.centre = [self.coords[0] + 25, self.coords[1] + 60]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=ladder, tag="ladder")
-
-    def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 10, self.centre[0] + 10, self.centre[1] - 60, self.centre[1] + 60]
-        return actionArray
-
-# Кот
-class Cat():  # Класс котика, которых мы спасаем
-    # Ширина 24, Высота 32
-    def __init__(self, coordsArray):  # ax by (Верхний левый угол)
-        self.coords = coordsArray
-        self.centre = [self.coords[0] + 12, self.coords[1] + 16]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=random.choice(cats), tag="cat")
-        self.avaible = True
-
-    def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 16, self.centre[1] + 16]
-        return actionArray
-
-    def collect(self):  # Собрать котика
-        global Score
-        self.avaible = False
-        Score += settings["ScoreAddCat"]     # Зачисляем очки
-        canvas.delete(self.id)
-
-# Бонусный цветок
-class BonusFlower():
-    # Ширина 32, Высота 36
-    def __init__(self, coordsArray):  # ax by (Верхний левый угол)
-        self.coords = coordsArray
-        self.centre = [self.coords[0] + 16, self.coords[1] + 18]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=bonusSeed, tag="bonus")
-        self.avaible = True
-
-    def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 16, self.centre[0] + 16, self.centre[1] - 18, self.centre[1] + 18]
-        return actionArray
-
-    def rise(self):
-        global Score
-        self.avaible = False
-        Score += settings["ScoreAddBonus"]
-        canvas.itemconfig(self.id, image=random.choice(bonus))
-
-# Быстромор
-class Fastroom():
-    # Ширина 24, Высота 24
-    def __init__(self, coordsArray):  # ax by (Верхний левый угол)
-        self.coords = coordsArray
-        self.centre = [self.coords[0] + 12, self.coords[1] + 12]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=mushroom[0], tag="mushroom")
-        self.avaible = True
-
-    def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
-        return actionArray
-
-    def effect(self):
-        global isFastEffect
-        isFastEffect = True
-
-# Медлянка
-class Slowroom():
-    # Ширина 24, Высота 24
-    def __init__(self, coordsArray):  # ax by (Верхний левый угол)
-        self.coords = coordsArray
-        self.centre = [self.coords[0] + 12, self.coords[1] + 12]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=mushroom[1], tag="mushroom")
-        self.avaible = True
-
-    def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
-        return actionArray
-
-    def effect(self):
-        global isSlowEffect
-        isSlowEffect = True
-
-# Вверхшенка
-class Gravroom():
-    # Ширина 24, Высота 24
-    def __init__(self, coordsArray):  # ax by (Верхний левый угол)
-        self.coords = coordsArray
-        self.centre = [self.coords[0] + 12, self.coords[1] + 12]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=mushroom[2], tag="mushroom")
-        self.avaible = True
-
-    def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
-        return actionArray
-
-    def effect(self):
-        global isGravEffect
-        isGravEffect = True
-
-# Выход
-class ExitFlower():  # Класс цветка-выхода
-    # Ширина 60, Высота 60
-    def __init__(self, coordsArray):  # ax by (Верхний левый угол)
-        self.coords = coordsArray
-        self.avaible = True
-        self.centre = [self.coords[0] + 30, self.coords[1] + 30]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=exitImage[0], tag="exit")
-
-    def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 30, self.centre[0] + 30, self.centre[1] - 30, self.centre[1] + 30]
-        return actionArray
-
-    def opening(self):  # Открытие цветка
-        canvas.itemconfig(self.id, image=exitImage[1])
-
-# Пустой объект
-class Empty():
-    def __init__(self):
-        self.avaible = False
-        self.id = None
+                if self.isClimbingDown:
+                    self.canvas.itemconfig(self.id, image=self.image["grannyClimbDown"])
+                    self.isClimbingDown = False
+                    self.lastanimation = "Climbing"
+                    if (ladd is False) | (plat is True):
+                        self.lastanimation = "Stand"
+                        # Падение
+            if (plat is False) & (ladd is False):
+                self.canvas.itemconfig(self.id, image=self.image["grannyFall"])
+                self.isWalkingLeft = False
+                self.isWalkingRight = False
+                self.lastanimation = "Stand"
+                # Обновляем таймер анимации
+            self.lastanimationtime = time.time()
 
 """Уровни"""
 # Инициальзация уровня по data.json
 def LevelInit():
     clearbutt()
     clearcanvas()
-    global limitedtime, avoidEffects, limitedFlag, Hero, Base, Exit, CatAmountReal, CatAmountAll, alphaPlatform, betaPlatform, gammaPlatform, deltaPlatform, epsilonPlatform, zetaPlatform, etaPlatform, thetaPlatform, iotaPlatform, alphaCat, betaCat, gammaCat, deltaCat, epsilonCat, zetaCat, alphaBonus, betaBonus, gammaBonus, deltaBonus, epsilonBonus, zetaBonus, alphaLadder, betaLadder, gammaLadder, deltaLadder, epsilonLadder, zetaLadder, alphaWall, betaWall, gammaWall, deltaWall, epsilonWall, zetaWall, alphaSavage, betaSavage, gammaSavage, deltaSavage, alphaFastroom, betaFastroom, alphaSlowroom, betaSlowroom, alphaGravroom, betaGravroom
+    global limitedtime, avoidEffects, limitedFlag, Hero, Base, Exit, alphaPlatform, betaPlatform, gammaPlatform, deltaPlatform, epsilonPlatform, zetaPlatform, etaPlatform, thetaPlatform, iotaPlatform, alphaCat, betaCat, gammaCat, deltaCat, epsilonCat, zetaCat, alphaBonus, betaBonus, gammaBonus, deltaBonus, epsilonBonus, zetaBonus, alphaLadder, betaLadder, gammaLadder, deltaLadder, epsilonLadder, zetaLadder, alphaWall, betaWall, gammaWall, deltaWall, epsilonWall, zetaWall, alphaSavage, betaSavage, gammaSavage, deltaSavage, alphaFastroom, betaFastroom, alphaSlowroom, betaSlowroom, alphaGravroom, betaGravroom
     limitedFlag = False
     avoidEffects = True
     limitedtime = 0
-    canvas.create_image(320, 240, image=jungleBackgroung, tag="play")
-    Base = PlatformBase()
-    Exit = ExitFlower(settings['levels'][level]['exitCoords'])
-    CatAmountAll = settings['levels'][level]['CatAmountAll']
-    CatAmountReal = settings['levels'][level]['CatAmountReal']
+    canvas.create_image(320, 240, image=image.jungleBackgroung, tag="play")
+    Base = PlatformBase(canvas=canvas, image=image.baseplatform)
+    Exit = ExitFlower(settings['levels'][level]['exitCoords'], canvas=canvas, image=image.exitImage)
+    objectsVariable.CatAmountAll = settings['levels'][level]['CatAmountAll']
+    objectsVariable.CatAmountReal = settings['levels'][level]['CatAmountReal']
     """Платформы"""
     if settings['levels'][level]['alphaPlatformFlag']:
-        alphaPlatform = PlatformSimple(settings['levels'][level]['alphaPlatformCoords'])
+        alphaPlatform = PlatformSimple(settings['levels'][level]['alphaPlatformCoords'], canvas=canvas)
     else:
         alphaPlatform = Empty()
     if settings['levels'][level]['betaPlatformFlag']:
-        betaPlatform = PlatformSimple(settings['levels'][level]['betaPlatformCoords'])
+        betaPlatform = PlatformSimple(settings['levels'][level]['betaPlatformCoords'], canvas=canvas)
     else:
         betaPlatform = Empty()
     if settings['levels'][level]['gammaPlatformFlag']:
-        gammaPlatform = PlatformSimple(settings['levels'][level]['gammaPlatformCoords'])
+        gammaPlatform = PlatformSimple(settings['levels'][level]['gammaPlatformCoords'], canvas=canvas)
     else:
         gammaPlatform = Empty()
     if settings['levels'][level]['deltaPlatformFlag']:
-        deltaPlatform = PlatformSimple(settings['levels'][level]['deltaPlatformCoords'])
+        deltaPlatform = PlatformSimple(settings['levels'][level]['deltaPlatformCoords'], canvas=canvas)
     else:
         deltaPlatform = Empty()
     if settings['levels'][level]['epsilonPlatformFlag']:
-        epsilonPlatform = PlatformSimple(settings['levels'][level]['epsilonPlatformCoords'])
+        epsilonPlatform = PlatformSimple(settings['levels'][level]['epsilonPlatformCoords'], canvas=canvas)
     else:
         epsilonPlatform = Empty()
     if settings['levels'][level]['zetaPlatformFlag']:
-        zetaPlatform = PlatformSimple(settings['levels'][level]['zetaPlatformCoords'])
+        zetaPlatform = PlatformSimple(settings['levels'][level]['zetaPlatformCoords'], canvas=canvas)
     else:
         zetaPlatform = Empty()
     if settings['levels'][level]['etaPlatformFlag']:
-        etaPlatform = PlatformSimple(settings['levels'][level]['etaPlatformCoords'])
+        etaPlatform = PlatformSimple(settings['levels'][level]['etaPlatformCoords'], canvas=canvas)
     else:
         etaPlatform = Empty()
     if settings['levels'][level]['thetaPlatformFlag']:
-        thetaPlatform = PlatformSimple(settings['levels'][level]['thetaPlatformCoords'])
+        thetaPlatform = PlatformSimple(settings['levels'][level]['thetaPlatformCoords'], canvas=canvas)
     else:
         thetaPlatform = Empty()
     if settings['levels'][level]['iotaPlatformFlag']:
-        iotaPlatform = PlatformSimple(settings['levels'][level]['iotaPlatformCoords'])
+        iotaPlatform = PlatformSimple(settings['levels'][level]['iotaPlatformCoords'], canvas=canvas)
     else:
         iotaPlatform = Empty()
 
     """Лестницы"""
     if settings['levels'][level]['alphaLadderFlag']:
-        alphaLadder = Ladder(settings['levels'][level]['alphaLadderCoords'])
+        alphaLadder = Ladder(settings['levels'][level]['alphaLadderCoords'], canvas=canvas, image=image.ladder)
     else:
         alphaLadder = Empty()
     if settings['levels'][level]['betaLadderFlag']:
-        betaLadder = Ladder(settings['levels'][level]['betaLadderCoords'])
+        betaLadder = Ladder(settings['levels'][level]['betaLadderCoords'], canvas=canvas, image=image.ladder)
     else:
         betaLadder = Empty()
     if settings['levels'][level]['gammaLadderFlag']:
-        gammaLadder = Ladder(settings['levels'][level]['gammaLadderCoords'])
+        gammaLadder = Ladder(settings['levels'][level]['gammaLadderCoords'], canvas=canvas, image=image.ladder)
     else:
         gammaLadder = Empty()
     if settings['levels'][level]['deltaLadderFlag']:
-        deltaLadder = Ladder(settings['levels'][level]['deltaLadderCoords'])
+        deltaLadder = Ladder(settings['levels'][level]['deltaLadderCoords'], canvas=canvas, image=image.ladder)
     else:
         deltaLadder = Empty()
     if settings['levels'][level]['epsilonLadderFlag']:
-        epsilonLadder = Ladder(settings['levels'][level]['epsilonLadderCoords'])
+        epsilonLadder = Ladder(settings['levels'][level]['epsilonLadderCoords'], canvas=canvas, image=image.ladder)
     else:
         epsilonLadder = Empty()
     if settings['levels'][level]['zetaLadderFlag']:
-        zetaLadder = Ladder(settings['levels'][level]['zetaLadderCoords'])
+        zetaLadder = Ladder(settings['levels'][level]['zetaLadderCoords'], canvas=canvas, image=image.ladder)
     else:
         zetaLadder = Empty()
 
     """Стены"""
     if settings['levels'][level]['alphaWallFlag']:
-        alphaWall = Wall(settings['levels'][level]['alphaWallCoords'])
+        alphaWall = Wall(settings['levels'][level]['alphaWallCoords'], canvas=canvas, image=image.wallImage)
     else:
         alphaWall = Empty()
     if settings['levels'][level]['betaWallFlag']:
-        betaWall = Wall(settings['levels'][level]['betaWallCoords'])
+        betaWall = Wall(settings['levels'][level]['betaWallCoords'], canvas=canvas, image=image.wallImage)
     else:
         betaWall = Empty()
     if settings['levels'][level]['gammaWallFlag']:
-        gammaWall = Wall(settings['levels'][level]['gammaWallCoords'])
+        gammaWall = Wall(settings['levels'][level]['gammaWallCoords'], canvas=canvas, image=image.wallImage)
     else:
         gammaWall = Empty()
     if settings['levels'][level]['deltaWallFlag']:
-        deltaWall = Wall(settings['levels'][level]['deltaWallCoords'])
+        deltaWall = Wall(settings['levels'][level]['deltaWallCoords'], canvas=canvas, image=image.wallImage)
     else:
         deltaWall = Empty()
     if settings['levels'][level]['epsilonWallFlag']:
-        epsilonWall = Wall(settings['levels'][level]['epsilonWallCoords'])
+        epsilonWall = Wall(settings['levels'][level]['epsilonWallCoords'], canvas=canvas, image=image.wallImage)
     else:
         epsilonWall = Empty()
     if settings['levels'][level]['zetaWallFlag']:
-        zetaWall = Wall(settings['levels'][level]['zetaWallCoords'])
+        zetaWall = Wall(settings['levels'][level]['zetaWallCoords'], canvas=canvas, image=image.wallImage)
     else:
         zetaWall = Empty()
 
     """Коты"""
     if settings['levels'][level]['alphaCatFlag']:
-        alphaCat = Cat(settings['levels'][level]['alphaCatCoords'])
+        alphaCat = Cat(settings['levels'][level]['alphaCatCoords'], canvas=canvas, image=image.cats)
     else:
         alphaCat = Empty()
     if settings['levels'][level]['betaCatFlag']:
-        betaCat = Cat(settings['levels'][level]['betaCatCoords'])
+        betaCat = Cat(settings['levels'][level]['betaCatCoords'], canvas=canvas, image=image.cats)
     else:
         betaCat = Empty()
     if settings['levels'][level]['gammaCatFlag']:
-        gammaCat = Cat(settings['levels'][level]['gammaCatCoords'])
+        gammaCat = Cat(settings['levels'][level]['gammaCatCoords'], canvas=canvas, image=image.cats)
     else:
         gammaCat = Empty()
     if settings['levels'][level]['deltaCatFlag']:
-        deltaCat = Cat(settings['levels'][level]['deltaCatCoords'])
+        deltaCat = Cat(settings['levels'][level]['deltaCatCoords'], canvas=canvas, image=image.cats)
     else:
         deltaCat = Empty()
     if settings['levels'][level]['epsilonCatFlag']:
-        epsilonCat = Cat(settings['levels'][level]['epsilonCatCoords'])
+        epsilonCat = Cat(settings['levels'][level]['epsilonCatCoords'], canvas=canvas, image=image.cats)
     else:
         epsilonCat = Empty()
     if settings['levels'][level]['zetaCatFlag']:
-        zetaCat = Cat(settings['levels'][level]['zetaCatCoords'])
+        zetaCat = Cat(settings['levels'][level]['zetaCatCoords'], canvas=canvas, image=image.cats)
     else:
         zetaCat = Empty()
 
     """Цветочки"""
     if settings['levels'][level]['alphaBonusFlag']:
-        alphaBonus = BonusFlower(settings['levels'][level]['alphaBonusCoords'])
+        alphaBonus = BonusFlower(settings['levels'][level]['alphaBonusCoords'], canvas=canvas,
+                                 imagerise=random.choice(image.bonus), imageseed=image.bonusSeed)
     else:
         alphaBonus = Empty()
     if settings['levels'][level]['betaBonusFlag']:
-        betaBonus = BonusFlower(settings['levels'][level]['betaBonusCoords'])
+        betaBonus = BonusFlower(settings['levels'][level]['betaBonusCoords'], canvas=canvas,
+                                imagerise=random.choice(image.bonus), imageseed=image.bonusSeed)
     else:
         betaBonus = Empty()
     if settings['levels'][level]['gammaBonusFlag']:
-        gammaBonus = BonusFlower(settings['levels'][level]['gammaBonusCoords'])
+        gammaBonus = BonusFlower(settings['levels'][level]['gammaBonusCoords'], canvas=canvas,
+                                 imagerise=random.choice(image.bonus), imageseed=image.bonusSeed)
     else:
         gammaBonus = Empty()
     if settings['levels'][level]['deltaBonusFlag']:
-        deltaBonus = BonusFlower(settings['levels'][level]['deltaBonusCoords'])
+        deltaBonus = BonusFlower(settings['levels'][level]['deltaBonusCoords'], canvas=canvas,
+                                 imagerise=random.choice(image.bonus), imageseed=image.bonusSeed)
     else:
         deltaBonus = Empty()
     if settings['levels'][level]['epsilonBonusFlag']:
-        epsilonBonus = BonusFlower(settings['levels'][level]['epsilonBonusCoords'])
+        epsilonBonus = BonusFlower(settings['levels'][level]['epsilonBonusCoords'], canvas=canvas,
+                                   imagerise=random.choice(image.bonus), imageseed=image.bonusSeed)
     else:
         epsilonBonus = Empty()
     if settings['levels'][level]['zetaBonusFlag']:
-        zetaBonus = BonusFlower(settings['levels'][level]['zetaBonusCoords'])
+        zetaBonus = BonusFlower(settings['levels'][level]['zetaBonusCoords'], canvas=canvas,
+                                imagerise=random.choice(image.bonus), imageseed=image.bonusSeed)
     else:
         zetaBonus = Empty()
 
     """Туземец"""
     if settings['levels'][level]['alphaSavageFlag']:
-        alphaSavage = Savage(settings['levels'][level]['alphaSavageCoords'])
+        alphaSavage = Savage(settings['levels'][level]['alphaSavageCoords'], canvas=canvas, image=image.savage,
+                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
     else:
         alphaSavage = Empty()
     if settings['levels'][level]['betaSavageFlag']:
-        betaSavage = Savage(settings['levels'][level]['betaSavageCoords'])
+        betaSavage = Savage(settings['levels'][level]['betaSavageCoords'], canvas=canvas, image=image.savage,
+                            animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
     else:
         betaSavage = Empty()
     if settings['levels'][level]['gammaSavageFlag']:
-        gammaSavage = Savage(settings['levels'][level]['gammaSavageCoords'])
+        gammaSavage = Savage(settings['levels'][level]['gammaSavageCoords'], canvas=canvas, image=image.savage,
+                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
     else:
         gammaSavage = Empty()
     if settings['levels'][level]['deltaSavageFlag']:
-        deltaSavage = Savage(settings['levels'][level]['deltaSavageCoords'])
+        deltaSavage = Savage(settings['levels'][level]['deltaSavageCoords'], canvas=canvas, image=image.savage,
+                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
     else:
         deltaSavage = Empty()
 
     """Быстромор"""
     if settings['levels'][level]['alphaFastroomFlag']:
-        alphaFastroom = Fastroom(settings['levels'][level]['alphaFastroomCoords'])
+        alphaFastroom = Fastroom(settings['levels'][level]['alphaFastroomCoords'], canvas=canvas, image=image.mushroom)
     else:
         alphaFastroom = Empty()
     if settings['levels'][level]['betaFastroomFlag']:
-        betaFastroom = Fastroom(settings['levels'][level]['betaFastroomCoords'])
+        betaFastroom = Fastroom(settings['levels'][level]['betaFastroomCoords'], canvas=canvas, image=image.mushroom)
     else:
         betaFastroom = Empty()
 
     """Медлянка"""
     if settings['levels'][level]['alphaSlowroomFlag']:
-        alphaSlowroom = Slowroom(settings['levels'][level]['alphaSlowroomCoords'])
+        alphaSlowroom = Slowroom(settings['levels'][level]['alphaSlowroomCoords'], canvas=canvas, image=image.mushroom)
     else:
         alphaSlowroom = Empty()
     if settings['levels'][level]['betaSlowroomFlag']:
-        betaSlowroom = Slowroom(settings['levels'][level]['betaSlowroomCoords'])
+        betaSlowroom = Slowroom(settings['levels'][level]['betaSlowroomCoords'], canvas=canvas, image=image.mushroom)
     else:
         betaSlowroom = Empty()
 
     """Вверхшенка"""
     if settings['levels'][level]['alphaGravroomFlag']:
-        alphaGravroom = Gravroom(settings['levels'][level]['alphaGravroomCoords'])
+        alphaGravroom = Gravroom(settings['levels'][level]['alphaGravroomCoords'], canvas=canvas, image=image.mushroom)
     else:
         alphaGravroom = Empty()
     if settings['levels'][level]['betaGravroomFlag']:
-        betaGravroom = Gravroom(settings['levels'][level]['betaGravroomCoords'])
+        betaGravroom = Gravroom(settings['levels'][level]['betaGravroomCoords'], canvas=canvas, image=image.mushroom)
     else:
         betaGravroom = Empty()
 
-    Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'])
+    Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], canvas=canvas, image=image.granny)
 
 # Обработка выбора уровня
 def LevelShoose():
@@ -983,46 +705,47 @@ def LevelShoose():
     ask = sd.askinteger(title="Выбор уровня",
                         prompt="Введите номер уровня.\nМаксимальный уровень: %i" % settings["levelamount"], minvalue=1,
                         maxvalue=settings["levelamount"])
-    if type(ask)==int:
-        if (level ==0)|settings["cheatmode"]:
+    if type(ask) == int:
+        if (level == 0) | settings["cheatmode"]:
             level = ask
             LevelInit()
 
 # Переход на следующий уровень или победа
 def LevelAdd():  # Логика переключения
-    global level, Score, GlobalScore, lives, Globallives
-    Globallives = lives
-    GlobalScore += Score
-    Score = 0
-    if level < settings["levelamount"]:         # Если уровень не последний
-        level += 1                              # Добавляем уровень
-        LevelInit()                             # Загружаем уровень
-    elif level == settings["levelamount"]:      # Если уровень последний
-        endgame(win=True)                       # Вывод сообшения о победе
+    global level
+    objectsVariable.Globallives = objectsVariable.lives
+    objectsVariable.GlobalScore += objectsVariable.Score
+    objectsVariable.Score = 0
+    if level < settings["levelamount"]:  # Если уровень не последний
+        level += 1  # Добавляем уровень
+        LevelInit()  # Загружаем уровень
+    elif level == settings["levelamount"]:  # Если уровень последний
+        endgame(win=True)  # Вывод сообшения о победе
 
 # Начать уровень заново
 def LevelRestart():
-    global Score, lives
-    ask = mb.askyesno(title="Внимание" , message="Вы действительно хотите начать уровень заново?")
+    ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать уровень заново?")
     if ask:
-        lives = Globallives
-        Score = 0
+        objectsVariable.lives = objectsVariable.Globallives
+        objectsVariable.Score = 0
         LevelInit()
+
 """Доп. Функции"""
 # Общая проверка по массивам
-def action_check(Grannyzone, Actionzone, Index):  # Проверка выхода по массивам
+def action_check(playerzone, objectzone, index):  # Проверка выхода по массивам
     solution = False
-    if (Grannyzone[0] + Index >= Actionzone[0]) & (Grannyzone[0] + Index <= Actionzone[1]):
-        if (Grannyzone[2] >= Actionzone[2]) & (Grannyzone[2] <= Actionzone[3]):
+    if (playerzone[0] + index >= objectzone[0]) & (playerzone[0] + index <= objectzone[1]):
+        if (playerzone[2] >= objectzone[2]) & (playerzone[2] <= objectzone[3]):
             solution = True
-        if (Grannyzone[3] >= Actionzone[2]) & (Grannyzone[3] <= Actionzone[3]):
+        if (playerzone[3] >= objectzone[2]) & (playerzone[3] <= objectzone[3]):
             solution = True
-    if (Grannyzone[1] - Index >= Actionzone[0]) & (Grannyzone[1] - Index <= Actionzone[1]):
-        if (Grannyzone[2] >= Actionzone[2]) & (Grannyzone[2] <= Actionzone[3]):
+    if (playerzone[1] - index >= objectzone[0]) & (playerzone[1] - index <= objectzone[1]):
+        if (playerzone[2] >= objectzone[2]) & (playerzone[2] <= objectzone[3]):
             solution = True
-        if (Grannyzone[3] >= Actionzone[2]) & (Grannyzone[3] <= Actionzone[3]):
+        if (playerzone[3] >= objectzone[2]) & (playerzone[3] <= objectzone[3]):
             solution = True
     return solution
+
 
 # Платформа
 # Над платформой
@@ -1037,51 +760,53 @@ def grannyoverplatform():  # Определение платформ на уро
     solutionEta = False
     solutionTheta = False
     solutionIota = False
-    GrannyTouch = Hero.touch_place()
+    playertouch = Hero.touch_place()
     BaseTouch = Base.touch_place()
-    solutionBase = ground_check(GrannyTouch, BaseTouch)
+    solutionBase = ground_check(playertouch, BaseTouch)
     if alphaPlatform.avaible:
         AlphaTouch = alphaPlatform.touch_place()
-        solutionAlpha = ground_check(GrannyTouch, AlphaTouch)
+        solutionAlpha = ground_check(playertouch, AlphaTouch)
     if betaPlatform.avaible:
         BetaTouch = betaPlatform.touch_place()
-        solutionBeta = ground_check(GrannyTouch, BetaTouch)
+        solutionBeta = ground_check(playertouch, BetaTouch)
     if gammaPlatform.avaible:
         GammaTouch = gammaPlatform.touch_place()
-        solutionGamma = ground_check(GrannyTouch, GammaTouch)
+        solutionGamma = ground_check(playertouch, GammaTouch)
     if deltaPlatform.avaible:
         DeltaTouch = deltaPlatform.touch_place()
-        solutionDelta = ground_check(GrannyTouch, DeltaTouch)
+        solutionDelta = ground_check(playertouch, DeltaTouch)
     if epsilonPlatform.avaible:
         EpsilonTouch = epsilonPlatform.touch_place()
-        solutionEpsilon = ground_check(GrannyTouch, EpsilonTouch)
+        solutionEpsilon = ground_check(playertouch, EpsilonTouch)
     if zetaPlatform.avaible:
         ZetaTouch = zetaPlatform.touch_place()
-        solutionZeta = ground_check(GrannyTouch, ZetaTouch)
+        solutionZeta = ground_check(playertouch, ZetaTouch)
     if etaPlatform.avaible:
         EtaTouch = etaPlatform.touch_place()
-        solutionEta = ground_check(GrannyTouch, EtaTouch)
+        solutionEta = ground_check(playertouch, EtaTouch)
     if thetaPlatform.avaible:
         ThetaTouch = thetaPlatform.touch_place()
-        solutionTheta = ground_check(GrannyTouch, ThetaTouch)
+        solutionTheta = ground_check(playertouch, ThetaTouch)
     if iotaPlatform.avaible:
         IotaTouch = iotaPlatform.touch_place()
-        solutionIota = ground_check(GrannyTouch, IotaTouch)
+        solutionIota = ground_check(playertouch, IotaTouch)
 
-    if (solutionBase == True) | (solutionAlpha == True) | (solutionBeta == True) | (solutionGamma == True) | (
-        solutionDelta == True) | (solutionEpsilon == True) | (solutionZeta == True) | (solutionEta == True) | (
-        solutionTheta == True) | (solutionIota == True):
+    if (solutionBase is True) | (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (
+            solutionDelta is True) | (solutionEpsilon is True) | (solutionZeta is True) | (solutionEta is True) | (
+            solutionTheta is True) | (solutionIota is True):
         globalsolution = True
     return globalsolution
 
-def ground_check(GrannyTouch, PlatformTouch):  # Проверка земли под ногами по массивам
+
+def ground_check(playertouch, platformtouch):  # Проверка земли под ногами по массивам
     solution = False
-    if PlatformTouch[0] == GrannyTouch[0]:
-        if (GrannyTouch[1] >= PlatformTouch[1]) & (GrannyTouch[1] <= PlatformTouch[2]):
+    if platformtouch[0] == playertouch[0]:
+        if (playertouch[1] >= platformtouch[1]) & (playertouch[1] <= platformtouch[2]):
             solution = True
-        if (GrannyTouch[2] >= PlatformTouch[1]) & (GrannyTouch[2] <= PlatformTouch[2]):
+        if (playertouch[2] >= platformtouch[1]) & (playertouch[2] <= platformtouch[2]):
             solution = True
     return solution
+
 
 # Под платформой
 def grannyunderplatform():  # Определение платформ на уровнях !!!Не забывать добавлять!!!
@@ -1096,49 +821,51 @@ def grannyunderplatform():  # Определение платформ на ур�
     solutionTheta = False
     solutionIota = False
 
-    GrannyTouch = Hero.touch_head()
+    playertouch = Hero.touch_head()
     if alphaPlatform.avaible:
         AlphaTouch = alphaPlatform.touch_head()
-        solutionAlpha = head_check(GrannyTouch, AlphaTouch)
+        solutionAlpha = head_check(playertouch, AlphaTouch)
     if betaPlatform.avaible:
         BetaTouch = betaPlatform.touch_head()
-        solutionBeta = head_check(GrannyTouch, BetaTouch)
+        solutionBeta = head_check(playertouch, BetaTouch)
     if gammaPlatform.avaible:
         GammaTouch = gammaPlatform.touch_head()
-        solutionGamma = head_check(GrannyTouch, GammaTouch)
+        solutionGamma = head_check(playertouch, GammaTouch)
     if deltaPlatform.avaible:
         DeltaTouch = deltaPlatform.touch_head()
-        solutionDelta = head_check(GrannyTouch, DeltaTouch)
+        solutionDelta = head_check(playertouch, DeltaTouch)
     if epsilonPlatform.avaible:
         EpsilonTouch = epsilonPlatform.touch_head()
-        solutionEpsilon = head_check(GrannyTouch, EpsilonTouch)
+        solutionEpsilon = head_check(playertouch, EpsilonTouch)
     if zetaPlatform.avaible:
         ZetaTouch = zetaPlatform.touch_head()
-        solutionZeta = head_check(GrannyTouch, ZetaTouch)
+        solutionZeta = head_check(playertouch, ZetaTouch)
     if etaPlatform.avaible:
         EtaTouch = etaPlatform.touch_head()
-        solutionEta = head_check(GrannyTouch, EtaTouch)
+        solutionEta = head_check(playertouch, EtaTouch)
     if thetaPlatform.avaible:
         ThetaTouch = thetaPlatform.touch_head()
-        solutionTheta = head_check(GrannyTouch, ThetaTouch)
+        solutionTheta = head_check(playertouch, ThetaTouch)
     if iotaPlatform.avaible:
         IotaTouch = iotaPlatform.touch_head()
-        solutionIota = head_check(GrannyTouch, IotaTouch)
+        solutionIota = head_check(playertouch, IotaTouch)
 
-    if (solutionAlpha == False) & (solutionBeta == False) & (solutionGamma == False) & (solutionDelta == False) & (
-            solutionEpsilon == False) & (solutionZeta == False) & (solutionEta == False) & (solutionTheta == False) & (
-            solutionIota == False):
+    if (solutionAlpha is False) & (solutionBeta is False) & (solutionGamma is False) & (solutionDelta is False) & (
+            solutionEpsilon is False) & (solutionZeta is False) & (solutionEta is False) & (solutionTheta is False) & (
+            solutionIota is False):
         globalsolution = False
     return globalsolution
 
-def head_check(GrannyTouch, PlatformTouch):  # Проверка земли над головой по массивам
+
+def head_check(playertouch, platformtouch):  # Проверка земли над головой по массивам
     solution = False
-    if PlatformTouch[0] == GrannyTouch[0]:
-        if (GrannyTouch[1] >= PlatformTouch[1]) & (GrannyTouch[1] <= PlatformTouch[2]):
+    if platformtouch[0] == playertouch[0]:
+        if (playertouch[1] >= platformtouch[1]) & (playertouch[1] <= platformtouch[2]):
             solution = True
-        if (GrannyTouch[2] >= PlatformTouch[1]) & (GrannyTouch[2] <= PlatformTouch[2]):
+        if (playertouch[2] >= platformtouch[1]) & (playertouch[2] <= platformtouch[2]):
             solution = True
     return solution
+
 
 # Туземец и персонаж
 def savagehitgranny():
@@ -1147,24 +874,25 @@ def savagehitgranny():
     solutionBeta = False
     solutionGamma = False
     solutionDelta = False
-    Grannyzone = Hero.actionzone()
+    playerzone = Hero.actionzone()
     if alphaSavage.avaible:
         Alphazone = alphaSavage.actionzone()
-        solutionAlpha = action_check(Grannyzone, Alphazone, 24)
+        solutionAlpha = action_check(playerzone, Alphazone, 24)
     if betaSavage.avaible:
         Betazone = betaSavage.actionzone()
-        solutionBeta = action_check(Grannyzone, Betazone, 24)
+        solutionBeta = action_check(playerzone, Betazone, 24)
     if gammaSavage.avaible:
         Gammazone = gammaSavage.actionzone()
-        solutionGamma = action_check(Grannyzone, Gammazone, 24)
+        solutionGamma = action_check(playerzone, Gammazone, 24)
     if deltaSavage.avaible:
         Deltazone = deltaSavage.actionzone()
-        solutionDelta = action_check(Grannyzone, Deltazone, 24)
+        solutionDelta = action_check(playerzone, Deltazone, 24)
 
-    if (solutionAlpha == True) | (solutionBeta == True) | (solutionGamma == True) | (solutionDelta == True):
+    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True):
         globalsolution = True
 
     return globalsolution
+
 
 def grannyhitsavage():
     globalsolution = False
@@ -1172,25 +900,25 @@ def grannyhitsavage():
     solutionBeta = False
     solutionGamma = False
     solutionDelta = False
-    Grannyzone = Hero.hit_area()
+    playerzone = Hero.hit_area()
     if alphaSavage.avaible:
         Alphazone = alphaSavage.actionzone()
-        solutionAlpha = action_check(Grannyzone, Alphazone, 24)
+        solutionAlpha = action_check(playerzone, Alphazone, 24)
     if betaSavage.avaible:
         Betazone = betaSavage.actionzone()
-        solutionBeta = action_check(Grannyzone, Betazone, 24)
+        solutionBeta = action_check(playerzone, Betazone, 24)
     if gammaSavage.avaible:
         Gammazone = gammaSavage.actionzone()
-        solutionGamma = action_check(Grannyzone, Gammazone, 24)
+        solutionGamma = action_check(playerzone, Gammazone, 24)
     if deltaSavage.avaible:
         Deltazone = deltaSavage.actionzone()
-        solutionDelta = action_check(Grannyzone, Deltazone, 24)
+        solutionDelta = action_check(playerzone, Deltazone, 24)
 
-    if (solutionAlpha == True) | (solutionBeta == True) | (solutionGamma == True) | (solutionDelta == True):
+    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True):
         globalsolution = True
 
-    exit = [globalsolution, solutionAlpha, solutionBeta, solutionGamma, solutionDelta]
-    return exit
+    return [globalsolution, solutionAlpha, solutionBeta, solutionGamma, solutionDelta]
+
 
 # Лестница и персонаж
 def grannyonladder():  # Определение лестниц на уровне !!!Не забывать добавлять!!!
@@ -1201,35 +929,35 @@ def grannyonladder():  # Определение лестниц на уровне
     solutionDelta = False
     solutionEpsilon = False
     solutionZeta = False
-    Grannyzone = Hero.actionzone()
+    playerzone = Hero.actionzone()
     if alphaLadder.avaible:
         Alphazone = alphaLadder.actionzone()
-        solutionAlpha = action_check(Grannyzone, Alphazone, 15)
+        solutionAlpha = action_check(playerzone, Alphazone, 15)
     if betaLadder.avaible:
         Betazone = betaLadder.actionzone()
-        solutionBeta = action_check(Grannyzone, Betazone, 15)
+        solutionBeta = action_check(playerzone, Betazone, 15)
     if gammaLadder.avaible:
         Gammazone = gammaLadder.actionzone()
-        solutionGamma = action_check(Grannyzone, Gammazone, 15)
+        solutionGamma = action_check(playerzone, Gammazone, 15)
     if deltaLadder.avaible:
         Deltazone = deltaLadder.actionzone()
-        solutionDelta = action_check(Grannyzone, Deltazone, 15)
+        solutionDelta = action_check(playerzone, Deltazone, 15)
     if epsilonLadder.avaible:
         Epsilonzone = epsilonLadder.actionzone()
-        solutionEpsilon = action_check(Grannyzone, Epsilonzone, 15)
+        solutionEpsilon = action_check(playerzone, Epsilonzone, 15)
     if zetaLadder.avaible:
         Zetazone = zetaLadder.actionzone()
-        solutionZeta = action_check(Grannyzone, Zetazone, 15)
+        solutionZeta = action_check(playerzone, Zetazone, 15)
 
-    if (solutionAlpha == True) | (solutionBeta == True) | (solutionGamma == True) | (solutionDelta == True) | (
-            solutionEpsilon == True) | (solutionZeta == True):
+    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
+            solutionEpsilon is True) | (solutionZeta is True):
         globalsolution = True
 
     return globalsolution
 
+
 # Кот и персоныж
 def grannycarrycat():  # Определение котов на уровне !!!Не забывать добавлять!!!
-    global CatAmountReal
     globalsolution = False
     solutionAlpha = False
     solutionBeta = False
@@ -1237,48 +965,55 @@ def grannycarrycat():  # Определение котов на уровне !!!
     solutionDelta = False
     solutionEpsilon = False
     solutionZeta = False
-    Grannyzone = Hero.actionzone()
+    playerzone = Hero.actionzone()
     if alphaCat.avaible:
         Alphazone = alphaCat.actionzone()
-        solutionAlpha = action_check(Grannyzone, Alphazone, 10)
-        if solutionAlpha == True:
+        solutionAlpha = action_check(playerzone, Alphazone, 10)
+        if solutionAlpha is True:
             alphaCat.collect()
-            CatAmountReal += 1
+            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
+            objectsVariable.CatAmountReal += 1
     if betaCat.avaible:
         Betazone = betaCat.actionzone()
-        solutionBeta = action_check(Grannyzone, Betazone, 10)
-        if solutionBeta == True:
+        solutionBeta = action_check(playerzone, Betazone, 10)
+        if solutionBeta is True:
             betaCat.collect()
-            CatAmountReal += 1
+            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
+            objectsVariable.CatAmountReal += 1
     if gammaCat.avaible:
         Gammazone = gammaCat.actionzone()
-        solutionGamma = action_check(Grannyzone, Gammazone, 10)
-        if solutionGamma == True:
+        solutionGamma = action_check(playerzone, Gammazone, 10)
+        if solutionGamma is True:
             gammaCat.collect()
-            CatAmountReal += 1
+            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
+            objectsVariable.CatAmountReal += 1
     if deltaCat.avaible:
         Deltazone = deltaCat.actionzone()
-        solutionDelta = action_check(Grannyzone, Deltazone, 10)
-        if solutionDelta == True:
+        solutionDelta = action_check(playerzone, Deltazone, 10)
+        if solutionDelta is True:
             deltaCat.collect()
-            CatAmountReal += 1
+            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
+            objectsVariable.CatAmountReal += 1
     if epsilonCat.avaible:
         Epsilonzone = epsilonCat.actionzone()
-        solutionEpsilon = action_check(Grannyzone, Epsilonzone, 10)
-        if solutionEpsilon == True:
+        solutionEpsilon = action_check(playerzone, Epsilonzone, 10)
+        if solutionEpsilon is True:
             epsilonCat.collect()
-            CatAmountReal += 1
+            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
+            objectsVariable.CatAmountReal += 1
     if zetaCat.avaible:
         Zetazone = zetaCat.actionzone()
-        solutionZeta = action_check(Grannyzone, Zetazone, 10)
-        if solutionZeta == True:
+        solutionZeta = action_check(playerzone, Zetazone, 10)
+        if solutionZeta is True:
             zetaCat.collect()
-            CatAmountReal += 1
-    if (solutionAlpha == True) | (solutionBeta == True) | (solutionGamma == True) | (solutionDelta == True) | (
-            solutionEpsilon == True) | (solutionZeta == True):
+            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
+            objectsVariable.CatAmountReal += 1
+    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
+            solutionEpsilon is True) | (solutionZeta is True):
         globalsolution = True
 
     return globalsolution
+
 
 # Цветочек и персонаж
 def grannygetbonus():  # Определение цветочков на уровне !!!Не забывать добавлять!!!
@@ -1289,112 +1024,123 @@ def grannygetbonus():  # Определение цветочков на уров
     solutionDelta = False
     solutionEpsilon = False
     solutionZeta = False
-    Grannyzone = Hero.actionzone()
+    playerzone = Hero.actionzone()
     if alphaBonus.avaible:
         Alphazone = alphaBonus.actionzone()
-        solutionAlpha = action_check(Grannyzone, Alphazone, 16)
-        if solutionAlpha == True:
+        solutionAlpha = action_check(playerzone, Alphazone, 16)
+        if solutionAlpha is True:
+            objectsVariable.Score += settings["ScoreAddBonus"]
             alphaBonus.rise()
     if betaBonus.avaible:
         Betazone = betaBonus.actionzone()
-        solutionBeta = action_check(Grannyzone, Betazone, 16)
-        if solutionBeta == True:
+        solutionBeta = action_check(playerzone, Betazone, 16)
+        if solutionBeta is True:
+            objectsVariable.Score += settings["ScoreAddBonus"]
             betaBonus.rise()
     if gammaBonus.avaible:
         Gammazone = gammaBonus.actionzone()
-        solutionGamma = action_check(Grannyzone, Gammazone, 16)
-        if solutionGamma == True:
+        solutionGamma = action_check(playerzone, Gammazone, 16)
+        if solutionGamma is True:
+            objectsVariable.Score += settings["ScoreAddBonus"]
             gammaBonus.rise()
     if deltaBonus.avaible:
         Deltazone = deltaBonus.actionzone()
-        solutionDelta = action_check(Grannyzone, Deltazone, 16)
-        if solutionDelta == True:
+        solutionDelta = action_check(playerzone, Deltazone, 16)
+        if solutionDelta is True:
+            objectsVariable.Score += settings["ScoreAddBonus"]
             deltaBonus.rise()
     if epsilonBonus.avaible:
         Epsilonzone = epsilonBonus.actionzone()
-        solutionEpsilon = action_check(Grannyzone, Epsilonzone, 16)
-        if solutionEpsilon == True:
+        solutionEpsilon = action_check(playerzone, Epsilonzone, 16)
+        if solutionEpsilon is True:
+            objectsVariable.Score += settings["ScoreAddBonus"]
             epsilonBonus.rise()
     if zetaBonus.avaible:
         Zetazone = zetaBonus.actionzone()
-        solutionZeta = action_check(Grannyzone, Zetazone, 16)
-        if solutionZeta == True:
+        solutionZeta = action_check(playerzone, Zetazone, 16)
+        if solutionZeta is True:
+            objectsVariable.Score += settings["ScoreAddBonus"]
             zetaBonus.rise()
-    if (solutionAlpha == True) | (solutionBeta == True) | (solutionGamma == True) | (solutionDelta == True) | (
-            solutionEpsilon == True) | (solutionZeta == True):
+    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
+            solutionEpsilon is True) | (solutionZeta is True):
         globalsolution = True
 
     return globalsolution
+
 
 # Грибочки и персонаж
 def grannyfastroom():
     globalsolution = False
     solutionAlpha = False
     solutionBeta = False
-    Grannyzone = Hero.actionzone()
+    playerzone = Hero.actionzone()
     if alphaFastroom.avaible:
         Alphazone = alphaFastroom.actionzone()
-        solutionAlpha = action_check(Grannyzone, Alphazone, 12)
-        if solutionAlpha == True:
-            alphaFastroom.effect()
+        solutionAlpha = action_check(playerzone, Alphazone, 12)
+        if solutionAlpha is True:
+            objectsVariable.isFastEffect = True
     if betaFastroom.avaible:
         Betazone = betaFastroom.actionzone()
-        solutionBeta = action_check(Grannyzone, Betazone, 12)
-        if solutionBeta == True:
-            betaFastroom.effect()
-    if (solutionAlpha == True) | (solutionBeta == True):
+        solutionBeta = action_check(playerzone, Betazone, 12)
+        if solutionBeta is True:
+            objectsVariable.isFastEffect = True
+    if (solutionAlpha is True) | (solutionBeta is True):
         globalsolution = True
 
     return globalsolution
+
 
 def grannyslowroom():
     globalsolution = False
     solutionAlpha = False
     solutionBeta = False
-    Grannyzone = Hero.actionzone()
+    playerzone = Hero.actionzone()
     if alphaSlowroom.avaible:
         Alphazone = alphaSlowroom.actionzone()
-        solutionAlpha = action_check(Grannyzone, Alphazone, 12)
-        if solutionAlpha == True:
-            alphaSlowroom.effect()
+        solutionAlpha = action_check(playerzone, Alphazone, 12)
+        if solutionAlpha is True:
+            objectsVariable.isSlowEffect = True
     if betaSlowroom.avaible:
         Betazone = betaSlowroom.actionzone()
-        solutionBeta = action_check(Grannyzone, Betazone, 12)
-        if solutionBeta == True:
-            betaSlowroom.effect()
-    if (solutionAlpha == True) | (solutionBeta == True):
+        solutionBeta = action_check(playerzone, Betazone, 12)
+        if solutionBeta is True:
+            objectsVariable.isSlowEffect = True
+    if (solutionAlpha is True) | (solutionBeta is True):
         globalsolution = True
 
     return globalsolution
+
 
 def grannygravroom():
     globalsolution = False
     solutionAlpha = False
     solutionBeta = False
-    Grannyzone = Hero.actionzone()
+    playerzone = Hero.actionzone()
     if alphaGravroom.avaible:
         Alphazone = alphaGravroom.actionzone()
-        solutionAlpha = action_check(Grannyzone, Alphazone, 12)
-        if solutionAlpha == True:
-            alphaGravroom.effect()
+        solutionAlpha = action_check(playerzone, Alphazone, 12)
+        if solutionAlpha is True:
+            objectsVariable.isGravEffect = True
     if betaGravroom.avaible:
         Betazone = betaGravroom.actionzone()
-        solutionBeta = action_check(Grannyzone, Betazone, 12)
-        if solutionBeta == True:
-            betaGravroom.effect()
-    if (solutionAlpha == True) | (solutionBeta == True):
+        solutionBeta = action_check(playerzone, Betazone, 12)
+        if solutionBeta is True:
+            objectsVariable.isGravEffect = True
+    if (solutionAlpha is True) | (solutionBeta is True):
         globalsolution = True
 
     return globalsolution
+
 
 # Выход с уровня
 def grannyinexit():  # Определение выхода на уровне
     globalsolution = False
     if level != 0:
-        Grannyzone = Hero.actionzone()
+        playerzone = Hero.actionzone()
         Exitzone = Exit.actionzone()
-        globalsolution = action_check(Grannyzone, Exitzone, 30)
+        globalsolution = action_check(playerzone, Exitzone, 30)
     return globalsolution
+
 
 # Стены
 def grannyandwall():  # Определение стен на уровне !!!Не забывать добавлять!!!
@@ -1406,89 +1152,93 @@ def grannyandwall():  # Определение стен на уровне !!!Н�
     solutionDelta = False
     solutionEpsilon = False
     solutionZeta = False
-    Grannyzone = Hero.actionzone()
+    playerzone = Hero.actionzone()
     if alphaWall.avaible:
         Alphazone = alphaWall.actionzone()
-        solutionAlpha = wall_check(Grannyzone, Alphazone)
+        solutionAlpha = wall_check(playerzone, Alphazone)
     if betaWall.avaible:
         Betazone = betaWall.actionzone()
-        solutionBeta = wall_check(Grannyzone, Betazone)
+        solutionBeta = wall_check(playerzone, Betazone)
     if gammaWall.avaible:
         Gammazone = gammaWall.actionzone()
-        solutionGamma = wall_check(Grannyzone, Gammazone)
+        solutionGamma = wall_check(playerzone, Gammazone)
     if deltaWall.avaible:
         Deltazone = deltaWall.actionzone()
-        solutionDelta = wall_check(Grannyzone, Deltazone)
+        solutionDelta = wall_check(playerzone, Deltazone)
     if epsilonWall.avaible:
         Epsilonzone = epsilonWall.actionzone()
-        solutionEpsilon = wall_check(Grannyzone, Epsilonzone)
+        solutionEpsilon = wall_check(playerzone, Epsilonzone)
     if zetaWall.avaible:
         Zetazone = zetaWall.actionzone()
-        solutionZeta = wall_check(Grannyzone, Zetazone)
-    if (solutionAlpha == True) | (solutionBeta == True) | (solutionGamma == True) | (solutionDelta == True) | (
-            solutionEpsilon == True) | (solutionZeta == True):
+        solutionZeta = wall_check(playerzone, Zetazone)
+    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
+            solutionEpsilon is True) | (solutionZeta is True):
         globalsolution = True
 
-    if globalsolution == False:
+    if globalsolution is False:
         wallside = "0"
 
     return globalsolution
 
-def wall_check(Grannyzone, Wallzone):  # Проверка стен по массивам
+
+def wall_check(playerzone, wallzone):  # Проверка стен по массивам
     global wallside
     solution = False
-    if (Grannyzone[0] + 16 >= Wallzone[0]) & (Grannyzone[0] + 16 <= Wallzone[1]):
-        if (Grannyzone[2] >= Wallzone[2]) & (Grannyzone[2] <= Wallzone[3]):
+    if (playerzone[0] + 16 >= wallzone[0]) & (playerzone[0] + 16 <= wallzone[1]):
+        if (playerzone[2] >= wallzone[2]) & (playerzone[2] <= wallzone[3]):
             solution = True
-        if (Grannyzone[3] >= Wallzone[2]) & (Grannyzone[3] <= Wallzone[3]):
+        if (playerzone[3] >= wallzone[2]) & (playerzone[3] <= wallzone[3]):
             wallside = "R"
             solution = True
-    if (Grannyzone[1] - 16 >= Wallzone[0]) & (Grannyzone[1] - 16 <= Wallzone[1]):
-        if (Grannyzone[2] >= Wallzone[2]) & (Grannyzone[2] <= Wallzone[3]):
+    if (playerzone[1] - 16 >= wallzone[0]) & (playerzone[1] - 16 <= wallzone[1]):
+        if (playerzone[2] >= wallzone[2]) & (playerzone[2] <= wallzone[3]):
             solution = True
-        if (Grannyzone[3] >= Wallzone[2]) & (Grannyzone[3] <= Wallzone[3]):
+        if (playerzone[3] >= wallzone[2]) & (playerzone[3] <= wallzone[3]):
             wallside = "L"
             solution = True
     return solution
 
+
 # Гравитация
 def gravity():  # Если персонаж не на платформн и не на лестнице, на нее действует гравитация
     global simpgrav
-    if ((plat == False) | (antigrav == True)) & (ladd == False):
+    if ((plat is False) | (antigrav is True)) & (ladd is False):
         simpgrav = True
         Hero.gravitymove()
     else:
         simpgrav = False
 
+
 # Эффекты грибов
 def effects():
-    global isFastEffect, isSlowEffect, isGravEffect, lasteffecttime, gravitySpeed, grannyWalkSpeed, antigrav, avoidEffects
-    if isFastEffect:
+    global lasteffecttime, gravitySpeed, grannyWalkSpeed, antigrav, avoidEffects
+    if objectsVariable.isFastEffect:
         grannyWalkSpeed = grannyWalkSpeedFast
         lasteffecttime = time.time()
         labelFast.place(x=500, y=475)
         labelEffect.place(x=450, y=475)
         labelSlow.place_forget()
-        isFastEffect = False
-    if isSlowEffect:
+        objectsVariable.isFastEffect = False
+    if objectsVariable.isSlowEffect:
         grannyWalkSpeed = grannyWalkSpeedSlow
         lasteffecttime = time.time()
         labelSlow.place(x=545, y=475)
         labelEffect.place(x=450, y=475)
         labelFast.place_forget()
-        isSlowEffect = False
-    if isGravEffect:
+        objectsVariable.isSlowEffect = False
+    if objectsVariable.isGravEffect:
         gravitySpeed = gravitySpeedInvert
         lasteffecttime = time.time()
         labelGrav.place(x=590, y=475)
         labelEffect.place(x=450, y=475)
         antigrav = True
-        isGravEffect = False
-    if (time.time() - lasteffecttime < effectduration):
+        objectsVariable.isGravEffect = False
+    if time.time() - lasteffecttime < effectduration:
         TimeStr = "%.2f с" % (effectduration - (time.time() - lasteffecttime))
         labelEffect.config(text=TimeStr)
-    if ((isFastEffect == False) & (isSlowEffect == False) & (isGravEffect == False) & (
-            time.time() - lasteffecttime >= effectduration)) | avoidEffects:
+    if ((objectsVariable.isFastEffect is False) & (objectsVariable.isSlowEffect is False) & (
+            objectsVariable.isGravEffect == False) & (
+                time.time() - lasteffecttime >= effectduration)) | avoidEffects:
         labelFast.place_forget()
         labelSlow.place_forget()
         labelGrav.place_forget()
@@ -1498,32 +1248,33 @@ def effects():
         grannyWalkSpeed = grannyWalkSpeedNormal
         gravitySpeed = gravitySpeedNormal
 
+
 # Убийства
 def savageKill():
     global alphaSavage, betaSavage, gammaSavage, deltaSavage
     if GraHitSav[0]:
-        if (alphaSavage.avaible) & GraHitSav[1]:
+        if alphaSavage.avaible & GraHitSav[1]:
             canvas.delete(alphaSavage.id)
             alphaSavage = Empty()
-        if (betaSavage.avaible) & GraHitSav[2]:
+        if betaSavage.avaible & GraHitSav[2]:
             canvas.delete(betaSavage.id)
             betaSavage = Empty()
-        if (gammaSavage.avaible) & GraHitSav[3]:
+        if gammaSavage.avaible & GraHitSav[3]:
             canvas.delete(gammaSavage.id)
             gammaSavage = Empty()
-        if (deltaSavage.avaible) & GraHitSav[4]:
+        if deltaSavage.avaible & GraHitSav[4]:
             canvas.delete(deltaSavage.id)
             deltaSavage = Empty()
 
 def grannyKill():
-    global lives, Hero
+    global Hero
     if SavHitGra:
         canvas.delete(Hero.id)
-        lives -= 1
-        if lives < 0:
+        objectsVariable.lives -= 1
+        if objectsVariable.lives < 0:
             endgame(win=False)
         else:
-            Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'])
+            Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], canvas=canvas, image=image.granny)
 
 # Функции Дикаря
 # Платформа по которой он ходит
@@ -1576,6 +1327,7 @@ def savagePlates(thesavage, homeplatform):
         else:
             thesavage.way = Base.border()
 
+
 # Изменение направления
 def savageDirection(thesavage):
     coords = thesavage.coords()
@@ -1584,6 +1336,7 @@ def savageDirection(thesavage):
         thesavage.direction = "right"
     elif coords[0] >= way[1]:
         thesavage.direction = "left"
+
 
 # Установка платформ и направлений
 def savageWalking():
@@ -1640,10 +1393,10 @@ def savageAnimate():
 # Проверка на сбор котиков. Открытие цветка и выход с уровня
 def recquecountertoexit():
     global isExitActive
-    if CatAmountReal == CatAmountAll:
+    if objectsVariable.CatAmountReal == objectsVariable.CatAmountAll:
         isExitActive = True
         Exit.opening()
-        if grannyinexit() == True:
+        if grannyinexit() is True:
             LevelAdd()
     else:
         isExitActive = False
@@ -1651,14 +1404,14 @@ def recquecountertoexit():
 # Организация временных ограничений уровней
 def levelLimit():
     global limitedFlag, limitedtime
-    if (settings["levels"][level]["limited"]):
-        if limitedFlag == False:
+    if settings["levels"][level]["limited"]:
+        if limitedFlag is False:
             limitedFlag = True
             limitedtime = time.time()
             labelTime.place(x=50, y=475)
             labelTimer.place(x=90, y=475)
-        elif limitedFlag == True:
-            if (time.time() - limitedtime < settings["levels"][level]["time"]):
+        elif limitedFlag is True:
+            if time.time() - limitedtime < settings["levels"][level]["time"]:
                 TimeStr = "%.2f с" % (settings["levels"][level]["time"] - (time.time() - limitedtime))
                 labelTimer.config(text=TimeStr)
             if (time.time() - limitedtime) > settings["levels"][level]["time"]:
@@ -1674,15 +1427,16 @@ def levelLimit():
 
 # Организация конца игры, вывод сообщений о выйгрыше/проигрыше
 def endgame(win):
-    global GlobalScore
     if win:
-        GlobalScore += Score
-        message = "Поздравляем с победой! \nВы набрали %i из %i очков" % (GlobalScore, settings["ScoreMax"])
+        objectsVariable.GlobalScore += objectsVariable.Score
+        message = "Поздравляем с победой! \nВы набрали %i из %i очков" % (
+            objectsVariable.GlobalScore, settings["ScoreMax"])
         mb.showinfo(title="Победа", message=message)
         mainmenu_open()
     else:
-        GlobalScore += Score
-        message = "К сожалению, Вы проиграли. \nВы набрали %i из %i очков" % (GlobalScore, settings["ScoreMax"])
+        objectsVariable.GlobalScore += objectsVariable.Score
+        message = "К сожалению, Вы проиграли. \nВы набрали %i из %i очков" % (
+            objectsVariable.GlobalScore, settings["ScoreMax"])
         mb.showinfo(title="Проигрыш", message=message)
         mainmenu_open()
 
@@ -1706,13 +1460,13 @@ def color():
 # Включение и отключение кнопок меню сверху
 def buttonstate():
     if level == 0:
-        gamemenu.entryconfig("Выход в меню", state = "disabled")
+        gamemenu.entryconfig("Выход в меню", state="disabled")
         gamemenu.entryconfig("Начать уровень заново", state="disabled")
         gamemenu.entryconfig("Выбор уровня", state="normal")
     else:
         gamemenu.entryconfig("Выход в меню", state="normal")
         gamemenu.entryconfig("Начать уровень заново", state="normal")
-        if settings["cheatmode"] == False:
+        if not settings["cheatmode"]:
             gamemenu.entryconfig("Выбор уровня", state="disabled")
 
 # Опрос выхода в главное меню
@@ -1732,8 +1486,9 @@ def menu():  # Описание меню(сверху полоска)
     gamemenu.add_separator()
     optionmenu = Menu(gamemenu, tearoff=1, bg=backgroundcolor)
     musicmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
-    musicmenu.add_radiobutton(label="Отключена", value=0, variable=musicmode)
-    musicmenu.add_radiobutton(label="Включена", value=1, variable=musicmode)
+    musicmenu.add_command(label="Громкость", command=setvolume)
+    musicmenu.add_radiobutton(label="Включена", value=True, variable=musicmode)
+    musicmenu.add_radiobutton(label="Отключена", value=False, variable=musicmode)
     debugmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
     debugmenu.add_radiobutton(label="Отключена", value=0, variable=debugmode)
     debugmenu.add_radiobutton(label="Флаги персонажа", value=1, variable=debugmode)
@@ -1761,15 +1516,17 @@ def reloadScreen():
     labelCats.grid_forget()
     labelLives.grid_forget()
     statusbar.place_forget()
-    labelLevel.config(bg = backgroundcolor)
-    labelScore.config(bg = backgroundcolor)
-    labelCats.config(bg = backgroundcolor)
-    labelLives.config(bg = backgroundcolor)
-    statusbar.config(bg = backgroundcolor)
-    root.configure(bg = backgroundcolor)
+    labelLevel.config(bg=backgroundcolor)
+    labelScore.config(bg=backgroundcolor)
+    labelCats.config(bg=backgroundcolor)
+    labelLives.config(bg=backgroundcolor)
+    statusbar.config(bg=backgroundcolor)
+    root.configure(bg=backgroundcolor)
     loadScreen()
     menu()
 
+
+Hero = Empty()
 menu()  # Создаем меню
 mainmenu_open()  # Запускаем заглавный экран
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Обработка выхода при нажатии на крестик
@@ -1777,13 +1534,13 @@ root.protocol("WM_DELETE_WINDOW", on_closing)  # Обработка выхода
 while run:
     if (time.time() - lastframetime) >= settings["frametime"]:
         fps += 1
-        music_start()
-        if level != 0:                   # Если игра идеn
+        music()
+        if level != 0:  # Если игра идет
             plat = grannyoverplatform()  # Cтоит ли персонаж на платформе
             ladd = grannyonladder()  # Стоит ли персонаж на лестнице
             carr = grannycarrycat()  # Подбирает ли персонаж котенка
-            vent = grannyinexit()    # Стоит ли персонаж у выходв
-            barr = grannyandwall()   # Стоит ли персонаж у стены
+            vent = grannyinexit()  # Стоит ли персонаж у выходв
+            barr = grannyandwall()  # Стоит ли персонаж у стены
             flow = grannygetbonus()  # Стоит ли персонаж у цветочка
             fast = grannyfastroom()  # Стоит ли персонаж у Быстромора
             grav = grannygravroom()  # Стоит ли персонаж у Вверхшенки
@@ -1792,19 +1549,19 @@ while run:
             SavHitGra = savagehitgranny()  # Может ли Дикарь убить персонажа
             GraHitSav = grannyhitsavage()  # Может ли персонаж убить Дикаря
             grannyKill()  # Проверка смерти персонажа
-            effects()     # Применение эффектов от грибов
+            effects()  # Применение эффектов от грибов
             levelLimit()  # Применение временных ограничений
             recquecountertoexit()  # Делаем проверку готовность выйти с уровня
             status()  # Обновляем статусбар и данные для пользователя
-            savageWalking()     # Дикарь
+            savageWalking()  # Дикарь
             savageActions()
             savageAnimate()
-            if Hero.avaible:    # Если герой есть, применяем к нему
-                Hero.action_queue()     # Выполнение очереди действий
-                gravity()               # Применяем к персонажу фактор графитации
-                Hero.animate()          # Анимируем персонажа
+            if Hero.avaible:  # Если герой есть, применяем к нему
+                Hero.action_queue()  # Выполнение очереди действий
+                gravity()  # Применяем к персонажу фактор графитации
+                Hero.animate()  # Анимируем персонажа
         buttonstate()
         timer()
-        root.update_idletasks()         # Обновляем объекты окна
+        root.update_idletasks()  # Обновляем объекты окна
         root.update()
         lastframetime = time.time()
