@@ -1,8 +1,9 @@
 # Granny`s Skirmish
-# version 0.9.4
+# version 0.9.5
 
 """Импорт"""
 import json
+import platform
 from tkinter import *
 from tkinter import colorchooser as cc
 from tkinter import messagebox as mb
@@ -10,7 +11,6 @@ from tkinter import simpledialog as sd
 from pygame import mixer
 from images import *
 from objects import *
-
 
 """Файл настроек"""
 with open("data.json", 'r', encoding="utf-8") as file:  # Открываем файл с настройками
@@ -66,6 +66,9 @@ level = 0  # Уровень
 typeMusic = 0
 volumeMusic = settings["musicvolume"]
 
+sysName = platform.uname().system
+shouldReloadButtons = True
+
 """Построение окна"""
 root = Tk()  # Создаем окно
 root.title(settings['title'])  # Заголовок окна
@@ -73,6 +76,8 @@ root.configure(bg=backgroundcolor)  # Фон окна
 root.geometry("%ix%i" % (windowSize[0], windowSize[1]))  # Размеры окна
 root.resizable(0, 0)  # Запрет на изменение размеров окна
 image = ImageHeap()
+if sysName == "Windows":
+    root.iconbitmap(image.iconPath)
 """Музыка"""
 mixer.init()
 
@@ -97,13 +102,19 @@ def music():
 
     if (musicmode.get() is True) & (typeMusic == 0) & (isMusicOn is False):
         music_stop()
-        mixer.music.load(os.path.join('assets', 'music', 'mainmenu.mid'))
+        if sysName == "Windows":
+            mixer.music.load(os.path.join('assets', 'music', 'mainmenu.mid'))
+        else:
+            mixer.music.load(os.path.join('assets', 'music', 'mainmenu.mp3'))
         mixer.music.play(loops=200)
         isMusicOn = True
 
     if (musicmode.get() is True) & (typeMusic == 1) & (isMusicOn is False):
         music_stop()
-        mixer.music.load(os.path.join('assets', 'music', 'level.mid'))
+        if sysName == "Windows":
+            mixer.music.load(os.path.join('assets', 'music', 'level.mid'))
+        else:
+            mixer.music.load(os.path.join('assets', 'music', 'level.mp3'))
         mixer.music.play(loops=1000)
         isMusicOn = True
 
@@ -198,16 +209,19 @@ def setvolume():
     volumeWindow = Toplevel()
     volumeWindow.title("Громкость музыки")  # Заголовок окна
     volumeWindow.configure(bg=backgroundcolor)  # Фон окна
-    volumeWindow.geometry("%ix%i" % (200, 120))  # Размеры окна
+    volumeWindow.geometry("%ix%i" % (216, 130))  # Размеры окна
     volumeWindow.resizable(0, 0)  # Запрет на изменение размеров окна
-    Label(volumeWindow, bg=backgroundcolor, text="Выберите подходящую громкость").grid(row=0, column=0, columnspan=2)
-    Label(volumeWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeMusic).grid(
+    if sysName == "Windows":
+        volumeWindow.iconbitmap(image.iconPath)
+    Label(volumeWindow, bg=backgroundcolor, text="Выберите подходящую громкость", font=("Arial", 10)).grid(
+        row=0, column=0, columnspan=2)
+    Label(volumeWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeMusic, font=("Arial", 10)).grid(
         row=1, column=0, columnspan=2)
-    Scale(volumeWindow, variable=scalevolume, bg=backgroundcolor, orient=HORIZONTAL, length=180).grid(
+    Scale(volumeWindow, variable=scalevolume, bg=backgroundcolor, orient=HORIZONTAL, length=180, font=("Arial", 10)).grid(
         row=3, column=0, columnspan=2)
-    Button(volumeWindow, text="Сохранить", bg=backgroundcolor, command=savevolume).grid(
+    Button(volumeWindow, text="Сохранить", bg=backgroundcolor, command=savevolume, font=("Arial", 10)).grid(
         row=4, column=0, pady=10)
-    Button(volumeWindow, text="Отменить", bg=backgroundcolor, command=undovolume).grid(
+    Button(volumeWindow, text="Отменить", bg=backgroundcolor, command=undovolume, font=("Arial", 10)).grid(
         row=4, column=1, pady=10)
 
 def savevolume():
@@ -231,8 +245,8 @@ def mainmenu_open():  # Открытие главного меню
     labelCats.config(text=" ")
     labelScore.config(text=" ")
     labelLives.config(text=" ")
-    newgameButt.place(x=195, y=260)
-    exitgameButt.place(x=195, y=350)
+    newgameButt.place(x=185, y=260)
+    exitgameButt.place(x=185, y=350)
     labelFast.place_forget()
     labelSlow.place_forget()
     labelGrav.place_forget()
@@ -290,8 +304,8 @@ def status():
         if level == 0:
             message = "Готов"
     elif debugmode.get() == 4:
-        message = "FPS:%i; Time:%i; KeySpeed:%i; Cheat:%s; MusicState:%s; Volume:%i;" % (
-            fpsGlobal, lastframetime, KeySpeed, settings["cheatmode"], musicmode.get(), volumeMusic)
+        message = "System:%s, FPS:%i; KeySpeed:%i; Cheat:%s; MusicState:%s; Volume:%i;" % (
+            sysName, fpsGlobal, KeySpeed, settings["cheatmode"], musicmode.get(), volumeMusic)
         if level == 0:
             message = "Готов"
     elif level != 0:
@@ -488,7 +502,8 @@ class Granny:  # Класс персонажа, которым мы управл
 def LevelInit():
     clearbutt()
     clearcanvas()
-    global limitedtime, avoidEffects, limitedFlag, Hero, Base, Exit, alphaPlatform, betaPlatform, gammaPlatform, deltaPlatform, epsilonPlatform, zetaPlatform, etaPlatform, thetaPlatform, iotaPlatform, alphaCat, betaCat, gammaCat, deltaCat, epsilonCat, zetaCat, alphaBonus, betaBonus, gammaBonus, deltaBonus, epsilonBonus, zetaBonus, alphaLadder, betaLadder, gammaLadder, deltaLadder, epsilonLadder, zetaLadder, alphaWall, betaWall, gammaWall, deltaWall, epsilonWall, zetaWall, alphaSavage, betaSavage, gammaSavage, deltaSavage, alphaFastroom, betaFastroom, alphaSlowroom, betaSlowroom, alphaGravroom, betaGravroom
+    global shouldReloadButtons, limitedtime, avoidEffects, limitedFlag, Hero, Base, Exit, alphaPlatform, betaPlatform, gammaPlatform, deltaPlatform, epsilonPlatform, zetaPlatform, etaPlatform, thetaPlatform, iotaPlatform, alphaCat, betaCat, gammaCat, deltaCat, epsilonCat, zetaCat, alphaBonus, betaBonus, gammaBonus, deltaBonus, epsilonBonus, zetaBonus, alphaLadder, betaLadder, gammaLadder, deltaLadder, epsilonLadder, zetaLadder, alphaWall, betaWall, gammaWall, deltaWall, epsilonWall, zetaWall, alphaSavage, betaSavage, gammaSavage, deltaSavage, alphaFastroom, betaFastroom, alphaSlowroom, betaSlowroom, alphaGravroom, betaGravroom
+    shouldReloadButtons = True
     limitedFlag = False
     avoidEffects = True
     limitedtime = 0
@@ -712,7 +727,7 @@ def LevelShoose():
 
 # Переход на следующий уровень или победа
 def LevelAdd():  # Логика переключения
-    global level
+    global level, shouldReloadButtons
     objectsVariable.Globallives = objectsVariable.lives
     objectsVariable.GlobalScore += objectsVariable.Score
     objectsVariable.Score = 0
@@ -721,6 +736,7 @@ def LevelAdd():  # Логика переключения
         LevelInit()  # Загружаем уровень
     elif level == settings["levelamount"]:  # Если уровень последний
         endgame(win=True)  # Вывод сообшения о победе
+    shouldReloadButtons = True
 
 # Начать уровень заново
 def LevelRestart():
@@ -1459,15 +1475,19 @@ def color():
 
 # Включение и отключение кнопок меню сверху
 def buttonstate():
-    if level == 0:
-        gamemenu.entryconfig("Выход в меню", state="disabled")
-        gamemenu.entryconfig("Начать уровень заново", state="disabled")
-        gamemenu.entryconfig("Выбор уровня", state="normal")
-    else:
-        gamemenu.entryconfig("Выход в меню", state="normal")
-        gamemenu.entryconfig("Начать уровень заново", state="normal")
-        if not settings["cheatmode"]:
-            gamemenu.entryconfig("Выбор уровня", state="disabled")
+    global shouldReloadButtons
+    if shouldReloadButtons:
+        if level == 0:
+            gamemenu.entryconfig("Выход в меню", state="disabled")
+            gamemenu.entryconfig("Начать уровень заново", state="disabled")
+            gamemenu.entryconfig("Выбор уровня", state="normal")
+        else:
+            gamemenu.entryconfig("Выход в меню", state="normal")
+            gamemenu.entryconfig("Начать уровень заново", state="normal")
+            if not settings["cheatmode"]:
+                gamemenu.entryconfig("Выбор уровня", state="disabled")
+
+    shouldReloadButtons = False
 
 # Опрос выхода в главное меню
 def on_mainmenu():
