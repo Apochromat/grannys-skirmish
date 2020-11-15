@@ -1,11 +1,9 @@
 {
     "title": "Granny`s Skirmish",
-    "version": "v0.9.5 prerelease",
-    "windowsize":  [640, 520],
+    "version": "v0.9.6 prerelease",
+    "windowsize":  [640, 540],
 	"canvassize":  [640, 480],
 	"backgroung": "thistle2",
-	"buttoncolor": "khaki",
-	"font": "Helvetica",
 	"fontsize": 20,
 	"statusbarwidth":80,
 	"hidwidth": 19,

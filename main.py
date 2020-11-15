@@ -1,5 +1,5 @@
 # Granny`s Skirmish
-# version 0.9.5
+# version 0.9.6
 
 """Импорт"""
 import json
@@ -177,12 +177,8 @@ def on_closing():  # Опрос закрытия
 
 
 # Кнопки главного меню
-newgameButt = Button(root, text="Новая игра", bg=settings["buttoncolor"], width=16, height=1,
-                     font=(settings["font"], settings["fontsize"]),
-                     command=newgame)
-exitgameButt = Button(root, text="Выход", bg=settings["buttoncolor"], width=16, height=1,
-                      font=(settings["font"], settings["fontsize"]),
-                      command=on_closing)
+newgameButt = Button(root, image = image.newgame,  command=newgame, borderwidth=0, bd=0)
+exitgameButt = Button(root, image =image.quit, command=on_closing, borderwidth=0, bd=0)
 
 """Добавление элементов в окно"""
 def loadScreen():
@@ -235,7 +231,7 @@ def undovolume():
 """Функции окон"""
 # Открытие главного меню
 def mainmenu_open():  # Открытие главного меню
-    global level
+    global level, shouldReloadButtons
     level = 0
     objectsVariable.lives = settings['livesnormal']
     objectsVariable.Score = 0
@@ -245,14 +241,15 @@ def mainmenu_open():  # Открытие главного меню
     labelCats.config(text=" ")
     labelScore.config(text=" ")
     labelLives.config(text=" ")
-    newgameButt.place(x=185, y=260)
-    exitgameButt.place(x=185, y=350)
+    newgameButt.place(x=182, y=245)
+    exitgameButt.place(x=182, y=335)
     labelFast.place_forget()
     labelSlow.place_forget()
     labelGrav.place_forget()
     labelEffect.place_forget()
     labelTime.place_forget()
     labelTimer.place_forget()
+    shouldReloadButtons = True
     print("Запуск")
 
 # Обновление статусбара
@@ -326,7 +323,6 @@ def clearcanvas():
     canvas.delete("granny")
     canvas.delete("savage")
     canvas.delete("exit")
-
 
 """Объекты"""
 # Персонаж

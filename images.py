@@ -14,6 +14,8 @@ def imgload(path):  # Функция загрузки изображений
 class ImageHeap:
     def __init__(self):
         self.iconPath = os.path.join('assets', 'graphics', 'icon.ico')
+        self.quit = imgload(os.path.join('assets', 'graphics', 'quit.png'))
+        self.newgame = imgload(os.path.join('assets', 'graphics', 'newgame.png'))
         self.mainmenuBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'menu_background.png'))
         self.jungleBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'jungle_background.jpg'))
         self.baseplatform = imgload(os.path.join('assets', 'graphics', 'platformbase.png'))
