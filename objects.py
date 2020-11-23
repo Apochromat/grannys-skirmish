@@ -16,6 +16,10 @@ class VariableHeap:
         self.GlobalScore = 0  # Счет
         self.Score = 0  # Счет уровня
 
+        self.isLadderTop = False
+
+        self.keyCounter = 0
+
 # Базовая платформа
 class PlatformBase:  # Класс базовой платформы, которая присутствует на всех уровнях
     def __init__(self, canvas, image):
@@ -75,6 +79,7 @@ class Ladder:  # Класс лестницы, позволяет забират�
         self.avaible = True
         self.centre = [self.coords[0] + 25, self.coords[1] + 60]
         self.id = self.canvas.create_image(self.centre[0], self.centre[1], image=image, tag="ladder")
+        self.isLadderTop = False
 
     def actionzone(self):  # Зона активности (совершения действий)
         actionArray = [self.centre[0] - 10, self.centre[0] + 10, self.centre[1] - 60, self.centre[1] + 60]
@@ -172,6 +177,7 @@ class Savage:
         self.avaible = True
         self.action = ""
         self.way = [0, 640]
+        self.wallside = 0
         self.direction = random.choice(["left", "right"])
         self.lastWalkRightImage = 0
         self.lastWalkLeftImage = 0
@@ -184,6 +190,12 @@ class Savage:
 
     def actionzone(self):  # Зона действий
         return [self.x - 30, self.x + 30, self.y - 32, self.y + 32]
+
+    def changedirection(self):
+        if self.direction == "right":
+            self.direction = "left"
+        else:
+            self.direction = "right"
 
     def action_queue(self):
         if self.action == "turn_left":
@@ -248,6 +260,7 @@ class Empty:
     def __init__(self):
         self.avaible = False
         self.id = None
+        self.isLadderTop = False
 
     def coords(self):
         pass

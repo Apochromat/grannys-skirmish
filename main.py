@@ -1,5 +1,5 @@
 # Granny`s Skirmish
-# version 0.9.6
+# version 0.9.7
 
 """Импорт"""
 import json
@@ -17,10 +17,14 @@ with open("data.json", 'r', encoding="utf-8") as file:  # Открываем ф�
     settings = json.load(file)  # Записываем как словарь в переменную
 
 """Переменные"""
+sysName = platform.uname().system
 objectsVariable = VariableHeap()
 run = True  # Флаг работы приложения
 version = settings['version']  # Загрузка номера версии
-windowSize = settings["windowsize"]  # Размер окна
+if sysName == "Windows":
+    windowSize = settings["windowsizewin"]  # Размер окна
+else:
+    windowSize = settings["windowsizelin"]
 canvasSize = settings["canvassize"]  # Размер области рисования
 aboutmessage = settings["aboutmessage"] % version  # Формирование сообщения об игре
 authorsmessage = settings["authorsmessage"]  # Формирование сообщения об авторах
@@ -51,7 +55,6 @@ wallside = "0"  # Сторона стенки в которую уперся п�
 isMusicOn = False
 
 keytime = time.time()  # Время последнего нажатия на клавиши
-key = 0  # Счетчик нажатий
 KeySpeed = 0  # Скорость нажатий за секунду
 fps = 0  # Моментальная частота кадров
 fpsGlobal = 0  # Частота кадров
@@ -66,9 +69,9 @@ level = 0  # Уровень
 typeMusic = 0
 volumeMusic = settings["musicvolume"]
 
-sysName = platform.uname().system
 shouldReloadButtons = True
 
+ladd = False
 """Построение окна"""
 root = Tk()  # Создаем окно
 root.title(settings['title'])  # Заголовок окна
@@ -139,12 +142,10 @@ labelEffect = Label(root, text=" ", width=settings["effectwidth"], height=1, bg=
 labelTime = Label(root, text="Time", width=settings["effectwidth"], height=1, bg="lightcoral")
 labelTimer = Label(root, text="Timer", width=settings["timerwidth"], height=1, bg="lightcoral")
 
-
 # Удаление кнопок с главного меню
 def clearbutt():
     newgameButt.place_forget()
     exitgameButt.place_forget()
-
 
 # Начало новой игры
 def newgame():
@@ -166,7 +167,6 @@ def newgame():
         clearbutt()
         LevelAdd()
 
-
 # Опрос закрытия программы
 def on_closing():  # Опрос закрытия
     global run
@@ -174,7 +174,6 @@ def on_closing():  # Опрос закрытия
         print("Выход")
         run = False
         root.destroy()
-
 
 # Кнопки главного меню
 newgameButt = Button(root, image = image.newgame,  command=newgame, borderwidth=0, bd=0)
@@ -188,7 +187,6 @@ def loadScreen():
     labelLives.grid(row=0, column=3)
     canvas.grid(row=1, column=0, columnspan=4)
     statusbar.place(x=0, y=500)
-
 
 loadScreen()
 
@@ -375,10 +373,11 @@ class Granny:  # Класс персонажа, которым мы управл
                 self.canvas.move(self.id, grannyWalkSpeed, 0)  # Двигаемся вправо на значение скорости
                 self.x += grannyWalkSpeed  # Обновляем координату
         if self.action == "turn_up":  # Если нужно подняться наверх
-            self.isClimbingUp = True  # Ставим флаг, что забираемся
-            if (self.y > 30) & ladd:  # Если не у края и на лестнице
-                self.canvas.move(self.id, 0, -grannyWalkSpeed)  # Двигаемся вверх на значение скорости
-                self.y -= grannyWalkSpeed  # Обновляем координату
+            if not objectsVariable.isLadderTop:
+                self.isClimbingUp = True  # Ставим флаг, что забираемся
+                if (self.y > 30) & ladd:  # Если не у края и на лестнице
+                    self.canvas.move(self.id, 0, -grannyWalkSpeed)  # Двигаемся вверх на значение скорости
+                    self.y -= grannyWalkSpeed  # Обновляем координату
         if self.action == "turn_down":  # Если нужно стуститься вниз
             self.isClimbingDown = True  # Ставим флаг, что спускаемся
             if (plat is False) & (antigrav is False) & (simpgrav is False):
@@ -390,34 +389,29 @@ class Granny:  # Класс персонажа, которым мы управл
         self.action = ""  # Сбрасываем задачу
 
     def turn_left(self, event):  # Движение влево
-        global key
-        if key <= settings["keyboardLimit"]:
-            key += 1
+        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
             self.action = "turn_left"
+        objectsVariable.keyCounter += 1
 
     def turn_right(self, event):  # Движение вправо
-        global key
-        if key <= settings["keyboardLimit"]:
-            key += 1
+        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
             self.action = "turn_right"
+        objectsVariable.keyCounter += 1
 
     def turn_up(self, event):  # Движение вверх до потолка
-        global key
-        if key <= settings["keyboardLimit"]:
-            key += 1
+        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
             self.action = "turn_up"
+        objectsVariable.keyCounter += 1
 
     def turn_down(self, event):  # Движение вниз
-        global key
-        if key <= settings["keyboardLimit"]:
-            key += 1
+        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
             self.action = "turn_down"
+        objectsVariable.keyCounter += 1
 
     def hit_enemy(self, event):  # Удар
-        global key
-        if key <= settings["keyboardLimit"]:
-            key += 1
+        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
             self.action = "hit_enemy"
+        objectsVariable.keyCounter += 1
 
     def touch_place(self):  # Массив точек касания нижней линии
         return [self.y + 30, self.x + 5, self.x - 5]
@@ -467,6 +461,9 @@ class Granny:  # Класс персонажа, которым мы управл
                 self.isHitEnemy = False
                 self.lastanimation = "Hit"
             # Забирание и спуск по лестнице
+            if objectsVariable.isLadderTop:
+                self.canvas.itemconfig(self.id, image=self.image["image"])
+
             if (ladd is True) & (plat is False):
                 if self.isClimbingUp:
                     if self.lastClimbUpImage == 3:
@@ -721,7 +718,7 @@ def LevelShoose():
             level = ask
             LevelInit()
 
-# Переход на следующий уровень или победа
+# Переход на следующий уровень или конец игры
 def LevelAdd():  # Логика переключения
     global level, shouldReloadButtons
     objectsVariable.Globallives = objectsVariable.lives
@@ -757,7 +754,6 @@ def action_check(playerzone, objectzone, index):  # Проверка выход�
         if (playerzone[3] >= objectzone[2]) & (playerzone[3] <= objectzone[3]):
             solution = True
     return solution
-
 
 # Платформа
 # Над платформой
@@ -809,7 +805,6 @@ def grannyoverplatform():  # Определение платформ на уро
         globalsolution = True
     return globalsolution
 
-
 def ground_check(playertouch, platformtouch):  # Проверка земли под ногами по массивам
     solution = False
     if platformtouch[0] == playertouch[0]:
@@ -818,7 +813,6 @@ def ground_check(playertouch, platformtouch):  # Проверка земли п�
         if (playertouch[2] >= platformtouch[1]) & (playertouch[2] <= platformtouch[2]):
             solution = True
     return solution
-
 
 # Под платформой
 def grannyunderplatform():  # Определение платформ на уровнях !!!Не забывать добавлять!!!
@@ -868,7 +862,6 @@ def grannyunderplatform():  # Определение платформ на ур�
         globalsolution = False
     return globalsolution
 
-
 def head_check(playertouch, platformtouch):  # Проверка земли над головой по массивам
     solution = False
     if platformtouch[0] == playertouch[0]:
@@ -877,7 +870,6 @@ def head_check(playertouch, platformtouch):  # Проверка земли на�
         if (playertouch[2] >= platformtouch[1]) & (playertouch[2] <= platformtouch[2]):
             solution = True
     return solution
-
 
 # Туземец и персонаж
 def savagehitgranny():
@@ -905,7 +897,6 @@ def savagehitgranny():
 
     return globalsolution
 
-
 def grannyhitsavage():
     globalsolution = False
     solutionAlpha = False
@@ -931,9 +922,17 @@ def grannyhitsavage():
 
     return [globalsolution, solutionAlpha, solutionBeta, solutionGamma, solutionDelta]
 
-
 # Лестница и персонаж
-def grannyonladder():  # Определение лестниц на уровне !!!Не забывать добавлять!!!
+def topladder(theladder, theplayer):
+    ladderaction = theladder.actionzone()
+    playeraction = theplayer.actionzone()
+    if ladderaction[2] >= playeraction[3]:
+        theladder.isLadderTop = True
+    else:
+        theladder.isLadderTop = False
+
+def grannyonladder():
+    global ladd
     globalsolution = False
     solutionAlpha = False
     solutionBeta = False
@@ -945,28 +944,43 @@ def grannyonladder():  # Определение лестниц на уровне
     if alphaLadder.avaible:
         Alphazone = alphaLadder.actionzone()
         solutionAlpha = action_check(playerzone, Alphazone, 15)
+        topladder(alphaLadder, Hero)
     if betaLadder.avaible:
         Betazone = betaLadder.actionzone()
         solutionBeta = action_check(playerzone, Betazone, 15)
+        topladder(betaLadder, Hero)
     if gammaLadder.avaible:
         Gammazone = gammaLadder.actionzone()
         solutionGamma = action_check(playerzone, Gammazone, 15)
+        topladder(gammaLadder, Hero)
     if deltaLadder.avaible:
         Deltazone = deltaLadder.actionzone()
         solutionDelta = action_check(playerzone, Deltazone, 15)
+        topladder(deltaLadder, Hero)
     if epsilonLadder.avaible:
         Epsilonzone = epsilonLadder.actionzone()
         solutionEpsilon = action_check(playerzone, Epsilonzone, 15)
+        topladder(epsilonLadder, Hero)
     if zetaLadder.avaible:
         Zetazone = zetaLadder.actionzone()
         solutionZeta = action_check(playerzone, Zetazone, 15)
+        topladder(zetaLadder, Hero)
 
     if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
             solutionEpsilon is True) | (solutionZeta is True):
         globalsolution = True
 
-    return globalsolution
+    if ((alphaLadder.isLadderTop is True) | (betaLadder.isLadderTop is True) | (gammaLadder.isLadderTop is True) | (
+        deltaLadder.isLadderTop is True) | (epsilonLadder.isLadderTop is True) | (zetaLadder.isLadderTop is True)) & (
+        Hero.lastanimation == "Climbing"):
+        objectsVariable.isLadderTop = True
+    else:
+        objectsVariable.isLadderTop = False
 
+    if ladd is False:
+        objectsVariable.isLadderTop = False
+
+    return globalsolution
 
 # Кот и персоныж
 def grannycarrycat():  # Определение котов на уровне !!!Не забывать добавлять!!!
@@ -1026,7 +1040,6 @@ def grannycarrycat():  # Определение котов на уровне !!!
 
     return globalsolution
 
-
 # Цветочек и персонаж
 def grannygetbonus():  # Определение цветочков на уровне !!!Не забывать добавлять!!!
     globalsolution = False
@@ -1079,7 +1092,6 @@ def grannygetbonus():  # Определение цветочков на уров
 
     return globalsolution
 
-
 # Грибочки и персонаж
 def grannyfastroom():
     globalsolution = False
@@ -1101,7 +1113,6 @@ def grannyfastroom():
 
     return globalsolution
 
-
 def grannyslowroom():
     globalsolution = False
     solutionAlpha = False
@@ -1121,7 +1132,6 @@ def grannyslowroom():
         globalsolution = True
 
     return globalsolution
-
 
 def grannygravroom():
     globalsolution = False
@@ -1143,7 +1153,6 @@ def grannygravroom():
 
     return globalsolution
 
-
 # Выход с уровня
 def grannyinexit():  # Определение выхода на уровне
     globalsolution = False
@@ -1153,9 +1162,8 @@ def grannyinexit():  # Определение выхода на уровне
         globalsolution = action_check(playerzone, Exitzone, 30)
     return globalsolution
 
-
-# Стены
-def grannyandwall():  # Определение стен на уровне !!!Не забывать добавлять!!!
+# Стены для персонажа и дикаря
+def grannyandwall():
     global wallside
     globalsolution = False
     solutionAlpha = False
@@ -1167,22 +1175,22 @@ def grannyandwall():  # Определение стен на уровне !!!Н�
     playerzone = Hero.actionzone()
     if alphaWall.avaible:
         Alphazone = alphaWall.actionzone()
-        solutionAlpha = wall_check(playerzone, Alphazone)
+        solutionAlpha = wall_check(playerzone, Alphazone, None)
     if betaWall.avaible:
         Betazone = betaWall.actionzone()
-        solutionBeta = wall_check(playerzone, Betazone)
+        solutionBeta = wall_check(playerzone, Betazone, None)
     if gammaWall.avaible:
         Gammazone = gammaWall.actionzone()
-        solutionGamma = wall_check(playerzone, Gammazone)
+        solutionGamma = wall_check(playerzone, Gammazone, None)
     if deltaWall.avaible:
         Deltazone = deltaWall.actionzone()
-        solutionDelta = wall_check(playerzone, Deltazone)
+        solutionDelta = wall_check(playerzone, Deltazone, None)
     if epsilonWall.avaible:
         Epsilonzone = epsilonWall.actionzone()
-        solutionEpsilon = wall_check(playerzone, Epsilonzone)
+        solutionEpsilon = wall_check(playerzone, Epsilonzone, None)
     if zetaWall.avaible:
         Zetazone = zetaWall.actionzone()
-        solutionZeta = wall_check(playerzone, Zetazone)
+        solutionZeta = wall_check(playerzone, Zetazone, None)
     if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
             solutionEpsilon is True) | (solutionZeta is True):
         globalsolution = True
@@ -1192,24 +1200,64 @@ def grannyandwall():  # Определение стен на уровне !!!Н�
 
     return globalsolution
 
-
-def wall_check(playerzone, wallzone):  # Проверка стен по массивам
+def wall_check(playerzone, wallzone, thesavage):  # Проверка стен по массивам
     global wallside
     solution = False
     if (playerzone[0] + 16 >= wallzone[0]) & (playerzone[0] + 16 <= wallzone[1]):
         if (playerzone[2] >= wallzone[2]) & (playerzone[2] <= wallzone[3]):
             solution = True
         if (playerzone[3] >= wallzone[2]) & (playerzone[3] <= wallzone[3]):
-            wallside = "R"
+            if thesavage is None:
+                wallside = "R"
+            else:
+                thesavage.wallside = "R"
             solution = True
     if (playerzone[1] - 16 >= wallzone[0]) & (playerzone[1] - 16 <= wallzone[1]):
         if (playerzone[2] >= wallzone[2]) & (playerzone[2] <= wallzone[3]):
             solution = True
         if (playerzone[3] >= wallzone[2]) & (playerzone[3] <= wallzone[3]):
-            wallside = "L"
+            if thesavage is None:
+                wallside = "L"
+            else:
+                thesavage.wallside = "L"
             solution = True
     return solution
 
+def anysavageandwall(theobject): # Проверяет столкновение для одного любого Дикаря
+    globalsolution = False
+    solutionAlpha = False
+    solutionBeta = False
+    solutionGamma = False
+    solutionDelta = False
+    solutionEpsilon = False
+    solutionZeta = False
+    savagezone = theobject.actionzone()
+    if alphaWall.avaible:
+        Alphazone = alphaWall.actionzone()
+        solutionAlpha = wall_check(savagezone, Alphazone, theobject)
+    if betaWall.avaible:
+        Betazone = betaWall.actionzone()
+        solutionBeta = wall_check(savagezone, Betazone, theobject)
+    if gammaWall.avaible:
+        Gammazone = gammaWall.actionzone()
+        solutionGamma = wall_check(savagezone, Gammazone, theobject)
+    if deltaWall.avaible:
+        Deltazone = deltaWall.actionzone()
+        solutionDelta = wall_check(savagezone, Deltazone, theobject)
+    if epsilonWall.avaible:
+        Epsilonzone = epsilonWall.actionzone()
+        solutionEpsilon = wall_check(savagezone, Epsilonzone, theobject)
+    if zetaWall.avaible:
+        Zetazone = zetaWall.actionzone()
+        solutionZeta = wall_check(savagezone, Zetazone, theobject)
+    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
+            solutionEpsilon is True) | (solutionZeta is True):
+        globalsolution = True
+
+    if globalsolution is False:
+        theobject.wallside = "0"
+
+    return globalsolution
 
 # Гравитация
 def gravity():  # Если персонаж не на платформн и не на лестнице, на нее действует гравитация
@@ -1219,7 +1267,6 @@ def gravity():  # Если персонаж не на платформн и не
         Hero.gravitymove()
     else:
         simpgrav = False
-
 
 # Эффекты грибов
 def effects():
@@ -1259,7 +1306,6 @@ def effects():
         antigrav = False
         grannyWalkSpeed = grannyWalkSpeedNormal
         gravitySpeed = gravitySpeedNormal
-
 
 # Убийства
 def savageKill():
@@ -1339,35 +1385,45 @@ def savagePlates(thesavage, homeplatform):
         else:
             thesavage.way = Base.border()
 
-
-# Изменение направления
+# Изменение направления при встрече с концом платформы
 def savageDirection(thesavage):
     coords = thesavage.coords()
     way = thesavage.way
     if coords[0] <= way[0]:
-        thesavage.direction = "right"
+        thesavage.changedirection()
     elif coords[0] >= way[1]:
-        thesavage.direction = "left"
-
+        thesavage.changedirection()
 
 # Установка платформ и направлений
 def savageWalking():
     if alphaSavage.avaible:
         homeplatform = settings["levels"][level]["alphaSavagePlatform"]
         savagePlates(alphaSavage, homeplatform)
-        savageDirection(alphaSavage)
+        if anysavageandwall(alphaSavage):
+            alphaSavage.changedirection()
+        else:
+            savageDirection(alphaSavage)
     if betaSavage.avaible:
         homeplatform = settings["levels"][level]["betaSavagePlatform"]
         savagePlates(betaSavage, homeplatform)
-        savageDirection(betaSavage)
+        if anysavageandwall(betaSavage):
+            betaSavage.changedirection()
+        else:
+            savageDirection(betaSavage)
     if gammaSavage.avaible:
         homeplatform = settings["levels"][level]["gammaSavagePlatform"]
         savagePlates(gammaSavage, homeplatform)
-        savageDirection(gammaSavage)
+        if anysavageandwall(gammaSavage):
+            gammaSavage.changedirection()
+        else:
+            savageDirection(gammaSavage)
     if deltaSavage.avaible:
         homeplatform = settings["levels"][level]["deltaSavagePlatform"]
         savagePlates(deltaSavage, homeplatform)
-        savageDirection(deltaSavage)
+        if anysavageandwall(deltaSavage):
+            deltaSavage.changedirection()
+        else:
+            savageDirection(deltaSavage)
 
 # Организация движений
 def savageMove(thesavage):
@@ -1376,7 +1432,7 @@ def savageMove(thesavage):
     else:
         thesavage.turn_left()
 
-# Вызов очереди действий для существующих дикарей
+# Вызов очереди действий существующих дикарей
 def savageActions():
     if alphaSavage.avaible:
         savageMove(alphaSavage)
@@ -1454,13 +1510,18 @@ def endgame(win):
 
 # Подсчет кликов и кадров
 def timer():
-    global key, keytime, KeySpeed, fps, fpsGlobal
+    global  keytime, KeySpeed, fps, fpsGlobal
     if (time.time() - keytime) >= 1:
-        KeySpeed = key
+        KeySpeed = objectsVariable.keyCounter
         fpsGlobal = fps
         fps = 0
-        key = 0
+        objectsVariable.keyCounter = 0
         keytime = time.time()
+    if KeySpeed > settings["keyboardLimit"]:
+        message = "Скорость клавиатуры превышает допустимую. \n Допустимая: %i \n Текущая: %i \n" % (
+            settings["keyboardLimit"], KeySpeed) + "Измените скорость в настройках компьютера на %i пунктов" % (
+            settings["keyboardLimit"] - KeySpeed)
+        mb.showwarning(title="Настройте клавиатуру", message=message)
 
 # Выбор цвета фона
 def color():
@@ -1520,7 +1581,7 @@ def menu():  # Описание меню(сверху полоска)
     gamemenu.add_command(label="Выход", command=on_closing)
     aboutmenu = Menu(mainmenu, tearoff=0, bg=backgroundcolor)
     aboutmenu.add_command(label="Авторы", command=lambda: mb.showinfo(title="Авторы", message=authorsmessage))
-    aboutmenu.add_command(label="Об игре", command=lambda: mb.showinfo(title="Авторы", message=aboutmessage))
+    aboutmenu.add_command(label="Об игре", command=lambda: mb.showinfo(title="Об игре", message=aboutmessage))
     mainmenu.add_cascade(label="Игра", menu=gamemenu)
     mainmenu.add_cascade(label="Справка", menu=aboutmenu)
     root.config(menu=mainmenu)
@@ -1541,7 +1602,6 @@ def reloadScreen():
     loadScreen()
     menu()
 
-
 Hero = Empty()
 menu()  # Создаем меню
 mainmenu_open()  # Запускаем заглавный экран
@@ -1553,7 +1613,6 @@ while run:
         music()
         if level != 0:  # Если игра идет
             plat = grannyoverplatform()  # Cтоит ли персонаж на платформе
-            ladd = grannyonladder()  # Стоит ли персонаж на лестнице
             carr = grannycarrycat()  # Подбирает ли персонаж котенка
             vent = grannyinexit()  # Стоит ли персонаж у выходв
             barr = grannyandwall()  # Стоит ли персонаж у стены
@@ -1573,6 +1632,7 @@ while run:
             savageActions()
             savageAnimate()
             if Hero.avaible:  # Если герой есть, применяем к нему
+                ladd = grannyonladder()  # Стоит ли персонаж на лестнице
                 Hero.action_queue()  # Выполнение очереди действий
                 gravity()  # Применяем к персонажу фактор графитации
                 Hero.animate()  # Анимируем персонажа
