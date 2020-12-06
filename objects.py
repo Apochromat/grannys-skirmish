@@ -7,6 +7,10 @@ class VariableHeap:
         self.isSlowEffect = False  # Устанавливается ли эффект медленности
         self.isGravEffect = False  # Устанавливается ли эффект антигравитации
 
+        self.isFastroomSoundPlayed = False
+        self.isSlowroomSoundPlayed = False
+        self.isGravroomSoundPlayed = False
+
         self.lives = 0
         self.GlobalLives = 0
 

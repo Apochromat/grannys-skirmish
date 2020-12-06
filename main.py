@@ -1,5 +1,5 @@
 # Granny`s Skirmish
-# version 0.9.7
+# version 0.9.8
 
 """Импорт"""
 import json
@@ -11,6 +11,7 @@ from tkinter import simpledialog as sd
 from pygame import mixer
 from images import *
 from objects import *
+from music import *
 
 """Файл настроек"""
 with open("data.json", 'r', encoding="utf-8") as file:  # Открываем файл с настройками
@@ -19,6 +20,8 @@ with open("data.json", 'r', encoding="utf-8") as file:  # Открываем ф�
 """Переменные"""
 sysName = platform.uname().system
 objectsVariable = VariableHeap()
+musicPaths = MusicPathHeap()
+soundPaths = SoundPathHeap()
 run = True  # Флаг работы приложения
 version = settings['version']  # Загрузка номера версии
 if sysName == "Windows":
@@ -68,6 +71,7 @@ level = 0  # Уровень
 
 typeMusic = 0
 volumeMusic = settings["musicvolume"]
+volumeSound = settings["soundvolume"]
 
 shouldReloadButtons = True
 
@@ -92,6 +96,11 @@ def music_stop():
 def music():
     global isMusicOn, typeMusic
     mixer.music.set_volume(volumeMusic / 100)
+    mixer.Channel(0).set_volume(volumeSound / 100)
+    mixer.Channel(1).set_volume(volumeSound / 100)
+    mixer.Channel(2).set_volume(volumeSound / 100)
+    mixer.Channel(3).set_volume(volumeSound / 100)
+    mixer.Channel(4).set_volume(volumeSound / 100)
     if musicmode.get() is False:
         music_stop()
     if level == 0:
@@ -106,18 +115,18 @@ def music():
     if (musicmode.get() is True) & (typeMusic == 0) & (isMusicOn is False):
         music_stop()
         if sysName == "Windows":
-            mixer.music.load(os.path.join('assets', 'music', 'mainmenu.mid'))
+            mixer.music.load(musicPaths.mainmenuWin)
         else:
-            mixer.music.load(os.path.join('assets', 'music', 'mainmenu.mp3'))
+            mixer.music.load(musicPaths.mainmenuLin)
         mixer.music.play(loops=200)
         isMusicOn = True
 
     if (musicmode.get() is True) & (typeMusic == 1) & (isMusicOn is False):
         music_stop()
         if sysName == "Windows":
-            mixer.music.load(os.path.join('assets', 'music', 'level.mid'))
+            mixer.music.load(musicPaths.levelWin)
         else:
-            mixer.music.load(os.path.join('assets', 'music', 'level.mp3'))
+            mixer.music.load(usicPaths.levelLin)
         mixer.music.play(loops=1000)
         isMusicOn = True
 
@@ -193,39 +202,73 @@ loadScreen()
 # Переменная для режимов отладки и музыки
 musicmode = BooleanVar()
 musicmode.set(settings["musicswitch"])
+soundmode = BooleanVar()
+soundmode.set(settings["soundswitch"])
 debugmode = IntVar()
-scalevolume = IntVar()
-scalevolume.set(volumeMusic)
+scalevolumeMusic = IntVar()
+scalevolumeMusic.set(volumeMusic)
+scalevolumeSound = IntVar()
+scalevolumeSound.set(volumeMusic)
 
-"""Окно выбора громкости звука"""
-def setvolume():
-    global volumeWindow
-    volumeWindow = Toplevel()
-    volumeWindow.title("Громкость музыки")  # Заголовок окна
-    volumeWindow.configure(bg=backgroundcolor)  # Фон окна
-    volumeWindow.geometry("%ix%i" % (216, 130))  # Размеры окна
-    volumeWindow.resizable(0, 0)  # Запрет на изменение размеров окна
+"""Окно выбора громкости Музыки"""
+def setvolumemusic():
+    global volumeMusicWindow
+    volumeMusicWindow = Toplevel()
+    volumeMusicWindow.title("Громкость музыки")  # Заголовок окна
+    volumeMusicWindow.configure(bg=backgroundcolor)  # Фон окна
+    volumeMusicWindow.geometry("%ix%i" % (216, 130))  # Размеры окна
+    volumeMusicWindow.resizable(0, 0)  # Запрет на изменение размеров окна
     if sysName == "Windows":
-        volumeWindow.iconbitmap(image.iconPath)
-    Label(volumeWindow, bg=backgroundcolor, text="Выберите подходящую громкость", font=("Arial", 10)).grid(
+        volumeMusicWindow.iconbitmap(image.iconPath)
+    Label(volumeMusicWindow, bg=backgroundcolor, text="Выберите подходящую громкость", font=("Arial", 10)).grid(
         row=0, column=0, columnspan=2)
-    Label(volumeWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeMusic, font=("Arial", 10)).grid(
+    Label(volumeMusicWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeMusic, font=("Arial", 10)).grid(
         row=1, column=0, columnspan=2)
-    Scale(volumeWindow, variable=scalevolume, bg=backgroundcolor, orient=HORIZONTAL, length=180, font=("Arial", 10)).grid(
+    Scale(volumeMusicWindow, variable=scalevolumeMusic, bg=backgroundcolor, orient=HORIZONTAL, length=180, font=("Arial", 10)).grid(
         row=3, column=0, columnspan=2)
-    Button(volumeWindow, text="Сохранить", bg=backgroundcolor, command=savevolume, font=("Arial", 10)).grid(
+    Button(volumeMusicWindow, text="Сохранить", bg=backgroundcolor, command=savevolumemusic, font=("Arial", 10)).grid(
         row=4, column=0, pady=10)
-    Button(volumeWindow, text="Отменить", bg=backgroundcolor, command=undovolume, font=("Arial", 10)).grid(
+    Button(volumeMusicWindow, text="Отменить", bg=backgroundcolor, command=undovolumemusic, font=("Arial", 10)).grid(
         row=4, column=1, pady=10)
 
-def savevolume():
+def savevolumemusic():
     global volumeMusic
-    volumeMusic = scalevolume.get()
-    volumeWindow.destroy()
+    volumeMusic = scalevolumeMusic.get()
+    volumeMusicWindow.destroy()
 
-def undovolume():
-    volumeWindow.destroy()
-    scalevolume.set(volumeMusic)
+def undovolumemusic():
+    volumeMusicWindow.destroy()
+    scalevolumeMusic.set(volumeMusic)
+
+"""Окно выбора громкости Звуков"""
+def setvolumesound():
+    global volumeSoundWindow
+    volumeSoundWindow = Toplevel()
+    volumeSoundWindow.title("Громкость pderjd")  # Заголовок окна
+    volumeSoundWindow.configure(bg=backgroundcolor)  # Фон окна
+    volumeSoundWindow.geometry("%ix%i" % (216, 130))  # Размеры окна
+    volumeSoundWindow.resizable(0, 0)  # Запрет на изменение размеров окна
+    if sysName == "Windows":
+        volumeSoundWindow.iconbitmap(image.iconPath)
+    Label(volumeSoundWindow, bg=backgroundcolor, text="Выберите подходящую громкость", font=("Arial", 10)).grid(
+        row=0, column=0, columnspan=2)
+    Label(volumeSoundWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeSound, font=("Arial", 10)).grid(
+        row=1, column=0, columnspan=2)
+    Scale(volumeSoundWindow, variable=scalevolumeSound, bg=backgroundcolor, orient=HORIZONTAL, length=180, font=("Arial", 10)).grid(
+        row=3, column=0, columnspan=2)
+    Button(volumeSoundWindow, text="Сохранить", bg=backgroundcolor, command=savevolumesound, font=("Arial", 10)).grid(
+        row=4, column=0, pady=10)
+    Button(volumeSoundWindow, text="Отменить", bg=backgroundcolor, command=undovolumesound, font=("Arial", 10)).grid(
+        row=4, column=1, pady=10)
+
+def savevolumesound():
+    global volumeSound
+    volumeSound = scalevolumeSound.get()
+    volumeSoundWindow.destroy()
+
+def undovolumesound():
+    volumeSoundWindow.destroy()
+    scalevolumeSound.set(volumeSound)
 """Функции окон"""
 # Открытие главного меню
 def mainmenu_open():  # Открытие главного меню
@@ -299,8 +342,8 @@ def status():
         if level == 0:
             message = "Готов"
     elif debugmode.get() == 4:
-        message = "System:%s, FPS:%i; KeySpeed:%i; Cheat:%s; MusicState:%s; Volume:%i;" % (
-            sysName, fpsGlobal, KeySpeed, settings["cheatmode"], musicmode.get(), volumeMusic)
+        message = "System:%s, FPS:%i; Key:%i; Cheat:%s; Music:%s; MVol:%i; Sound:%s; SVol:%i" % (
+            sysName, fpsGlobal, KeySpeed, settings["cheatmode"], musicmode.get(), volumeMusic,soundmode.get(), volumeSound)
         if level == 0:
             message = "Готов"
     elif level != 0:
@@ -384,6 +427,8 @@ class Granny:  # Класс персонажа, которым мы управл
                 self.canvas.move(self.id, 0, grannyWalkSpeed)  # Двигаемся вниз на значение скорости
                 self.y += grannyWalkSpeed  # Обновляем координату
         if self.action == "hit_enemy":  # Если нужно ударить
+            if soundmode.get():
+                mixer.Channel(4).play(mixer.Sound(random.choice(soundPaths.grannyhit)))
             self.isHitEnemy = True  # Ставим флаг, что ударяем
             savageKill()  # Обьявляем всех Дикарей в зоне мертвыми
         self.action = ""  # Сбрасываем задачу
@@ -725,9 +770,12 @@ def LevelAdd():  # Логика переключения
     objectsVariable.GlobalScore += objectsVariable.Score
     objectsVariable.Score = 0
     if level < settings["levelamount"]:  # Если уровень не последний
+        if (level != 0) & soundmode.get():
+            mixer.Channel(0).play(mixer.Sound(soundPaths.exit))
         level += 1  # Добавляем уровень
         LevelInit()  # Загружаем уровень
     elif level == settings["levelamount"]:  # Если уровень последний
+        mixer.Channel(0).play(mixer.Sound(soundPaths.win))
         endgame(win=True)  # Вывод сообшения о победе
     shouldReloadButtons = True
 
@@ -1036,6 +1084,8 @@ def grannycarrycat():  # Определение котов на уровне !!!
             objectsVariable.CatAmountReal += 1
     if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
             solutionEpsilon is True) | (solutionZeta is True):
+        if soundmode.get():
+            mixer.Channel(3).play(mixer.Sound(random.choice(soundPaths.cat)))
         globalsolution = True
 
     return globalsolution
@@ -1089,7 +1139,8 @@ def grannygetbonus():  # Определение цветочков на уров
     if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
             solutionEpsilon is True) | (solutionZeta is True):
         globalsolution = True
-
+        if soundmode.get():
+            mixer.Channel(1).play(mixer.Sound(soundPaths.bonus))
     return globalsolution
 
 # Грибочки и персонаж
@@ -1100,16 +1151,22 @@ def grannyfastroom():
     playerzone = Hero.actionzone()
     if alphaFastroom.avaible:
         Alphazone = alphaFastroom.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 12)
+        solutionAlpha = action_check(playerzone, Alphazone, 15)
         if solutionAlpha is True:
             objectsVariable.isFastEffect = True
     if betaFastroom.avaible:
         Betazone = betaFastroom.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 12)
+        solutionBeta = action_check(playerzone, Betazone, 15)
         if solutionBeta is True:
             objectsVariable.isFastEffect = True
     if (solutionAlpha is True) | (solutionBeta is True):
         globalsolution = True
+        if objectsVariable.isFastroomSoundPlayed is False:
+            if soundmode.get():
+                mixer.Channel(2).play(mixer.Sound(soundPaths.mushroom))
+            objectsVariable.isFastroomSoundPlayed = True
+    else:
+        objectsVariable.isFastroomSoundPlayed = False
 
     return globalsolution
 
@@ -1120,16 +1177,22 @@ def grannyslowroom():
     playerzone = Hero.actionzone()
     if alphaSlowroom.avaible:
         Alphazone = alphaSlowroom.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 12)
+        solutionAlpha = action_check(playerzone, Alphazone, 15)
         if solutionAlpha is True:
             objectsVariable.isSlowEffect = True
     if betaSlowroom.avaible:
         Betazone = betaSlowroom.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 12)
+        solutionBeta = action_check(playerzone, Betazone, 15)
         if solutionBeta is True:
             objectsVariable.isSlowEffect = True
     if (solutionAlpha is True) | (solutionBeta is True):
         globalsolution = True
+        if objectsVariable.isSlowroomSoundPlayed is False:
+            if soundmode.get():
+                mixer.Channel(2).play(mixer.Sound(soundPaths.mushroom))
+            objectsVariable.isSlowroomSoundPlayed = True
+    else:
+        objectsVariable.isSlowroomSoundPlayed = False
 
     return globalsolution
 
@@ -1140,16 +1203,22 @@ def grannygravroom():
     playerzone = Hero.actionzone()
     if alphaGravroom.avaible:
         Alphazone = alphaGravroom.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 12)
+        solutionAlpha = action_check(playerzone, Alphazone, 15)
         if solutionAlpha is True:
             objectsVariable.isGravEffect = True
     if betaGravroom.avaible:
         Betazone = betaGravroom.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 12)
+        solutionBeta = action_check(playerzone, Betazone, 15)
         if solutionBeta is True:
             objectsVariable.isGravEffect = True
     if (solutionAlpha is True) | (solutionBeta is True):
         globalsolution = True
+        if objectsVariable.isGravroomSoundPlayed is False:
+            if soundmode.get():
+                mixer.Channel(2).play(mixer.Sound(soundPaths.mushroom))
+            objectsVariable.isGravroomSoundPlayed = True
+    else:
+        objectsVariable.isGravroomSoundPlayed = False
 
     return globalsolution
 
@@ -1327,6 +1396,8 @@ def savageKill():
 def grannyKill():
     global Hero
     if SavHitGra:
+        if soundmode.get():
+            mixer.Channel(1).play(mixer.Sound(random.choice(soundPaths.savagehit)))
         canvas.delete(Hero.id)
         objectsVariable.lives -= 1
         if objectsVariable.lives < 0:
@@ -1563,9 +1634,13 @@ def menu():  # Описание меню(сверху полоска)
     gamemenu.add_separator()
     optionmenu = Menu(gamemenu, tearoff=1, bg=backgroundcolor)
     musicmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
-    musicmenu.add_command(label="Громкость", command=setvolume)
+    musicmenu.add_command(label="Громкость", command=setvolumemusic)
     musicmenu.add_radiobutton(label="Включена", value=True, variable=musicmode)
     musicmenu.add_radiobutton(label="Отключена", value=False, variable=musicmode)
+    soundmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
+    soundmenu.add_command(label="Громкость", command=setvolumesound)
+    soundmenu.add_radiobutton(label="Включена", value=True, variable=soundmode)
+    soundmenu.add_radiobutton(label="Отключена", value=False, variable=soundmode)
     debugmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
     debugmenu.add_radiobutton(label="Отключена", value=0, variable=debugmode)
     debugmenu.add_radiobutton(label="Флаги персонажа", value=1, variable=debugmode)
@@ -1574,6 +1649,7 @@ def menu():  # Описание меню(сверху полоска)
     debugmenu.add_radiobutton(label="Системное", value=4, variable=debugmode)
     gamemenu.add_cascade(label="Настройки", menu=optionmenu)
     optionmenu.add_cascade(label="Музыка", menu=musicmenu)
+    optionmenu.add_cascade(label="Звуки", menu=soundmenu)
     optionmenu.add_command(label="Выбрать цвет фона", command=color)
     optionmenu.add_cascade(label="Отладка", menu=debugmenu)
     gamemenu.add_separator()

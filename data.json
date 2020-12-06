@@ -1,6 +1,6 @@
 {
     "title": "Granny`s Skirmish",
-    "version": "v0.9.7 prerelease",
+    "version": "v0.9.8 prerelease",
     "windowsizewin":  [640, 540],
 	"windowsizelin":  [640, 520],
 	"canvassize":  [640, 480],
@@ -35,6 +35,8 @@
 	"cheatmode": false,
 	"musicswitch": true,
 	"musicvolume": 30,
+	"soundswitch": true,
+	"soundvolume": 50,
 	
 	"globals":["Hero", "Base", "Exit", "CatAmountAll", "CatAmountReal", "alphaPlatform", "betaPlatform", "gammaPlatform", "deltaPlatform", "epsilonPlatform", "zetaPlatform", "etaPlatform", "thetaPlatform", "iotaPlatform", "alphaCat", "betaCat", "gammaCat", "deltaCat", "epsilonCat", "zetaCat", "alphaBonus", "betaBonus", "gammaBonus", "deltaBonus", "epsilonBonus", "zetaBonus", "alphaLadder", "betaLadder", "gammaLadder", "deltaLadder", "epsilonLadder", "zetaLadder", "alphaWall", "betaWall", "gammaWall", "deltaWall", "epsilonWall", "zetaWall", "alphaSavage", "betaSavage", "gammaSavage", "deltaSavage", "alphaFastroom", "betaFastroom", "alphaSlowroom", "betaSlowroom", "alphaGravroom", "betaGravroom"],
 	

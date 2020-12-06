@@ -2,8 +2,6 @@ import os
 from PIL import Image, ImageTk
 
 """Изображения"""
-
-
 # Функция загрузки изображений
 def imgload(path):  # Функция загрузки изображений
     img = Image.open(path)
