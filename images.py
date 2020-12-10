@@ -14,27 +14,31 @@ class ImageHeap:
         self.iconPath = os.path.join('assets', 'graphics', 'icon.ico')
         self.quit = imgload(os.path.join('assets', 'graphics', 'quit.png'))
         self.newgame = imgload(os.path.join('assets', 'graphics', 'newgame.png'))
+        self.continuegame = imgload(os.path.join('assets', 'graphics', 'continue.png'))
         self.mainmenuBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'menu_background.png'))
         self.jungleBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'jungle_background.jpg'))
         self.baseplatform = imgload(os.path.join('assets', 'graphics', 'platformbase.png'))
         self.ladder = imgload(os.path.join('assets', 'graphics', 'ladder.png'))
         self.wallImage = imgload(os.path.join('assets', 'graphics', 'wall.png'))
 
-        self.cats = [imgload(os.path.join('assets', 'graphics', 'cat', 'cat1.png')),
-                     imgload(os.path.join('assets', 'graphics', 'cat', 'cat2.png')),
-                     imgload(os.path.join('assets', 'graphics', 'cat', 'cat3.png'))]
+        self.cats = [imgload(os.path.join('assets', 'graphics', 'cat', 'cat_1.png')),
+                     imgload(os.path.join('assets', 'graphics', 'cat', 'cat_2.png')),
+                     imgload(os.path.join('assets', 'graphics', 'cat', 'cat_3.png'))]
 
         self.mushroom = [imgload(os.path.join('assets', 'graphics', 'mushroom', 'fastroom.png')),
                          imgload(os.path.join('assets', 'graphics', 'mushroom', 'slowroom.png')),
                          imgload(os.path.join('assets', 'graphics', 'mushroom', 'gravroom.png'))]
 
         self.bonusSeed = imgload(os.path.join('assets', 'graphics', 'bonus', 'bonusSeed.png'))
-        self.bonus = [imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus0.png')),
-                      imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus1.png')),
-                      imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus2.png'))]
+        self.bonus = [imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus_1.png')),
+                      imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus_2.png')),
+                      imgload(os.path.join('assets', 'graphics', 'bonus', 'bonus_3.png'))]
 
-        self.exitImage = [imgload(os.path.join('assets', 'graphics', 'exitflower_inactive.png')),
-                          imgload(os.path.join('assets', 'graphics', 'exitflower_active.png'))]
+        self.exitImage = [imgload(os.path.join('assets', 'graphics', 'exit', 'exitflower_inactive.png')),
+                          imgload(os.path.join('assets', 'graphics', 'exit', 'exitflower_active_1.png')),
+                          imgload(os.path.join('assets', 'graphics', 'exit', 'exitflower_active_2.png')),
+                          imgload(os.path.join('assets', 'graphics', 'exit', 'exitflower_active_3.png')),
+                          imgload(os.path.join('assets', 'graphics', 'exit', 'exitflower_active_4.png'))]
 
         self.savage = {
             "image": imgload(os.path.join('assets', 'graphics', 'savage', 'savage_stand.png')),

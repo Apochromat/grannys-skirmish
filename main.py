@@ -1,5 +1,5 @@
 # Granny`s Skirmish
-# version 0.9.8
+# version 0.9.9
 
 """Импорт"""
 import json
@@ -12,11 +12,15 @@ from pygame import mixer
 from images import *
 from objects import *
 from music import *
+from achievements import *
 
 """Файл настроек"""
 with open("data.json", 'r', encoding="utf-8") as file:  # Открываем файл с настройками
     settings = json.load(file)  # Записываем как словарь в переменную
 
+"""Данные игрока"""
+playerData = PlayerData()
+playerData.data["lastlives"] = settings["livesnormal"]
 """Переменные"""
 sysName = platform.uname().system
 objectsVariable = VariableHeap()
@@ -66,7 +70,7 @@ limitedFlag = False  # Ограничен ли уровень по времен�
 limitedtime = 0  # Время включения ограничения
 
 objectsVariable.lives = settings['livesnormal']  # Переменное количество жизней на уровне
-objectsVariable.Globallives = objectsVariable.lives
+objectsVariable.GlobalLives = objectsVariable.lives
 level = 0  # Уровень
 
 typeMusic = 0
@@ -87,7 +91,6 @@ if sysName == "Windows":
     root.iconbitmap(image.iconPath)
 """Музыка"""
 mixer.init()
-
 def music_stop():
     global isMusicOn
     mixer.music.stop()
@@ -129,7 +132,6 @@ def music():
             mixer.music.load(usicPaths.levelLin)
         mixer.music.play(loops=1000)
         isMusicOn = True
-
 """Элементы окна"""
 statusbar = Label(root, justify=LEFT, text="Готов", width=settings["statusbarwidth"], height=1,
                   bg=backgroundcolor, anchor=W)  # Статусбар
@@ -154,15 +156,19 @@ labelTimer = Label(root, text="Timer", width=settings["timerwidth"], height=1, b
 # Удаление кнопок с главного меню
 def clearbutt():
     newgameButt.place_forget()
+    continueButt.place_forget()
     exitgameButt.place_forget()
 
 # Начало новой игры
 def newgame():
     global level
-    if level != 0:
-        ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать новую игру?")
+    if (level != 0) | (playerData.data["lastlevel"] !=1):
+        ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать новую игру? \nВаш прогресс бедет утерян.")
         if ask:
             objectsVariable.lives = settings['livesnormal']
+            playerData.data["killedsavages"] = 0
+            playerData.data["wateredflowers"] = 0
+            playerData.data["islevelcyclecompleted"] = False
             level = 0
             objectsVariable.Score = 0
             objectsVariable.GlobalScore = 0
@@ -171,10 +177,32 @@ def newgame():
     else:
         objectsVariable.lives = settings['livesnormal']
         level = 0
+        playerData.data["islevelcyclecompleted"] = False
         objectsVariable.Score = 0
         objectsVariable.GlobalScore = 0
         clearbutt()
         LevelAdd()
+
+def continuegame():
+    global level
+    if (playerData.data["achievements"]["end"] is True) & (playerData.data["islevelcyclecompleted"] is True):
+        mb.showinfo(title="Новая игра+", message="Вы закончили основную игру."
+                                                 "\nНачинается новая игра+, достижения и рекорды сохранятся.")
+        playerData.data["islevelcyclecompleted"] = False
+        playerData.data["killedsavages"] =0
+        playerData.data["wateredflowers"] =0
+        objectsVariable.lives = settings["livesnormal"]
+        objectsVariable.Score = 0
+        objectsVariable.GlobalScore = 0
+        clearbutt()
+        LevelAdd()
+    else:
+        objectsVariable.lives = playerData.data["lastlives"]
+        level = playerData.data["lastlevel"]
+        objectsVariable.Score = 0
+        objectsVariable.GlobalScore = playerData.data["lastscore"]
+        clearbutt()
+        LevelInit()
 
 # Опрос закрытия программы
 def on_closing():  # Опрос закрытия
@@ -186,6 +214,7 @@ def on_closing():  # Опрос закрытия
 
 # Кнопки главного меню
 newgameButt = Button(root, image = image.newgame,  command=newgame, borderwidth=0, bd=0)
+continueButt = Button(root, image =image.continuegame, command=continuegame, borderwidth=0, bd=0)
 exitgameButt = Button(root, image =image.quit, command=on_closing, borderwidth=0, bd=0)
 
 """Добавление элементов в окно"""
@@ -282,8 +311,13 @@ def mainmenu_open():  # Открытие главного меню
     labelCats.config(text=" ")
     labelScore.config(text=" ")
     labelLives.config(text=" ")
-    newgameButt.place(x=182, y=245)
-    exitgameButt.place(x=182, y=335)
+    newgameButt.place(x=182, y=280)
+    continueButt.place(x=182, y=345)
+    exitgameButt.place(x=182, y=410)
+    if playerData.data["lastlevel"] != 1:
+        continueButt.configure(state = "normal")
+    elif (playerData.data["islevelcyclecompleted"] is True) | (playerData.data["lastlevel"] == 1):
+        continueButt.configure(state="disabled")
     labelFast.place_forget()
     labelSlow.place_forget()
     labelGrav.place_forget()
@@ -538,6 +572,9 @@ class Granny:  # Класс персонажа, которым мы управл
 """Уровни"""
 # Инициальзация уровня по data.json
 def LevelInit():
+    playerData.data["lastlevel"] = level
+    playerData.data["lastscore"] = objectsVariable.GlobalScore
+    playerData.data["lastlives"] = objectsVariable.GlobalLives
     clearbutt()
     clearcanvas()
     global shouldReloadButtons, limitedtime, avoidEffects, limitedFlag, Hero, Base, Exit, alphaPlatform, betaPlatform, gammaPlatform, deltaPlatform, epsilonPlatform, zetaPlatform, etaPlatform, thetaPlatform, iotaPlatform, alphaCat, betaCat, gammaCat, deltaCat, epsilonCat, zetaCat, alphaBonus, betaBonus, gammaBonus, deltaBonus, epsilonBonus, zetaBonus, alphaLadder, betaLadder, gammaLadder, deltaLadder, epsilonLadder, zetaLadder, alphaWall, betaWall, gammaWall, deltaWall, epsilonWall, zetaWall, alphaSavage, betaSavage, gammaSavage, deltaSavage, alphaFastroom, betaFastroom, alphaSlowroom, betaSlowroom, alphaGravroom, betaGravroom
@@ -547,9 +584,10 @@ def LevelInit():
     limitedtime = 0
     canvas.create_image(320, 240, image=image.jungleBackgroung, tag="play")
     Base = PlatformBase(canvas=canvas, image=image.baseplatform)
-    Exit = ExitFlower(settings['levels'][level]['exitCoords'], canvas=canvas, image=image.exitImage)
+    Exit = ExitFlower(settings['levels'][level]['exitCoords'], canvas=canvas, image=image.exitImage,
+                      animationexitduration = settings["animationExitduration"])
     objectsVariable.CatAmountAll = settings['levels'][level]['CatAmountAll']
-    objectsVariable.CatAmountReal = settings['levels'][level]['CatAmountReal']
+    objectsVariable.CatAmountReal = 0
     """Платформы"""
     if settings['levels'][level]['alphaPlatformFlag']:
         alphaPlatform = PlatformSimple(settings['levels'][level]['alphaPlatformCoords'], canvas=canvas)
@@ -698,28 +736,6 @@ def LevelInit():
     else:
         zetaBonus = Empty()
 
-    """Туземец"""
-    if settings['levels'][level]['alphaSavageFlag']:
-        alphaSavage = Savage(settings['levels'][level]['alphaSavageCoords'], canvas=canvas, image=image.savage,
-                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
-    else:
-        alphaSavage = Empty()
-    if settings['levels'][level]['betaSavageFlag']:
-        betaSavage = Savage(settings['levels'][level]['betaSavageCoords'], canvas=canvas, image=image.savage,
-                            animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
-    else:
-        betaSavage = Empty()
-    if settings['levels'][level]['gammaSavageFlag']:
-        gammaSavage = Savage(settings['levels'][level]['gammaSavageCoords'], canvas=canvas, image=image.savage,
-                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
-    else:
-        gammaSavage = Empty()
-    if settings['levels'][level]['deltaSavageFlag']:
-        deltaSavage = Savage(settings['levels'][level]['deltaSavageCoords'], canvas=canvas, image=image.savage,
-                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
-    else:
-        deltaSavage = Empty()
-
     """Быстромор"""
     if settings['levels'][level]['alphaFastroomFlag']:
         alphaFastroom = Fastroom(settings['levels'][level]['alphaFastroomCoords'], canvas=canvas, image=image.mushroom)
@@ -750,6 +766,28 @@ def LevelInit():
     else:
         betaGravroom = Empty()
 
+    """Туземец"""
+    if settings['levels'][level]['alphaSavageFlag']:
+        alphaSavage = Savage(settings['levels'][level]['alphaSavageCoords'], canvas=canvas, image=image.savage,
+                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
+    else:
+        alphaSavage = Empty()
+    if settings['levels'][level]['betaSavageFlag']:
+        betaSavage = Savage(settings['levels'][level]['betaSavageCoords'], canvas=canvas, image=image.savage,
+                            animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
+    else:
+        betaSavage = Empty()
+    if settings['levels'][level]['gammaSavageFlag']:
+        gammaSavage = Savage(settings['levels'][level]['gammaSavageCoords'], canvas=canvas, image=image.savage,
+                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
+    else:
+        gammaSavage = Empty()
+    if settings['levels'][level]['deltaSavageFlag']:
+        deltaSavage = Savage(settings['levels'][level]['deltaSavageCoords'], canvas=canvas, image=image.savage,
+                             animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
+    else:
+        deltaSavage = Empty()
+
     Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], canvas=canvas, image=image.granny)
 
 # Обработка выбора уровня
@@ -766,7 +804,7 @@ def LevelShoose():
 # Переход на следующий уровень или конец игры
 def LevelAdd():  # Логика переключения
     global level, shouldReloadButtons
-    objectsVariable.Globallives = objectsVariable.lives
+    objectsVariable.GlobalLives = objectsVariable.lives
     objectsVariable.GlobalScore += objectsVariable.Score
     objectsVariable.Score = 0
     if level < settings["levelamount"]:  # Если уровень не последний
@@ -783,7 +821,7 @@ def LevelAdd():  # Логика переключения
 def LevelRestart():
     ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать уровень заново?")
     if ask:
-        objectsVariable.lives = objectsVariable.Globallives
+        objectsVariable.lives = objectsVariable.GlobalLives
         objectsVariable.Score = 0
         LevelInit()
 
@@ -796,10 +834,14 @@ def action_check(playerzone, objectzone, index):  # Проверка выход�
             solution = True
         if (playerzone[3] >= objectzone[2]) & (playerzone[3] <= objectzone[3]):
             solution = True
+        if (playerzone[2] <= objectzone[2]) & (playerzone[3] >= objectzone[3]):
+            solution = True
     if (playerzone[1] - index >= objectzone[0]) & (playerzone[1] - index <= objectzone[1]):
         if (playerzone[2] >= objectzone[2]) & (playerzone[2] <= objectzone[3]):
             solution = True
         if (playerzone[3] >= objectzone[2]) & (playerzone[3] <= objectzone[3]):
+            solution = True
+        if (playerzone[2] <= objectzone[2]) & (playerzone[3] >= objectzone[3]):
             solution = True
     return solution
 
@@ -974,7 +1016,7 @@ def grannyhitsavage():
 def topladder(theladder, theplayer):
     ladderaction = theladder.actionzone()
     playeraction = theplayer.actionzone()
-    if ladderaction[2] >= playeraction[3]:
+    if ladderaction[2] == playeraction[3]:
         theladder.isLadderTop = True
     else:
         theladder.isLadderTop = False
@@ -1031,7 +1073,7 @@ def grannyonladder():
     return globalsolution
 
 # Кот и персоныж
-def grannycarrycat():  # Определение котов на уровне !!!Не забывать добавлять!!!
+def grannycarrycat():
     globalsolution = False
     solutionAlpha = False
     solutionBeta = False
@@ -1042,7 +1084,7 @@ def grannycarrycat():  # Определение котов на уровне !!!
     playerzone = Hero.actionzone()
     if alphaCat.avaible:
         Alphazone = alphaCat.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 10)
+        solutionAlpha = action_check(playerzone, Alphazone, 12)
         if solutionAlpha is True:
             alphaCat.collect()
             objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
@@ -1091,6 +1133,15 @@ def grannycarrycat():  # Определение котов на уровне !!!
     return globalsolution
 
 # Цветочек и персонаж
+def checkbonus(thebonus, playerzone):
+    bonuszone = thebonus.actionzone()
+    solution = action_check(playerzone, bonuszone, 16)
+    if solution is True:
+        objectsVariable.Score += settings["ScoreAddBonus"]
+        thebonus.rise()
+        FlowWatAdd()
+    return solution
+
 def grannygetbonus():  # Определение цветочков на уровне !!!Не забывать добавлять!!!
     globalsolution = False
     solutionAlpha = False
@@ -1101,41 +1152,17 @@ def grannygetbonus():  # Определение цветочков на уров
     solutionZeta = False
     playerzone = Hero.actionzone()
     if alphaBonus.avaible:
-        Alphazone = alphaBonus.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 16)
-        if solutionAlpha is True:
-            objectsVariable.Score += settings["ScoreAddBonus"]
-            alphaBonus.rise()
+        solutionAlpha = checkbonus(alphaBonus, playerzone)
     if betaBonus.avaible:
-        Betazone = betaBonus.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 16)
-        if solutionBeta is True:
-            objectsVariable.Score += settings["ScoreAddBonus"]
-            betaBonus.rise()
+        solutionBeta = checkbonus(betaBonus, playerzone)
     if gammaBonus.avaible:
-        Gammazone = gammaBonus.actionzone()
-        solutionGamma = action_check(playerzone, Gammazone, 16)
-        if solutionGamma is True:
-            objectsVariable.Score += settings["ScoreAddBonus"]
-            gammaBonus.rise()
+        solutionGamma = checkbonus(gammaBonus, playerzone)
     if deltaBonus.avaible:
-        Deltazone = deltaBonus.actionzone()
-        solutionDelta = action_check(playerzone, Deltazone, 16)
-        if solutionDelta is True:
-            objectsVariable.Score += settings["ScoreAddBonus"]
-            deltaBonus.rise()
+        solutionDelta = checkbonus(deltaBonus, playerzone)
     if epsilonBonus.avaible:
-        Epsilonzone = epsilonBonus.actionzone()
-        solutionEpsilon = action_check(playerzone, Epsilonzone, 16)
-        if solutionEpsilon is True:
-            objectsVariable.Score += settings["ScoreAddBonus"]
-            epsilonBonus.rise()
+        solutionEpsilon = checkbonus(epsilonBonus, playerzone)
     if zetaBonus.avaible:
-        Zetazone = zetaBonus.actionzone()
-        solutionZeta = action_check(playerzone, Zetazone, 16)
-        if solutionZeta is True:
-            objectsVariable.Score += settings["ScoreAddBonus"]
-            zetaBonus.rise()
+        solutionZeta = checkbonus(zetaBonus, playerzone)
     if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
             solutionEpsilon is True) | (solutionZeta is True):
         globalsolution = True
@@ -1377,24 +1404,28 @@ def effects():
         gravitySpeed = gravitySpeedNormal
 
 # Убийства
+def savageDeath(thesavage):
+    canvas.delete(thesavage.id)
+    SavKillAdd()
+
 def savageKill():
     global alphaSavage, betaSavage, gammaSavage, deltaSavage
     if GraHitSav[0]:
         if alphaSavage.avaible & GraHitSav[1]:
-            canvas.delete(alphaSavage.id)
+            savageDeath(alphaSavage)
             alphaSavage = Empty()
         if betaSavage.avaible & GraHitSav[2]:
-            canvas.delete(betaSavage.id)
+            savageDeath(betaSavage)
             betaSavage = Empty()
         if gammaSavage.avaible & GraHitSav[3]:
-            canvas.delete(gammaSavage.id)
+            savageDeath(gammaSavage)
             gammaSavage = Empty()
         if deltaSavage.avaible & GraHitSav[4]:
-            canvas.delete(deltaSavage.id)
+            savageDeath(deltaSavage)
             deltaSavage = Empty()
 
 def grannyKill():
-    global Hero
+    global Hero, avoidEffects
     if SavHitGra:
         if soundmode.get():
             mixer.Channel(1).play(mixer.Sound(random.choice(soundPaths.savagehit)))
@@ -1403,58 +1434,38 @@ def grannyKill():
         if objectsVariable.lives < 0:
             endgame(win=False)
         else:
+            avoidEffects = True
             Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], canvas=canvas, image=image.granny)
 
 # Функции Дикаря
 # Платформа по которой он ходит
+def chooseWayPlate(thesavage, theplatform):
+    if theplatform.avaible:
+        thesavage.way = theplatform.border()
+    else:
+        thesavage.way = Base.border()
+
 def savagePlates(thesavage, homeplatform):
     if homeplatform == "base":
         thesavage.way = Base.border()
     if homeplatform == "alpha":
-        if alphaPlatform.avaible:
-            thesavage.way = alphaPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, alphaPlatform)
     if homeplatform == "beta":
-        if betaPlatform.avaible:
-            thesavage.way = betaPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, betaPlatform)
     if homeplatform == "gamma":
-        if gammaPlatform.avaible:
-            thesavage.way = gammaPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, gammalatform)
     if homeplatform == "delta":
-        if deltaPlatform.avaible:
-            thesavage.way = deltaPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, deltaPlatform)
     if homeplatform == "epsilon":
-        if epsilonPlatform.avaible:
-            thesavage.way = epsilonPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, epsilonPlatform)
     if homeplatform == "zeta":
-        if zetaPlatform.avaible:
-            thesavage.way = zetaPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, zetaPlatform)
     if homeplatform == "eta":
-        if etaPlatform.avaible:
-            thesavage.way = etaPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, etaPlatform)
     if homeplatform == "theta":
-        if thetaPlatform.avaible:
-            thesavage.way = thetaPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, thetaPlatform)
     if homeplatform == "iota":
-        if iotaPlatform.avaible:
-            thesavage.way = iotaPlatform.border()
-        else:
-            thesavage.way = Base.border()
+        chooseWayPlate(thesavage, iotaPlatform)
 
 # Изменение направления при встрече с концом платформы
 def savageDirection(thesavage):
@@ -1570,12 +1581,20 @@ def endgame(win):
         objectsVariable.GlobalScore += objectsVariable.Score
         message = "Поздравляем с победой! \nВы набрали %i из %i очков" % (
             objectsVariable.GlobalScore, settings["ScoreMax"])
+        achievements_give()
+        if objectsVariable.GlobalScore > playerData.data["recordscore"]:
+            playerData.data["recordscore"] = objectsVariable.GlobalScore
+        playerData.data["achievements"]["end"]=True
+        playerData.data["islevelcyclecompleted"] = True
         mb.showinfo(title="Победа", message=message)
         mainmenu_open()
     else:
         objectsVariable.GlobalScore += objectsVariable.Score
         message = "К сожалению, Вы проиграли. \nВы набрали %i из %i очков" % (
             objectsVariable.GlobalScore, settings["ScoreMax"])
+        playerData.data["lastlevel"] = emptydata["lastlevel"]
+        playerData.data["lastscore"] = emptydata["lastscore"]
+        playerData.data["lastlives"] = settings["livesnormal"]
         mb.showinfo(title="Проигрыш", message=message)
         mainmenu_open()
 
@@ -1600,6 +1619,30 @@ def color():
     newbackground = cc.askcolor()
     backgroundcolor = newbackground[1]
     reloadScreen()
+
+# Получение достижений
+def achievements_give():
+    if playerData.data["killedsavages"] == 0:
+        playerData.data["achievements"]["pacifist"] = True
+    if objectsVariable.lives == settings["livesnormal"]:
+        playerData.data["achievements"]["nonbeliever"] = True
+    if playerData.data["wateredflowers"] == settings["flowersamount"]:
+        playerData.data["achievements"]["florist"] = True
+    if playerData.data["killedsavages"] == settings["savagesamount"]:
+        playerData.data["achievements"]["bloodmary"] = True
+    if objectsVariable.GlobalScore == settings["ScoreMax"]:
+        playerData.data["achievements"]["maximalist"] = True
+
+# Окно достижений
+def achievements_window():
+    global achWindow
+    achWindow = Toplevel()
+    achWindow.title("Достижения")  # Заголовок окна
+    achWindow.configure(bg=backgroundcolor)  # Фон окна
+    achWindow.geometry("400x300")  # Размеры окна
+    achWindow.resizable(0, 0)  # Запрет на изменение размеров окна
+    if sysName == "Windows":
+        achWindow.iconbitmap(image.iconPath)
 
 # Включение и отключение кнопок меню сверху
 def buttonstate():
@@ -1658,7 +1701,11 @@ def menu():  # Описание меню(сверху полоска)
     aboutmenu = Menu(mainmenu, tearoff=0, bg=backgroundcolor)
     aboutmenu.add_command(label="Авторы", command=lambda: mb.showinfo(title="Авторы", message=authorsmessage))
     aboutmenu.add_command(label="Об игре", command=lambda: mb.showinfo(title="Об игре", message=aboutmessage))
+    progressmenu = Menu(mainmenu, tearoff=0, bg=backgroundcolor)
+    progressmenu.add_command(label="Достижения", command=achievements_window)
+    progressmenu.add_command(label="Сбростить прогресс", command=clearprogress)
     mainmenu.add_cascade(label="Игра", menu=gamemenu)
+    mainmenu.add_cascade(label="Достижения", menu=progressmenu)
     mainmenu.add_cascade(label="Справка", menu=aboutmenu)
     root.config(menu=mainmenu)
 
@@ -1675,8 +1722,22 @@ def reloadScreen():
     labelLives.config(bg=backgroundcolor)
     statusbar.config(bg=backgroundcolor)
     root.configure(bg=backgroundcolor)
+    root.geometry("%ix%i" % (windowSize[0], windowSize[1]))
     loadScreen()
     menu()
+
+# Добавляем +1 к убитым Дикарям
+def SavKillAdd():
+    playerData.data["killedsavages"] += 1
+
+# Добавляем +1 к политым цветам
+def FlowWatAdd():
+    playerData.data["wateredflowers"] += 1
+
+def clearprogress():
+    if (mb.askyesno(title="Сброс", message="Вы уверены, что хотите сбросить прогресс?")):
+        playerData.eraseData()
+        mainmenu_open()
 
 Hero = Empty()
 menu()  # Создаем меню
@@ -1712,6 +1773,9 @@ while run:
                 Hero.action_queue()  # Выполнение очереди действий
                 gravity()  # Применяем к персонажу фактор графитации
                 Hero.animate()  # Анимируем персонажа
+            if Exit.avaible:  # Если герой есть, применяем к нему
+                Exit.animate()  # Анимируем персонажа
+            playerData.writeData()
         buttonstate()
         timer()
         root.update_idletasks()  # Обновляем объекты окна

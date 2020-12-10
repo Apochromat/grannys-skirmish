@@ -244,11 +244,15 @@ class Savage:
 # Выход
 class ExitFlower:  # Класс цветка-выхода
     # Ширина 60, Высота 60
-    def __init__(self, coordsarray, canvas, image):  # ax by (Верхний левый угол)
+    def __init__(self, coordsarray, canvas, image, animationexitduration):  # ax by (Верхний левый угол)
         self.image = image
         self.canvas = canvas
         self.coords = coordsarray
         self.avaible = True
+        self.open = False
+        self.animationExitduration = animationexitduration
+        self.lastExitanimationtime = time.time()
+        self.lastImage = 1
         self.centre = [self.coords[0] + 30, self.coords[1] + 30]
         self.id = self.canvas.create_image(self.centre[0], self.centre[1], image=self.image[0], tag="exit")
 
@@ -257,7 +261,15 @@ class ExitFlower:  # Класс цветка-выхода
         return actionArray
 
     def opening(self):  # Открытие цветка
-        self.canvas.itemconfig(self.id, image=self.image[1])
+        self.open = True
+
+    def animate(self):
+        if self.open & ((time.time() - self.lastExitanimationtime) > self.animationExitduration):
+            self.lastExitanimationtime = time.time()
+            self.canvas.itemconfig(self.id, image=self.image[self.lastImage])
+            self.lastImage += 1
+            if self.lastImage == 5:
+                self.lastImage = 1
 
 # Пустой объект
 class Empty:
