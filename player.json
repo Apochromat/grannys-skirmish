@@ -1,0 +1,17 @@
+{
+    "islevelcyclecompleted": false,
+    "recordscore": 0,
+    "achievements": {
+        "pacifist": false,
+        "nonbeliever": false,
+        "florist": false,
+        "bloodmary": false,
+        "maximalist": false,
+        "end": false
+    },
+    "killedsavages": 0,
+    "wateredflowers": 0,
+    "lastlevel": 1,
+    "lastlives": 5,
+    "lastscore": 0
+}

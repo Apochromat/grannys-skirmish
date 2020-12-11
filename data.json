@@ -1,6 +1,6 @@
 {
     "title": "Granny`s Skirmish",
-    "version": "v0.9.9 prerelease",
+    "version": "v0.9.10 prerelease",
     "windowsizewin": [
         640,
         540
@@ -33,7 +33,7 @@
     "livesnormal": 5,
     "ScoreAddCat": 10,
     "ScoreAddBonus": 15,
-    "ScoreMax": 120,
+    "ScoreMax": 60,
     "effectduration": 3,
     "keyboardLimit": 25,
     "animationGrannyduration": 0.15,
@@ -41,7 +41,7 @@
     "animationExitduration": 0.4,
     "frametime": 0.015,
     "levelamount": 2,
-    "savagesamount": 2,
+    "savagesamount": 1,
     "flowersamount": 2,
     "cheatmode": false,
     "musicswitch": true,
@@ -589,7 +589,7 @@
             "level": 2,
             "limited": false,
             "limittype": "NEXT",
-            "time": 0,
+            "time": 1,
             "exitCoords": [
                 400,
                 270
@@ -810,7 +810,7 @@
             "alphaSlowroomFlag": true,
             "alphaSlowroomCoords": [
                 360,
-                308
+                306
             ],
             "betaSlowroomFlag": false,
             "betaSlowroomCoords": [

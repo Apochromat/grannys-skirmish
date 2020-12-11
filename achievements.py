@@ -57,13 +57,16 @@ class PlayerData:
         except json.decoder.JSONDecodeError:
             print("Create player.json")
             self.eraseData()
-            self.data = json.load(self.file)
 
     def writeData(self):
         with open("player.json", "w", encoding="utf-8") as f:
             f.write(json.dumps(self.data, indent=4, ensure_ascii=False))
 
+    def loadData(self):
+        self.file = open("player.json", "r", encoding="utf-8")
+        self.data = json.load(self.file)
+
     def eraseData(self):
-        self.data = emptydata
         with open("player.json", "w", encoding="utf-8") as f:
             f.write(json.dumps(emptydata, indent=4, ensure_ascii=False))
+        self.loadData()

@@ -11,13 +11,13 @@ def imgload(path):  # Функция загрузки изображений
 # Загрузка изображений
 class ImageHeap:
     def __init__(self):
-        self.iconPath = os.path.join('assets', 'graphics', 'icon.ico')
-        self.quit = imgload(os.path.join('assets', 'graphics', 'quit.png'))
-        self.newgame = imgload(os.path.join('assets', 'graphics', 'newgame.png'))
-        self.continuegame = imgload(os.path.join('assets', 'graphics', 'continue.png'))
+        self.iconPath = os.path.join('assets', 'graphics', 'ui', 'icon.ico')
+        self.quit = imgload(os.path.join('assets', 'graphics', 'ui', 'quit.png'))
+        self.newgame = imgload(os.path.join('assets', 'graphics', 'ui', 'newgame.png'))
+        self.continuegame = imgload(os.path.join('assets', 'graphics', 'ui', 'continue.png'))
         self.mainmenuBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'menu_background.png'))
         self.jungleBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'jungle_background.jpg'))
-        self.baseplatform = imgload(os.path.join('assets', 'graphics', 'platformbase.png'))
+        self.baseplatform = imgload(os.path.join('assets', 'graphics', 'platform', 'platformbase.png'))
         self.ladder = imgload(os.path.join('assets', 'graphics', 'ladder.png'))
         self.wallImage = imgload(os.path.join('assets', 'graphics', 'wall.png'))
 
@@ -81,3 +81,47 @@ class ImageHeap:
                        "grannyHit": [imgload(os.path.join('assets', 'graphics', 'granny', 'granny_hit_1.png')),
                                      imgload(os.path.join('assets', 'graphics', 'granny', 'granny_hit_2.png'))]
                        }
+
+        self.platformparts = [imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_1.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_2.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_3.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_4.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_5.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_6.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_7.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_8.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_9.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_10.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_11.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_12.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_13.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_14.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_15.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_16.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_17.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_18.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_19.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_20.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_21.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_22.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_23.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_24.png')),
+                              imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_25.png'))]
+
+        self.ach_pacifist = [imgload(os.path.join('assets', 'graphics', 'achievements', 'pacifist_inactive.png')),
+                             imgload(os.path.join('assets', 'graphics', 'achievements', 'pacifist_active.png'))]
+
+        self.ach_bloodmary = [imgload(os.path.join('assets', 'graphics', 'achievements', 'bloodmary_inactive.png')),
+                              imgload(os.path.join('assets', 'graphics', 'achievements', 'bloodmary_active.png'))]
+
+        self.ach_florist = [imgload(os.path.join('assets', 'graphics', 'achievements', 'florist_inactive.png')),
+                            imgload(os.path.join('assets', 'graphics', 'achievements', 'florist_active.png'))]
+
+        self.ach_nonbeliever = [imgload(os.path.join('assets', 'graphics', 'achievements', 'nonbeliever_inactive.png')),
+                                imgload(os.path.join('assets', 'graphics', 'achievements', 'nonbeliever_active.png'))]
+
+        self.ach_maximalist = [imgload(os.path.join('assets', 'graphics', 'achievements', 'maximalist_inactive.png')),
+                               imgload(os.path.join('assets', 'graphics', 'achievements', 'maximalist_active.png'))]
+
+        self.ach_end = [imgload(os.path.join('assets', 'graphics', 'achievements', 'end_inactive.png')),
+                        imgload(os.path.join('assets', 'graphics', 'achievements', 'end_active.png'))]

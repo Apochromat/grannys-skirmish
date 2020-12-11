@@ -1,5 +1,5 @@
 # Granny`s Skirmish
-# version 0.9.9
+# version 0.9.10
 
 """Импорт"""
 import json
@@ -129,7 +129,7 @@ def music():
         if sysName == "Windows":
             mixer.music.load(musicPaths.levelWin)
         else:
-            mixer.music.load(usicPaths.levelLin)
+            mixer.music.load(musicPaths.levelLin)
         mixer.music.play(loops=1000)
         isMusicOn = True
 """Элементы окна"""
@@ -162,14 +162,13 @@ def clearbutt():
 # Начало новой игры
 def newgame():
     global level
-    if (level != 0) | (playerData.data["lastlevel"] !=1):
-        ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать новую игру? \nВаш прогресс бедет утерян.")
+    if (level != 0) | (playerData.data["lastlevel"] != 1) | playerData.data["achievements"]["end"]:
+        ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать новую игру? \n"
+                                                    "Ваш прогресс бедет утерян.")
         if ask:
             objectsVariable.lives = settings['livesnormal']
-            playerData.data["killedsavages"] = 0
-            playerData.data["wateredflowers"] = 0
-            playerData.data["islevelcyclecompleted"] = False
             level = 0
+            playerData.eraseData()
             objectsVariable.Score = 0
             objectsVariable.GlobalScore = 0
             clearbutt()
@@ -177,7 +176,7 @@ def newgame():
     else:
         objectsVariable.lives = settings['livesnormal']
         level = 0
-        playerData.data["islevelcyclecompleted"] = False
+        playerData.eraseData()
         objectsVariable.Score = 0
         objectsVariable.GlobalScore = 0
         clearbutt()
@@ -189,8 +188,8 @@ def continuegame():
         mb.showinfo(title="Новая игра+", message="Вы закончили основную игру."
                                                  "\nНачинается новая игра+, достижения и рекорды сохранятся.")
         playerData.data["islevelcyclecompleted"] = False
-        playerData.data["killedsavages"] =0
-        playerData.data["wateredflowers"] =0
+        playerData.data["killedsavages"] = 0
+        playerData.data["wateredflowers"] = 0
         objectsVariable.lives = settings["livesnormal"]
         objectsVariable.Score = 0
         objectsVariable.GlobalScore = 0
@@ -253,8 +252,8 @@ def setvolumemusic():
         row=0, column=0, columnspan=2)
     Label(volumeMusicWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeMusic, font=("Arial", 10)).grid(
         row=1, column=0, columnspan=2)
-    Scale(volumeMusicWindow, variable=scalevolumeMusic, bg=backgroundcolor, orient=HORIZONTAL, length=180, font=("Arial", 10)).grid(
-        row=3, column=0, columnspan=2)
+    Scale(volumeMusicWindow, variable=scalevolumeMusic, bg=backgroundcolor, orient=HORIZONTAL, length=180,
+          font=("Arial", 10)).grid(row=3, column=0, columnspan=2)
     Button(volumeMusicWindow, text="Сохранить", bg=backgroundcolor, command=savevolumemusic, font=("Arial", 10)).grid(
         row=4, column=0, pady=10)
     Button(volumeMusicWindow, text="Отменить", bg=backgroundcolor, command=undovolumemusic, font=("Arial", 10)).grid(
@@ -315,8 +314,9 @@ def mainmenu_open():  # Открытие главного меню
     continueButt.place(x=182, y=345)
     exitgameButt.place(x=182, y=410)
     if playerData.data["lastlevel"] != 1:
-        continueButt.configure(state = "normal")
-    elif (playerData.data["islevelcyclecompleted"] is True) | (playerData.data["lastlevel"] == 1):
+        continueButt.configure(state="normal")
+    elif ((playerData.data["lastlevel"] == 1) & (playerData.data["islevelcyclecompleted"] is True)) | (
+            playerData.data["achievements"]["end"] is False):
         continueButt.configure(state="disabled")
     labelFast.place_forget()
     labelSlow.place_forget()
@@ -377,7 +377,8 @@ def status():
             message = "Готов"
     elif debugmode.get() == 4:
         message = "System:%s, FPS:%i; Key:%i; Cheat:%s; Music:%s; MVol:%i; Sound:%s; SVol:%i" % (
-            sysName, fpsGlobal, KeySpeed, settings["cheatmode"], musicmode.get(), volumeMusic,soundmode.get(), volumeSound)
+            sysName, fpsGlobal, KeySpeed, settings["cheatmode"], musicmode.get(), volumeMusic, soundmode.get(),
+            volumeSound)
         if level == 0:
             message = "Готов"
     elif level != 0:
@@ -585,44 +586,53 @@ def LevelInit():
     canvas.create_image(320, 240, image=image.jungleBackgroung, tag="play")
     Base = PlatformBase(canvas=canvas, image=image.baseplatform)
     Exit = ExitFlower(settings['levels'][level]['exitCoords'], canvas=canvas, image=image.exitImage,
-                      animationexitduration = settings["animationExitduration"])
+                      animationexitduration=settings["animationExitduration"])
     objectsVariable.CatAmountAll = settings['levels'][level]['CatAmountAll']
     objectsVariable.CatAmountReal = 0
     """Платформы"""
     if settings['levels'][level]['alphaPlatformFlag']:
-        alphaPlatform = PlatformSimple(settings['levels'][level]['alphaPlatformCoords'], canvas=canvas)
+        alphaPlatform = PlatformSimple(settings['levels'][level]['alphaPlatformCoords'], canvas=canvas,
+                                       image=image.platformparts)
     else:
         alphaPlatform = Empty()
     if settings['levels'][level]['betaPlatformFlag']:
-        betaPlatform = PlatformSimple(settings['levels'][level]['betaPlatformCoords'], canvas=canvas)
+        betaPlatform = PlatformSimple(settings['levels'][level]['betaPlatformCoords'], canvas=canvas,
+                                      image=image.platformparts)
     else:
         betaPlatform = Empty()
     if settings['levels'][level]['gammaPlatformFlag']:
-        gammaPlatform = PlatformSimple(settings['levels'][level]['gammaPlatformCoords'], canvas=canvas)
+        gammaPlatform = PlatformSimple(settings['levels'][level]['gammaPlatformCoords'], canvas=canvas,
+                                       image=image.platformparts)
     else:
         gammaPlatform = Empty()
     if settings['levels'][level]['deltaPlatformFlag']:
-        deltaPlatform = PlatformSimple(settings['levels'][level]['deltaPlatformCoords'], canvas=canvas)
+        deltaPlatform = PlatformSimple(settings['levels'][level]['deltaPlatformCoords'], canvas=canvas,
+                                       image=image.platformparts)
     else:
         deltaPlatform = Empty()
     if settings['levels'][level]['epsilonPlatformFlag']:
-        epsilonPlatform = PlatformSimple(settings['levels'][level]['epsilonPlatformCoords'], canvas=canvas)
+        epsilonPlatform = PlatformSimple(settings['levels'][level]['epsilonPlatformCoords'], canvas=canvas,
+                                         image=image.platformparts)
     else:
         epsilonPlatform = Empty()
     if settings['levels'][level]['zetaPlatformFlag']:
-        zetaPlatform = PlatformSimple(settings['levels'][level]['zetaPlatformCoords'], canvas=canvas)
+        zetaPlatform = PlatformSimple(settings['levels'][level]['zetaPlatformCoords'], canvas=canvas,
+                                      image=image.platformparts)
     else:
         zetaPlatform = Empty()
     if settings['levels'][level]['etaPlatformFlag']:
-        etaPlatform = PlatformSimple(settings['levels'][level]['etaPlatformCoords'], canvas=canvas)
+        etaPlatform = PlatformSimple(settings['levels'][level]['etaPlatformCoords'], canvas=canvas,
+                                     image=image.platformparts)
     else:
         etaPlatform = Empty()
     if settings['levels'][level]['thetaPlatformFlag']:
-        thetaPlatform = PlatformSimple(settings['levels'][level]['thetaPlatformCoords'], canvas=canvas)
+        thetaPlatform = PlatformSimple(settings['levels'][level]['thetaPlatformCoords'], canvas=canvas,
+                                       image=image.platformparts)
     else:
         thetaPlatform = Empty()
     if settings['levels'][level]['iotaPlatformFlag']:
-        iotaPlatform = PlatformSimple(settings['levels'][level]['iotaPlatformCoords'], canvas=canvas)
+        iotaPlatform = PlatformSimple(settings['levels'][level]['iotaPlatformCoords'], canvas=canvas,
+                                      image=image.platformparts)
     else:
         iotaPlatform = Empty()
 
@@ -1062,7 +1072,7 @@ def grannyonladder():
 
     if ((alphaLadder.isLadderTop is True) | (betaLadder.isLadderTop is True) | (gammaLadder.isLadderTop is True) | (
         deltaLadder.isLadderTop is True) | (epsilonLadder.isLadderTop is True) | (zetaLadder.isLadderTop is True)) & (
-        Hero.lastanimation == "Climbing"):
+            Hero.lastanimation == "Climbing"):
         objectsVariable.isLadderTop = True
     else:
         objectsVariable.isLadderTop = False
@@ -1319,7 +1329,7 @@ def wall_check(playerzone, wallzone, thesavage):  # Проверка стен п
             solution = True
     return solution
 
-def anysavageandwall(theobject): # Проверяет столкновение для одного любого Дикаря
+def anysavageandwall(theobject):     # Проверяет столкновение для одного любого Дикаря
     globalsolution = False
     solutionAlpha = False
     solutionBeta = False
@@ -1392,7 +1402,7 @@ def effects():
         TimeStr = "%.2f с" % (effectduration - (time.time() - lasteffecttime))
         labelEffect.config(text=TimeStr)
     if ((objectsVariable.isFastEffect is False) & (objectsVariable.isSlowEffect is False) & (
-            objectsVariable.isGravEffect == False) & (
+            objectsVariable.isGravEffect is False) & (
                 time.time() - lasteffecttime >= effectduration)) | avoidEffects:
         labelFast.place_forget()
         labelSlow.place_forget()
@@ -1453,7 +1463,7 @@ def savagePlates(thesavage, homeplatform):
     if homeplatform == "beta":
         chooseWayPlate(thesavage, betaPlatform)
     if homeplatform == "gamma":
-        chooseWayPlate(thesavage, gammalatform)
+        chooseWayPlate(thesavage, gammaPlatform)
     if homeplatform == "delta":
         chooseWayPlate(thesavage, deltaPlatform)
     if homeplatform == "epsilon":
@@ -1584,7 +1594,7 @@ def endgame(win):
         achievements_give()
         if objectsVariable.GlobalScore > playerData.data["recordscore"]:
             playerData.data["recordscore"] = objectsVariable.GlobalScore
-        playerData.data["achievements"]["end"]=True
+        playerData.data["achievements"]["end"] = True
         playerData.data["islevelcyclecompleted"] = True
         mb.showinfo(title="Победа", message=message)
         mainmenu_open()
@@ -1600,7 +1610,7 @@ def endgame(win):
 
 # Подсчет кликов и кадров
 def timer():
-    global  keytime, KeySpeed, fps, fpsGlobal
+    global keytime, KeySpeed, fps, fpsGlobal
     if (time.time() - keytime) >= 1:
         KeySpeed = objectsVariable.keyCounter
         fpsGlobal = fps
@@ -1635,14 +1645,33 @@ def achievements_give():
 
 # Окно достижений
 def achievements_window():
-    global achWindow
-    achWindow = Toplevel()
+    global achWindow, pacifistFrame
+    achWindow = Toplevel(root)
     achWindow.title("Достижения")  # Заголовок окна
     achWindow.configure(bg=backgroundcolor)  # Фон окна
-    achWindow.geometry("400x300")  # Размеры окна
+    achWindow.geometry("620x235")  # Размеры окна
     achWindow.resizable(0, 0)  # Запрет на изменение размеров окна
     if sysName == "Windows":
         achWindow.iconbitmap(image.iconPath)
+    create_achievement_card(frame=achWindow, images=image.ach_pacifist, achname="pacifist",
+                            state=playerData.data["achievements"]["pacifist"], row=0, column=0)
+    create_achievement_card(frame=achWindow, images=image.ach_bloodmary, achname="bloodmary",
+                            state=playerData.data["achievements"]["bloodmary"], row=2, column=0)
+    create_achievement_card(frame=achWindow, images=image.ach_florist, achname="florist",
+                            state=playerData.data["achievements"]["florist"], row=0, column=2)
+    create_achievement_card(frame=achWindow, images=image.ach_nonbeliever, achname="nonbeliever",
+                            state=playerData.data["achievements"]["nonbeliever"], row=2, column=2)
+    create_achievement_card(frame=achWindow, images=image.ach_maximalist, achname="maximalist",
+                            state=playerData.data["achievements"]["maximalist"], row=4, column=0)
+    create_achievement_card(frame=achWindow, images=image.ach_end, achname="end",
+                            state=playerData.data["achievements"]["end"], row=4, column=2)
+
+def create_achievement_card(frame, images, achname, state, row, column):
+    Label(frame, image=images[int(state)], bg=backgroundcolor).grid(row=row, column=column, rowspan=2, padx=5, pady=5)
+    Label(frame, font=("Arial", 14), text=achievementsNames[achname]["name"], anchor=W,
+          bg=backgroundcolor).grid(row=row, column=column+1, sticky=W)
+    Label(frame, font=("Arial", 12), text=achievementsNames[achname]["description"], anchor=W,
+          bg=backgroundcolor).grid(row=row+1, column=column+1, sticky=NW)
 
 # Включение и отключение кнопок меню сверху
 def buttonstate():
@@ -1735,11 +1764,12 @@ def FlowWatAdd():
     playerData.data["wateredflowers"] += 1
 
 def clearprogress():
-    if (mb.askyesno(title="Сброс", message="Вы уверены, что хотите сбросить прогресс?")):
+    if mb.askyesno(title="Сброс", message="Вы уверены, что хотите сбросить прогресс?"):
         playerData.eraseData()
         mainmenu_open()
 
 Hero = Empty()
+Exit = Empty()
 menu()  # Создаем меню
 mainmenu_open()  # Запускаем заглавный экран
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Обработка выхода при нажатии на крестик

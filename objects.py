@@ -41,12 +41,18 @@ class PlatformBase:  # Класс базовой платформы, котор�
 
 # Платформа
 class PlatformSimple:  # Класс обычной платформы, масштабируется и изменяется для каждого уровня
-    def __init__(self, coordsarray, canvas):
+    def __init__(self, coordsarray, canvas, image):
         self.canvas = canvas
         self.coords = coordsarray
         self.avaible = True
+        self.lastpart = 0
         self.id = self.canvas.create_rectangle(self.coords[1], self.coords[0], self.coords[2], self.coords[0] + 30,
                                                fill="#a2653e", tag="platform")
+        for x in range(self.coords[1], self.coords[2]+1, 2):
+            if self.lastpart == 25:
+                self.lastpart = 0
+            self.canvas.create_image(x, self.coords[0] + 15, image=image[self.lastpart], tag="platform")
+            self.lastpart += 1
 
     def border(self):
         bord = [self.coords[1] + 15, self.coords[2] - 15]
@@ -240,7 +246,6 @@ class Savage:
             # Обновляем таймер кадра
             self.lastSavageanimationtime = time.time()
 
-
 # Выход
 class ExitFlower:  # Класс цветка-выхода
     # Ширина 60, Высота 60
@@ -277,6 +282,7 @@ class Empty:
         self.avaible = False
         self.id = None
         self.isLadderTop = False
+        self.lastanimation = None
 
     def coords(self):
         pass
@@ -300,4 +306,7 @@ class Empty:
         pass
 
     def animate(self):
+        pass
+
+    def opening(self):
         pass
