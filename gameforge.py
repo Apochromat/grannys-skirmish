@@ -1,3 +1,5 @@
+""" Gameforge 1.2"""
+
 import json
 import sys
 import webbrowser
@@ -20,8 +22,8 @@ background_color = "lavender"
 is_level_editing = False
 Level = Empty()
 levelinforge = 0
-hint = "Координата Персонажа и выхода лежит в границах: \n      X - [30; 610], Y - [30; 430]\n" \
-       "Координаты других объектов лежат в границах:\n      X - [0; 610], Y - [0; 430]\n" \
+hint = "Координата Персонажа и выхода лежит в границах: \n X - [30; 610], Y - [30; 430]\n" \
+       "Координаты других объектов лежат в границах:\n X - [0; 610], Y - [0; 430]\n" \
        "X1 должен быть меньше X2\n"\
        "Дикарь/Платформа принимает значения: base, alpha, beta,\n gamma, delta, epsilon, zeta, eta, theta, iota"
 
@@ -234,7 +236,7 @@ def write_vars():
     with open(filepath, 'w', encoding="utf-8") as file:
         file.write(json.dumps(settings, indent=4, ensure_ascii=False))
     load_vars()
-    mb.showinfo(title="Запись", message="Значения успешно записаны.")
+    mb.showinfo(title="Запись", message="Значения успешно записаны в файл.")
     master.common_information_show()
 
 def send_vars():
@@ -513,11 +515,12 @@ def level_edit_save():
     settings["levels"][levelinforge]["betaGravroomCoords"] = [beta_gravroom_x_editVar.get(),
                                                           beta_gravroom_y_editVar.get()]
 
-    mb.showinfo(title="Запись", message="Значения успешно записаны.")
+    mb.showinfo(title="Запись", message="Значения сохранены. Не забудьте сохранить файл.")
 
 def exit():
     if is_level_editing is False:
         if mb.askyesno(title="Выход", message="Вы действительно хотите выйти?\nНесохраненные данные будут утеряны"):
+            master.destroy()
             sys.exit()
     else:
         warning("Завершите редактирование уровня")
@@ -542,102 +545,71 @@ class Root(Tk):
         self.common_frame=Frame(self, bg=background_color)
         self.common_frame.grid(row=1, column=0, columnspan=5)
 
-    def common_spinbox(self, frame, label, spin, row, column, var, text, color, beg, end, len):
-        label = Label(frame, text=text, font=("Arial", 12), bg=colors[color], anchor=E, width =len)
-        spin = Spinbox(frame, font=("Arial", 10), bg=colors[color], textvariable=var, from_=beg, to=end, width=len)
-        label.grid(row=row, column=column, padx=0, pady=10)
-        spin.grid(row=row, column=column+1, padx=10, pady=10)
 
-    def common_entry(self,frame, label, entry, row, column, var, text, color):
-        label = Label(frame, text=text, font=("Arial", 12), bg=colors[color], anchor=E, width =12)
-        entry = Entry(frame, font=("Arial", 10), bg=colors[color], textvariable=var, width =14)
-        label.grid(row=row, column=column, padx=0, pady=10)
-        entry.grid(row=row, column=column+1, padx=10, pady=10)
+    def common_entry(self, frame, row, column, var, text, color):
+        Label(frame, text=text, font=("Arial", 12), bg=colors[color], anchor=E,
+              width =12).grid(row=row, column=column, padx=0, pady=10)
+        Entry(frame, font=("Arial", 10), bg=colors[color], textvariable=var,
+              width =14).grid(row=row, column=column+1, padx=10, pady=10)
 
-    def common_information_show(self):
-        self.label_common = Label(self, text="Общая информация", font=("Arial", 12), bg=background_color)
-        self.label_common.grid(row=0, column=2, padx=5, pady=0)
-
-        self.label_version = 0
-        self.entry_version = 0
-        self.common_entry(label=self.label_version, entry=self.entry_version, row=1, column=0,
-                             var=versionVar, text="Версия", color=0, frame=self.common_frame)
-
-        self.label_lives = 0
-        self.entry_lives = 0
-        self.common_entry(label=self.label_lives, entry=self.entry_lives, row=2, column=0,
-                             var=livesVar, text="Жизни", color=0, frame=self.common_frame)
-
-        self.label_catscore = 0
-        self.entry_catscore = 0
-        self.common_entry(label=self.label_catscore, entry=self.entry_catscore, row=3, column=0,
-                             var=catscoreVar, text="Очки (кот)", color=2, frame=self.common_frame)
-
-        self.label_bonusscore = 0
-        self.entry_bonusscore = 0
-        self.common_entry(label=self.label_bonusscore, entry=self.entry_bonusscore, row=4, column=0,
-                             var=bonusscoreVar, text="Очки (цветок)", color=2, frame=self.common_frame)
-
-        self.label_maxscore = 0
-        self.entry_maxscore = 0
-        self.common_entry(label=self.label_maxscore, entry=self.entry_maxscore, row=5, column=0,
-                             var=maxscoreVar, text="Очки (макс)", color=2, frame=self.common_frame)
-
-        self.label_effectduration = 0
-        self.entry_effectduration = 0
-        self.common_entry(label=self.label_effectduration, entry=self.entry_effectduration, row=6, column=0,
-                             var=effectdurationVar, text="Эффект", color=1, frame=self.common_frame)
-
-        self.label_levels = 0
-        self.entry_levels = 0
-        self.common_entry(label=self.label_levels, entry=self.entry_levels, row=1, column=3,
-                             var=levelsVar, text="Уровни", color=3, frame=self.common_frame)
-
-        self.label_savages = 0
-        self.entry_savages = 0
-        self.common_entry(label=self.label_savages, entry=self.entry_savages, row=2, column=3,
-                             var=savagesVar, text="Дикари", color=3, frame=self.common_frame)
-
-        self.label_flowers = 0
-        self.entry_flowers = 0
-        self.common_entry(label=self.label_flowers, entry=self.entry_flowers, row=3, column=3,
-                             var=flowersVar, text="Цветы", color=3, frame=self.common_frame)
-
-        self.label_cheat = 0
-        self.spin_cheat = 0
-        self.common_spinbox(label=self.label_cheat, spin=self.spin_cheat, row=4, column=3,
-                             var=cheatVar, text="Читы", color=4, beg=0, end=1, frame=self.common_frame, len=12)
-
-        self.label_music = 0
-        self.spin_music = 0
-        self.common_spinbox(label=self.label_music, spin=self.spin_music, row=5, column=3,
-                             var=musicVar, text="Музыка", color=5, beg=0, end=1, frame=self.common_frame, len=12)
-
-        self.label_sound = 0
-        self.spin_sound = 0
-        self.common_spinbox(label=self.label_sound, spin=self.spin_sound, row=6, column=3,
-                             var=soundVar, text="Звуки", color=5, beg=0, end=1, frame=self.common_frame, len=12)
+    def common_checkbutton(self, frame, row, column, var, text, color):
+        Label(frame, text=text, font=("Arial", 12), bg=lev_colors[color], anchor=E,
+              width =12).grid(row=row, column=column, padx=0, pady=10)
+        Checkbutton(frame, bg=lev_colors[color], variable=var,
+                    onvalue=1, offvalue=0).grid(row=row, column=column+1, padx=10, pady=10)
 
 
-        self.label_editlevel = Label(self, text="Редактировать уровень", font=("Arial", 12), bg="mistyrose",
-                                     anchor=E, width =20)
-        self.spin_editlevel =  Spinbox(self, font=("Arial", 10), bg="mistyrose",
-                                       textvariable=editlevelVar, from_=1, to=(len(settings["levels"])-1), width=20)
-        self.label_editlevel.place(x=40, y=300)
-        self.spin_editlevel.place(x=250, y=300)
+    def common_information_show(self, begin = False):
+        Label(self, text="Общая информация", font=("Arial", 12),bg=background_color).grid(row=0, column=2,
+                                                                                          padx=5, pady=0)
+
+        self.common_entry(row=1, column=0, var=versionVar, text="Версия", color=0,
+                          frame=self.common_frame)
+
+        self.common_entry(row=2, column=0, var=livesVar, text="Жизни", color=0,
+                          frame=self.common_frame)
+
+        self.common_entry(row=3, column=0, var=catscoreVar, text="Очки (кот)", color=2,
+                          frame=self.common_frame)
+
+        self.common_entry(row=4, column=0, var=bonusscoreVar, text="Очки (цветок)", color=2,
+                          frame=self.common_frame)
+
+        self.common_entry(row=5, column=0, var=maxscoreVar, text="Очки (макс)", color=2,
+                          frame=self.common_frame)
+
+        self.common_entry(row=6, column=0, var=effectdurationVar, text="Эффект", color=1,
+                          frame=self.common_frame)
+
+        self.common_entry(row=1, column=3, var=levelsVar, text="Уровни", color=3,
+                          frame=self.common_frame)
 
 
-        self.edit_button = Button(self, text="Редактировать", bg="mistyrose", font=("Arial", 12),
-                                  command=level_edit)
-        self.save_button = Button(self, text="Сохранить изменения", bg="palegreen", font=("Arial", 12),
-                                  command=send_vars)
-        self.close_button = Button(self, text="Закрыть", bg="pink2", font=("Arial", 12),
-                                   command=exit, width=19)
-        self.edit_button.place(x=165, y=330)
-        self.save_button.place(x=40, y=380)
-        self.close_button.place(x=250, y=380)
+        self.common_entry(row=2, column=3, var=savagesVar, text="Дикари", color=3,
+                          frame=self.common_frame)
 
+        self.common_entry(row=3, column=3, var=flowersVar, text="Цветы", color=3,
+                          frame=self.common_frame)
 
+        self.common_checkbutton(row=4, column=3, var=cheatVar, text="Читы", color=3, frame=self.common_frame)
+
+        self.common_checkbutton(row=5, column=3, var=musicVar, text="Музыка", color=5, frame=self.common_frame)
+
+        self.common_checkbutton(row=6, column=3, var=soundVar, text="Звуки", color=5, frame=self.common_frame)
+
+        if begin is False:
+            Label(self, text="Редактировать уровень", font=("Arial", 12), bg="mistyrose",
+                                         anchor=E, width =20).place(x=40, y=300)
+            Spinbox(self, font=("Arial", 10), bg="mistyrose", textvariable=editlevelVar, from_=1,
+                                           to=(len(settings["levels"])-1), width=20).place(x=250, y=300)
+
+            Button(self, text="Редактировать", bg="mistyrose", font=("Arial", 12),
+                   command=level_edit).place(x=165, y=330)
+            Button(self, text="Сохранить изменения", bg="palegreen", font=("Arial", 12),
+                   command=send_vars).place(x=40, y=380)
+
+        Button(self, text="Закрыть", bg="pink2", font=("Arial", 12),
+               command=exit, width=19).place(x=250, y=380)
 
 class LevelEdit():
     def __init__(self, mainwindow):
@@ -681,8 +653,7 @@ class LevelEdit():
         self.show_walls()
         self.show_savages()
         self.show_mushrooms()
-        self.hint_label = Label(self.hints, text=hint, bg=lev_colors[1], anchor=W)
-        self.hint_label.grid(sticky=NW)
+        Label(self.hints, text=hint, bg=lev_colors[1], anchor=W).grid(sticky=NW)
         self.level_save_butt = Button(self.window, bg="palegreen", text="Сохранить", command=level_edit_save,
                                       font=("Arial", 12))
         self.level_close_butt = Button(self.window, bg="pink3", text="Выход",command=level_edit_close,
@@ -695,886 +666,438 @@ class LevelEdit():
             "https://github.com/Apochromat/grannys-skirmish/wiki/Objects"))
 
     def show_basics(self):
-        self.obj_level_label = 0
-        self.obj_level_spin = 0
-        self.create_spinbox(frame=self.basics, label=self.obj_level_label, spin=self.obj_level_spin, row=0,
-                            column=0, var= level_editVar, text="Уровень:", color=0, beg=1, end=999, len=10,
-                            state = DISABLED)
+        self.create_spinbox(frame=self.basics, row=0, column=0, var= level_editVar, text="Уровень:",
+                            color=0, beg=1, end=999, len=10, state = DISABLED)
 
-        self.obj_limit_label = 0
-        self.obj_limit_butt = 0
-        self.create_checkbutton(frame=self.basics, label=self.obj_limit_label, checkbutton=self.obj_limit_butt, row=1,
-                            column=0, var=limit_editVar, text="Ограниченность:", color=0)
+        self.create_checkbutton(frame=self.basics, row=1, column=0, var=limit_editVar, text="Ограниченность:",
+                                color=0)
 
-        self.obj_limit_next_label = 0
-        self.obj_limit_next_butt = 0
-        self.create_radiobutton(frame=self.basics, label=self.obj_limit_next_label,
-                                radiobutton=self.obj_limit_next_butt, row=2,
-                                column=0, var=limit_type_editVar, text="Следующий:", color=0, value=0)
+        self.create_radiobutton(frame=self.basics, row=2, column=0, var=limit_type_editVar, text="Следующий:",
+                                color=0, value=0)
 
-        self.obj_limit_lose_label = 0
-        self.obj_limit_lose_butt = 0
-        self.create_radiobutton(frame=self.basics, label=self.obj_limit_lose_label,
-                                radiobutton=self.obj_limit_lose_butt, row=3,
-                                column=0, var=limit_type_editVar, text="Проигрыш:", color=0, value=1)
+        self.create_radiobutton(frame=self.basics, row=3, column=0, var=limit_type_editVar, text="Проигрыш:",
+                                color=0, value=1)
 
-        self.obj_limit_time_label = 0
-        self.obj_limit_time_spin = 0
-        self.create_spinbox(frame=self.basics, label=self.obj_limit_time_label, spin=self.obj_limit_time_spin, row=4,
-                            column=0, var=limit_time_editVar, text="Время:", color=0, beg=1, end=999, len=10)
+        self.create_spinbox(frame=self.basics, row=4, column=0, var=limit_time_editVar, text="Время:",
+                            color=0, beg=1, end=999, len=10)
 
-        self.obj_player_x_label = 0
-        self.obj_player_x_spin = 0
-        self.create_spinbox(frame=self.basics, label=self.obj_player_x_label, spin=self.obj_player_x_spin, row=0,
-                            column=2, var=player_x_editVar, text="Персонаж Х:", color=0, beg=30, end=610, len=12)
+        self.create_spinbox(frame=self.basics, row=0, column=2, var=player_x_editVar, text="Персонаж Х:",
+                            color=0, beg=30, end=610, len=12)
 
-        self.obj_player_y_label = 0
-        self.obj_player_y_spin = 0
-        self.create_spinbox(frame=self.basics, label=self.obj_player_y_label, spin=self.obj_player_y_spin, row=1,
-                            column=2, var=player_y_editVar, text="Персонаж Y:", color=0, beg=30, end=430, len=12)
+        self.create_spinbox(frame=self.basics, row=1, column=2, var=player_y_editVar, text="Персонаж Y:",
+                            color=0, beg=30, end=430, len=12)
 
-        self.obj_exit_x_label = 0
-        self.obj_exit_x_spin = 0
-        self.create_spinbox(frame=self.basics, label=self.obj_exit_x_label, spin=self.obj_exit_x_spin, row=2,
-                            column=2, var=exit_x_editVar, text="Выход Х:", color=0, beg=30, end=610, len=12)
+        self.create_spinbox(frame=self.basics, row=2,  column=2, var=exit_x_editVar, text="Выход Х:",
+                            color=0, beg=30, end=610, len=12)
 
-        self.obj_exit_y_label = 0
-        self.obj_exit_y_spin = 0
-        self.create_spinbox(frame=self.basics, label=self.obj_exit_y_label, spin=self.obj_exit_y_spin, row=3,
-                            column=2, var=exit_y_editVar, text="Выход Y:", color=0, beg=30, end=430, len=12)
+        self.create_spinbox(frame=self.basics, row=3, column=2, var=exit_y_editVar, text="Выход Y:",
+                            color=0, beg=30, end=430, len=12)
 
-        self.obj_cats_label = 0
-        self.obj_cats_time_spin = 0
-        self.create_spinbox(frame=self.basics, label=self.obj_cats_label, spin=self.obj_cats_time_spin, row=4,
-                            column=2, var=cats_editVar, text="Коты:", color=0, beg=0, end=6, len=12)
+        self.create_spinbox(frame=self.basics, row=4, column=2, var=cats_editVar, text="Коты:",
+                            color=0, beg=0, end=6, len=12)
 
     def show_platforms(self):
         """ALPHA"""
-        self.obj_alpha_platform_label = 0
-        self.obj_alpha_platform_butt = 0
-        self.obj_alpha_platform_y_label = 0
-        self.obj_alpha_platform_y_spin = 0
-        self.obj_alpha_platform_x1_label = 0
-        self.obj_alpha_platform_x1_spin = 0
-        self.obj_alpha_platform_x2_label = 0
-        self.obj_alpha_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_alpha_platform_label,
-                                checkbutton=self.obj_alpha_platform_butt, row=0,
+        self.create_checkbutton(frame=self.platforms, row=0,
                                 column=0, var=alpha_platform_state_editVar, text="Alpha platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_alpha_platform_y_label,
-                            spin=self.obj_alpha_platform_y_spin, row=1,
+        self.create_spinbox(frame=self.platforms, row=1,
                             column=0, var=alpha_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_alpha_platform_x1_label,
-                            spin=self.obj_alpha_platform_x1_spin, row=2,
+        self.create_spinbox(frame=self.platforms, row=2,
                             column=0, var=alpha_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_alpha_platform_x2_label,
-                            spin=self.obj_alpha_platform_x2_spin, row=3,
+        self.create_spinbox(frame=self.platforms, row=3,
                             column=0, var=alpha_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
         
         """BETA"""
-        self.obj_beta_platform_label = 0
-        self.obj_beta_platform_butt = 0
-        self.obj_beta_platform_y_label = 0
-        self.obj_beta_platform_y_spin = 0
-        self.obj_beta_platform_x1_label = 0
-        self.obj_beta_platform_x1_spin = 0
-        self.obj_beta_platform_x2_label = 0
-        self.obj_beta_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_beta_platform_label,
-                                checkbutton=self.obj_beta_platform_butt, row=4,
+        self.create_checkbutton(frame=self.platforms, row=4,
                                 column=0, var=beta_platform_state_editVar, text="Beta platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_beta_platform_y_label,
-                            spin=self.obj_beta_platform_y_spin, row=5,
+        self.create_spinbox(frame=self.platforms, row=5,
                             column=0, var=beta_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_beta_platform_x1_label,
-                            spin=self.obj_beta_platform_x1_spin, row=6,
+        self.create_spinbox(frame=self.platforms, row=6,
                             column=0, var=beta_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_beta_platform_x2_label,
-                            spin=self.obj_beta_platform_x2_spin, row=7,
+        self.create_spinbox(frame=self.platforms, row=7,
                             column=0, var=beta_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
 
         """GAMMA"""
-        self.obj_gamma_platform_label = 0
-        self.obj_gamma_platform_butt = 0
-        self.obj_gamma_platform_y_label = 0
-        self.obj_gamma_platform_y_spin = 0
-        self.obj_gamma_platform_x1_label = 0
-        self.obj_gamma_platform_x1_spin = 0
-        self.obj_gamma_platform_x2_label = 0
-        self.obj_gamma_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_gamma_platform_label,
-                                checkbutton=self.obj_gamma_platform_butt, row=8,
+        self.create_checkbutton(frame=self.platforms, row=8,
                                 column=0, var=gamma_platform_state_editVar, text="Gamma platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_gamma_platform_y_label,
-                            spin=self.obj_gamma_platform_y_spin, row=9,
+        self.create_spinbox(frame=self.platforms, row=9,
                             column=0, var=gamma_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_gamma_platform_x1_label,
-                            spin=self.obj_gamma_platform_x1_spin, row=10,
+        self.create_spinbox(frame=self.platforms, row=10,
                             column=0, var=gamma_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_gamma_platform_x2_label,
-                            spin=self.obj_gamma_platform_x2_spin, row=11,
+        self.create_spinbox(frame=self.platforms, row=11,
                             column=0, var=gamma_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
 
         """DELTA"""
-        self.obj_delta_platform_label = 0
-        self.obj_delta_platform_butt = 0
-        self.obj_delta_platform_y_label = 0
-        self.obj_delta_platform_y_spin = 0
-        self.obj_delta_platform_x1_label = 0
-        self.obj_delta_platform_x1_spin = 0
-        self.obj_delta_platform_x2_label = 0
-        self.obj_delta_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_delta_platform_label,
-                                checkbutton=self.obj_delta_platform_butt, row=12,
+        self.create_checkbutton(frame=self.platforms, row=12,
                                 column=0, var=delta_platform_state_editVar, text="Delta platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_delta_platform_y_label,
-                            spin=self.obj_delta_platform_y_spin, row=13,
+        self.create_spinbox(frame=self.platforms, row=13,
                             column=0, var=delta_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_delta_platform_x1_label,
-                            spin=self.obj_delta_platform_x1_spin, row=14,
+        self.create_spinbox(frame=self.platforms, row=14,
                             column=0, var=delta_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_delta_platform_x2_label,
-                            spin=self.obj_delta_platform_x2_spin, row=15,
+        self.create_spinbox(frame=self.platforms, row=15,
                             column=0, var=delta_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
 
         """EPSILON"""
-        self.obj_epsilon_platform_label = 0
-        self.obj_epsilon_platform_butt = 0
-        self.obj_epsilon_platform_y_label = 0
-        self.obj_epsilon_platform_y_spin = 0
-        self.obj_epsilon_platform_x1_label = 0
-        self.obj_epsilon_platform_x1_spin = 0
-        self.obj_epsilon_platform_x2_label = 0
-        self.obj_epsilon_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_epsilon_platform_label,
-                                checkbutton=self.obj_epsilon_platform_butt, row=16,
+        self.create_checkbutton(frame=self.platforms, row=16,
                                 column=0, var=epsilon_platform_state_editVar, text="Epsilon platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_epsilon_platform_y_label,
-                            spin=self.obj_epsilon_platform_y_spin, row=17,
+        self.create_spinbox(frame=self.platforms, row=17,
                             column=0, var=epsilon_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_epsilon_platform_x1_label,
-                            spin=self.obj_epsilon_platform_x1_spin, row=18,
+        self.create_spinbox(frame=self.platforms, row=18,
                             column=0, var=epsilon_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_epsilon_platform_x2_label,
-                            spin=self.obj_epsilon_platform_x2_spin, row=19,
+        self.create_spinbox(frame=self.platforms, row=19,
                             column=0, var=epsilon_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
 
         """ZETA"""
-        self.obj_zeta_platform_label = 0
-        self.obj_zeta_platform_butt = 0
-        self.obj_zeta_platform_y_label = 0
-        self.obj_zeta_platform_y_spin = 0
-        self.obj_zeta_platform_x1_label = 0
-        self.obj_zeta_platform_x1_spin = 0
-        self.obj_zeta_platform_x2_label = 0
-        self.obj_zeta_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_zeta_platform_label,
-                                checkbutton=self.obj_zeta_platform_butt, row=0,
+        self.create_checkbutton(frame=self.platforms, row=0,
                                 column=2, var=zeta_platform_state_editVar, text="Zeta platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_zeta_platform_y_label,
-                            spin=self.obj_zeta_platform_y_spin, row=1,
+        self.create_spinbox(frame=self.platforms, row=1,
                             column=2, var=zeta_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_zeta_platform_x1_label,
-                            spin=self.obj_zeta_platform_x1_spin, row=2,
+        self.create_spinbox(frame=self.platforms, row=2,
                             column=2, var=zeta_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_zeta_platform_x2_label,
-                            spin=self.obj_zeta_platform_x2_spin, row=3,
+        self.create_spinbox(frame=self.platforms, row=3,
                             column=2, var=zeta_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
 
         """ETA"""
-        self.obj_eta_platform_label = 0
-        self.obj_eta_platform_butt = 0
-        self.obj_eta_platform_y_label = 0
-        self.obj_eta_platform_y_spin = 0
-        self.obj_eta_platform_x1_label = 0
-        self.obj_eta_platform_x1_spin = 0
-        self.obj_eta_platform_x2_label = 0
-        self.obj_eta_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_eta_platform_label,
-                                checkbutton=self.obj_eta_platform_butt, row=4,
+        self.create_checkbutton(frame=self.platforms, row=4,
                                 column=2, var=eta_platform_state_editVar, text="Eta platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_eta_platform_y_label,
-                            spin=self.obj_eta_platform_y_spin, row=5,
+        self.create_spinbox(frame=self.platforms, row=5,
                             column=2, var=eta_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_eta_platform_x1_label,
-                            spin=self.obj_eta_platform_x1_spin, row=6,
+        self.create_spinbox(frame=self.platforms, row=6,
                             column=2, var=eta_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_eta_platform_x2_label,
-                            spin=self.obj_eta_platform_x2_spin, row=7,
+        self.create_spinbox(frame=self.platforms, row=7,
                             column=2, var=eta_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
 
         """THETA"""
-        self.obj_theta_platform_label = 0
-        self.obj_theta_platform_butt = 0
-        self.obj_theta_platform_y_label = 0
-        self.obj_theta_platform_y_spin = 0
-        self.obj_theta_platform_x1_label = 0
-        self.obj_theta_platform_x1_spin = 0
-        self.obj_theta_platform_x2_label = 0
-        self.obj_theta_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_theta_platform_label,
-                                checkbutton=self.obj_theta_platform_butt, row=8,
+        self.create_checkbutton(frame=self.platforms, row=8,
                                 column=2, var=theta_platform_state_editVar, text="Theta platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_theta_platform_y_label,
-                            spin=self.obj_theta_platform_y_spin, row=9,
+        self.create_spinbox(frame=self.platforms, row=9,
                             column=2, var=theta_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_theta_platform_x1_label,
-                            spin=self.obj_theta_platform_x1_spin, row=10,
+        self.create_spinbox(frame=self.platforms, row=10,
                             column=2, var=theta_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_theta_platform_x2_label,
-                            spin=self.obj_theta_platform_x2_spin, row=11,
+        self.create_spinbox(frame=self.platforms, row=11,
                             column=2, var=theta_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
 
         """IOTA"""
-        self.obj_iota_platform_label = 0
-        self.obj_iota_platform_butt = 0
-        self.obj_iota_platform_y_label = 0
-        self.obj_iota_platform_y_spin = 0
-        self.obj_iota_platform_x1_label = 0
-        self.obj_iota_platform_x1_spin = 0
-        self.obj_iota_platform_x2_label = 0
-        self.obj_iota_platform_x2_spin = 0
-        self.create_checkbutton(frame=self.platforms, label=self.obj_iota_platform_label,
-                                checkbutton=self.obj_iota_platform_butt, row=12,
+        self.create_checkbutton(frame=self.platforms, row=12,
                                 column=2, var=iota_platform_state_editVar, text="Iota platform:", color=2)
-        self.create_spinbox(frame=self.platforms, label=self.obj_iota_platform_y_label,
-                            spin=self.obj_iota_platform_y_spin, row=13,
+        self.create_spinbox(frame=self.platforms, row=13,
                             column=2, var=iota_platform_y_editVar, text="Y:", color=2, beg=0, end=430, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_iota_platform_x1_label,
-                            spin=self.obj_iota_platform_x1_spin, row=14,
+        self.create_spinbox(frame=self.platforms, row=14,
                             column=2, var=iota_platform_x1_editVar, text="X1:", color=2, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.platforms, label=self.obj_iota_platform_x2_label,
-                            spin=self.obj_iota_platform_x2_spin, row=15,
+        self.create_spinbox(frame=self.platforms, row=15,
                             column=2, var=iota_platform_x2_editVar, text="X2:", color=2, beg=0, end=610, len=10)
         
     def show_cats(self):
         """ALPHA"""
-        self.obj_alpha_cat_label = 0
-        self.obj_alpha_cat_butt = 0
-        self.obj_alpha_cat_x_label = 0
-        self.obj_alpha_cat_x_spin = 0
-        self.obj_alpha_cat_y_label = 0
-        self.obj_alpha_cat_y_spin = 0
-        self.create_checkbutton(frame=self.cats, label=self.obj_alpha_cat_label,
-                                checkbutton=self.obj_alpha_cat_butt, row=0,
+        self.create_checkbutton(frame=self.cats, row=0,
                                 column=0, var=alpha_cat_state_editVar, text="Alpha cat:", color=3)
-        self.create_spinbox(frame=self.cats, label=self.obj_alpha_cat_y_label,
-                            spin=self.obj_alpha_cat_x_spin, row=1,
+        self.create_spinbox(frame=self.cats, row=1,
                             column=0, var=alpha_cat_x_editVar, text="X:", color=3, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.cats, label=self.obj_alpha_cat_x_label,
-                            spin=self.obj_alpha_cat_y_spin, row=2,
+        self.create_spinbox(frame=self.cats, row=2,
                             column=0, var=alpha_cat_y_editVar, text="Y:", color=3, beg=0, end=430, len=10)
 
         """BETA"""
-        self.obj_beta_cat_label = 0
-        self.obj_beta_cat_butt = 0
-        self.obj_beta_cat_x_label = 0
-        self.obj_beta_cat_x_spin = 0
-        self.obj_beta_cat_y_label = 0
-        self.obj_beta_cat_y_spin = 0
-        self.create_checkbutton(frame=self.cats, label=self.obj_beta_cat_label,
-                                checkbutton=self.obj_beta_cat_butt, row=3,
+        self.create_checkbutton(frame=self.cats, row=3,
                                 column=0, var=beta_cat_state_editVar, text="Beta cat:", color=3)
-        self.create_spinbox(frame=self.cats, label=self.obj_beta_cat_y_label,
-                            spin=self.obj_beta_cat_x_spin, row=4,
+        self.create_spinbox(frame=self.cats, row=4,
                             column=0, var=beta_cat_x_editVar, text="X:", color=3, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.cats, label=self.obj_beta_cat_x_label,
-                            spin=self.obj_beta_cat_y_spin, row=5,
+        self.create_spinbox(frame=self.cats, row=5,
                             column=0, var=beta_cat_y_editVar, text="Y:", color=3, beg=0, end=430, len=10)
 
         """GAMMA"""
-        self.obj_gamma_cat_label = 0
-        self.obj_gamma_cat_butt = 0
-        self.obj_gamma_cat_x_label = 0
-        self.obj_gamma_cat_x_spin = 0
-        self.obj_gamma_cat_y_label = 0
-        self.obj_gamma_cat_y_spin = 0
-        self.create_checkbutton(frame=self.cats, label=self.obj_gamma_cat_label,
-                                checkbutton=self.obj_gamma_cat_butt, row=6,
+        self.create_checkbutton(frame=self.cats, row=6,
                                 column=0, var=gamma_cat_state_editVar, text="Gamma cat:", color=3)
-        self.create_spinbox(frame=self.cats, label=self.obj_gamma_cat_y_label,
-                            spin=self.obj_gamma_cat_x_spin, row=7,
+        self.create_spinbox(frame=self.cats, row=7,
                             column=0, var=gamma_cat_x_editVar, text="X:", color=3, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.cats, label=self.obj_gamma_cat_x_label,
-                            spin=self.obj_gamma_cat_y_spin, row=8,
+        self.create_spinbox(frame=self.cats, row=8,
                             column=0, var=gamma_cat_y_editVar, text="Y:", color=3, beg=0, end=430, len=10)
 
         """DELTA"""
-        self.obj_delta_cat_label = 0
-        self.obj_delta_cat_butt = 0
-        self.obj_delta_cat_x_label = 0
-        self.obj_delta_cat_x_spin = 0
-        self.obj_delta_cat_y_label = 0
-        self.obj_delta_cat_y_spin = 0
-        self.create_checkbutton(frame=self.cats, label=self.obj_delta_cat_label,
-                                checkbutton=self.obj_delta_cat_butt, row=9,
+        self.create_checkbutton(frame=self.cats, row=9,
                                 column=0, var=delta_cat_state_editVar, text="Delta cat:", color=3)
-        self.create_spinbox(frame=self.cats, label=self.obj_delta_cat_y_label,
-                            spin=self.obj_delta_cat_x_spin, row=10,
+        self.create_spinbox(frame=self.cats, row=10,
                             column=0, var=delta_cat_x_editVar, text="X:", color=3, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.cats, label=self.obj_delta_cat_x_label,
-                            spin=self.obj_delta_cat_y_spin, row=11,
+        self.create_spinbox(frame=self.cats, row=11,
                             column=0, var=delta_cat_y_editVar, text="Y:", color=3, beg=0, end=430, len=10)
 
         """EPSILON"""
-        self.obj_epsilon_cat_label = 0
-        self.obj_epsilon_cat_butt = 0
-        self.obj_epsilon_cat_x_label = 0
-        self.obj_epsilon_cat_x_spin = 0
-        self.obj_epsilon_cat_y_label = 0
-        self.obj_epsilon_cat_y_spin = 0
-        self.create_checkbutton(frame=self.cats, label=self.obj_epsilon_cat_label,
-                                checkbutton=self.obj_epsilon_cat_butt, row=12,
+        self.create_checkbutton(frame=self.cats, row=12,
                                 column=0, var=epsilon_cat_state_editVar, text="Epsilon cat:", color=3)
-        self.create_spinbox(frame=self.cats, label=self.obj_epsilon_cat_y_label,
-                            spin=self.obj_epsilon_cat_x_spin, row=13,
+        self.create_spinbox(frame=self.cats, row=13,
                             column=0, var=epsilon_cat_x_editVar, text="X:", color=3, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.cats, label=self.obj_epsilon_cat_x_label,
-                            spin=self.obj_epsilon_cat_y_spin, row=14,
+        self.create_spinbox(frame=self.cats, row=14,
                             column=0, var=epsilon_cat_y_editVar, text="Y:", color=3, beg=0, end=430, len=10)
 
         """ZETA"""
-        self.obj_zeta_cat_label = 0
-        self.obj_zeta_cat_butt = 0
-        self.obj_zeta_cat_x_label = 0
-        self.obj_zeta_cat_x_spin = 0
-        self.obj_zeta_cat_y_label = 0
-        self.obj_zeta_cat_y_spin = 0
-        self.create_checkbutton(frame=self.cats, label=self.obj_zeta_cat_label,
-                                checkbutton=self.obj_zeta_cat_butt, row=15,
+        self.create_checkbutton(frame=self.cats, row=15,
                                 column=0, var=zeta_cat_state_editVar, text="Zeta cat:", color=3)
-        self.create_spinbox(frame=self.cats, label=self.obj_zeta_cat_y_label,
-                            spin=self.obj_zeta_cat_x_spin, row=16,
+        self.create_spinbox(frame=self.cats, row=16,
                             column=0, var=zeta_cat_x_editVar, text="X:", color=3, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.cats, label=self.obj_zeta_cat_x_label,
-                            spin=self.obj_zeta_cat_y_spin, row=17,
+        self.create_spinbox(frame=self.cats, row=17,
                             column=0, var=zeta_cat_y_editVar, text="Y:", color=3, beg=0, end=430, len=10)
 
     def show_bonuses(self):
         """ALPHA"""
-        self.obj_alpha_bonus_label = 0
-        self.obj_alpha_bonus_butt = 0
-        self.obj_alpha_bonus_x_label = 0
-        self.obj_alpha_bonus_x_spin = 0
-        self.obj_alpha_bonus_y_label = 0
-        self.obj_alpha_bonus_y_spin = 0
-        self.create_checkbutton(frame=self.bonuses, label=self.obj_alpha_bonus_label,
-                                checkbutton=self.obj_alpha_bonus_butt, row=0,
+        self.create_checkbutton(frame=self.bonuses, row=0,
                                 column=0, var=alpha_bonus_state_editVar, text="Alpha bonus:", color=4)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_alpha_bonus_y_label,
-                            spin=self.obj_alpha_bonus_x_spin, row=1,
+        self.create_spinbox(frame=self.bonuses, row=1,
                             column=0, var=alpha_bonus_x_editVar, text="X:", color=4, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_alpha_bonus_x_label,
-                            spin=self.obj_alpha_bonus_y_spin, row=2,
+        self.create_spinbox(frame=self.bonuses, row=2,
                             column=0, var=alpha_bonus_y_editVar, text="Y:", color=4, beg=0, end=430, len=10)
 
         """BETA"""
-        self.obj_beta_bonus_label = 0
-        self.obj_beta_bonus_butt = 0
-        self.obj_beta_bonus_x_label = 0
-        self.obj_beta_bonus_x_spin = 0
-        self.obj_beta_bonus_y_label = 0
-        self.obj_beta_bonus_y_spin = 0
-        self.create_checkbutton(frame=self.bonuses, label=self.obj_beta_bonus_label,
-                                checkbutton=self.obj_beta_bonus_butt, row=3,
+        self.create_checkbutton(frame=self.bonuses, row=3,
                                 column=0, var=beta_bonus_state_editVar, text="Beta bonus:", color=4)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_beta_bonus_y_label,
-                            spin=self.obj_beta_bonus_x_spin, row=4,
+        self.create_spinbox(frame=self.bonuses, row=4,
                             column=0, var=beta_bonus_x_editVar, text="X:", color=4, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_beta_bonus_x_label,
-                            spin=self.obj_beta_bonus_y_spin, row=5,
+        self.create_spinbox(frame=self.bonuses, row=5,
                             column=0, var=beta_bonus_y_editVar, text="Y:", color=4, beg=0, end=430, len=10)
 
         """GAMMA"""
-        self.obj_gamma_bonus_label = 0
-        self.obj_gamma_bonus_butt = 0
-        self.obj_gamma_bonus_x_label = 0
-        self.obj_gamma_bonus_x_spin = 0
-        self.obj_gamma_bonus_y_label = 0
-        self.obj_gamma_bonus_y_spin = 0
-        self.create_checkbutton(frame=self.bonuses, label=self.obj_gamma_bonus_label,
-                                checkbutton=self.obj_gamma_bonus_butt, row=6,
+        self.create_checkbutton(frame=self.bonuses, row=6,
                                 column=0, var=gamma_bonus_state_editVar, text="Gamma bonus:", color=4)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_gamma_bonus_y_label,
-                            spin=self.obj_gamma_bonus_x_spin, row=7,
+        self.create_spinbox(frame=self.bonuses, row=7,
                             column=0, var=gamma_bonus_x_editVar, text="X:", color=4, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_gamma_bonus_x_label,
-                            spin=self.obj_gamma_bonus_y_spin, row=8,
+        self.create_spinbox(frame=self.bonuses, row=8,
                             column=0, var=gamma_bonus_y_editVar, text="Y:", color=4, beg=0, end=430, len=10)
 
         """DELTA"""
-        self.obj_delta_bonus_label = 0
-        self.obj_delta_bonus_butt = 0
-        self.obj_delta_bonus_x_label = 0
-        self.obj_delta_bonus_x_spin = 0
-        self.obj_delta_bonus_y_label = 0
-        self.obj_delta_bonus_y_spin = 0
-        self.create_checkbutton(frame=self.bonuses, label=self.obj_delta_bonus_label,
-                                checkbutton=self.obj_delta_bonus_butt, row=9,
+        self.create_checkbutton(frame=self.bonuses, row=9,
                                 column=0, var=delta_bonus_state_editVar, text="Delta bonus:", color=4)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_delta_bonus_y_label,
-                            spin=self.obj_delta_bonus_x_spin, row=10,
+        self.create_spinbox(frame=self.bonuses, row=10,
                             column=0, var=delta_bonus_x_editVar, text="X:", color=4, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_delta_bonus_x_label,
-                            spin=self.obj_delta_bonus_y_spin, row=11,
+        self.create_spinbox(frame=self.bonuses, row=11,
                             column=0, var=delta_bonus_y_editVar, text="Y:", color=4, beg=0, end=430, len=10)
 
         """EPSILON"""
-        self.obj_epsilon_bonus_label = 0
-        self.obj_epsilon_bonus_butt = 0
-        self.obj_epsilon_bonus_x_label = 0
-        self.obj_epsilon_bonus_x_spin = 0
-        self.obj_epsilon_bonus_y_label = 0
-        self.obj_epsilon_bonus_y_spin = 0
-        self.create_checkbutton(frame=self.bonuses, label=self.obj_epsilon_bonus_label,
-                                checkbutton=self.obj_epsilon_bonus_butt, row=12,
+        self.create_checkbutton(frame=self.bonuses, row=12,
                                 column=0, var=epsilon_bonus_state_editVar, text="Epsilon bonus:", color=4)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_epsilon_bonus_y_label,
-                            spin=self.obj_epsilon_bonus_x_spin, row=13,
+        self.create_spinbox(frame=self.bonuses, row=13,
                             column=0, var=epsilon_bonus_x_editVar, text="X:", color=4, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_epsilon_bonus_x_label,
-                            spin=self.obj_epsilon_bonus_y_spin, row=14,
+        self.create_spinbox(frame=self.bonuses, row=14,
                             column=0, var=epsilon_bonus_y_editVar, text="Y:", color=4, beg=0, end=430, len=10)
 
         """ZETA"""
-        self.obj_zeta_bonus_label = 0
-        self.obj_zeta_bonus_butt = 0
-        self.obj_zeta_bonus_x_label = 0
-        self.obj_zeta_bonus_x_spin = 0
-        self.obj_zeta_bonus_y_label = 0
-        self.obj_zeta_bonus_y_spin = 0
-        self.create_checkbutton(frame=self.bonuses, label=self.obj_zeta_bonus_label,
-                                checkbutton=self.obj_zeta_bonus_butt, row=15,
+        self.create_checkbutton(frame=self.bonuses, row=15,
                                 column=0, var=zeta_bonus_state_editVar, text="Zeta bonus:", color=4)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_zeta_bonus_y_label,
-                            spin=self.obj_zeta_bonus_x_spin, row=16,
+        self.create_spinbox(frame=self.bonuses, row=16,
                             column=0, var=zeta_bonus_x_editVar, text="X:", color=4, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.bonuses, label=self.obj_zeta_bonus_x_label,
-                            spin=self.obj_zeta_bonus_y_spin, row=17,
+        self.create_spinbox(frame=self.bonuses, row=17,
                             column=0, var=zeta_bonus_y_editVar, text="Y:", color=4, beg=0, end=430, len=10)
 
     def show_ladders(self):
         """ALPHA"""
-        self.obj_alpha_ladder_label = 0
-        self.obj_alpha_ladder_butt = 0
-        self.obj_alpha_ladder_x_label = 0
-        self.obj_alpha_ladder_x_spin = 0
-        self.obj_alpha_ladder_y_label = 0
-        self.obj_alpha_ladder_y_spin = 0
-        self.create_checkbutton(frame=self.ladders, label=self.obj_alpha_ladder_label,
-                                checkbutton=self.obj_alpha_ladder_butt, row=0,
+        self.create_checkbutton(frame=self.ladders, row=0,
                                 column=0, var=alpha_ladder_state_editVar, text="Alpha ladder:", color=5)
-        self.create_spinbox(frame=self.ladders, label=self.obj_alpha_ladder_y_label,
-                            spin=self.obj_alpha_ladder_x_spin, row=1,
+        self.create_spinbox(frame=self.ladders, row=1,
                             column=0, var=alpha_ladder_x_editVar, text="X:", color=5, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.ladders, label=self.obj_alpha_ladder_x_label,
-                            spin=self.obj_alpha_ladder_y_spin, row=2,
+        self.create_spinbox(frame=self.ladders, row=2,
                             column=0, var=alpha_ladder_y_editVar, text="Y:", color=5, beg=0, end=430, len=10)
 
         """BETA"""
-        self.obj_beta_ladder_label = 0
-        self.obj_beta_ladder_butt = 0
-        self.obj_beta_ladder_x_label = 0
-        self.obj_beta_ladder_x_spin = 0
-        self.obj_beta_ladder_y_label = 0
-        self.obj_beta_ladder_y_spin = 0
-        self.create_checkbutton(frame=self.ladders, label=self.obj_beta_ladder_label,
-                                checkbutton=self.obj_beta_ladder_butt, row=3,
+        self.create_checkbutton(frame=self.ladders, row=3,
                                 column=0, var=beta_ladder_state_editVar, text="Beta ladder:", color=5)
-        self.create_spinbox(frame=self.ladders, label=self.obj_beta_ladder_y_label,
-                            spin=self.obj_beta_ladder_x_spin, row=4,
+        self.create_spinbox(frame=self.ladders, row=4,
                             column=0, var=beta_ladder_x_editVar, text="X:", color=5, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.ladders, label=self.obj_beta_ladder_x_label,
-                            spin=self.obj_beta_ladder_y_spin, row=5,
+        self.create_spinbox(frame=self.ladders, row=5,
                             column=0, var=beta_ladder_y_editVar, text="Y:", color=5, beg=0, end=430, len=10)
 
         """GAMMA"""
-        self.obj_gamma_ladder_label = 0
-        self.obj_gamma_ladder_butt = 0
-        self.obj_gamma_ladder_x_label = 0
-        self.obj_gamma_ladder_x_spin = 0
-        self.obj_gamma_ladder_y_label = 0
-        self.obj_gamma_ladder_y_spin = 0
-        self.create_checkbutton(frame=self.ladders, label=self.obj_gamma_ladder_label,
-                                checkbutton=self.obj_gamma_ladder_butt, row=6,
+        self.create_checkbutton(frame=self.ladders, row=6,
                                 column=0, var=gamma_ladder_state_editVar, text="Gamma ladder:", color=5)
-        self.create_spinbox(frame=self.ladders, label=self.obj_gamma_ladder_y_label,
-                            spin=self.obj_gamma_ladder_x_spin, row=7,
+        self.create_spinbox(frame=self.ladders, row=7,
                             column=0, var=gamma_ladder_x_editVar, text="X:", color=5, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.ladders, label=self.obj_gamma_ladder_x_label,
-                            spin=self.obj_gamma_ladder_y_spin, row=8,
+        self.create_spinbox(frame=self.ladders, row=8,
                             column=0, var=gamma_ladder_y_editVar, text="Y:", color=5, beg=0, end=430, len=10)
 
         """DELTA"""
-        self.obj_delta_ladder_label = 0
-        self.obj_delta_ladder_butt = 0
-        self.obj_delta_ladder_x_label = 0
-        self.obj_delta_ladder_x_spin = 0
-        self.obj_delta_ladder_y_label = 0
-        self.obj_delta_ladder_y_spin = 0
-        self.create_checkbutton(frame=self.ladders, label=self.obj_delta_ladder_label,
-                                checkbutton=self.obj_delta_ladder_butt, row=9,
+        self.create_checkbutton(frame=self.ladders, row=9,
                                 column=0, var=delta_ladder_state_editVar, text="Delta ladder:", color=5)
-        self.create_spinbox(frame=self.ladders, label=self.obj_delta_ladder_y_label,
-                            spin=self.obj_delta_ladder_x_spin, row=10,
+        self.create_spinbox(frame=self.ladders, row=10,
                             column=0, var=delta_ladder_x_editVar, text="X:", color=5, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.ladders, label=self.obj_delta_ladder_x_label,
-                            spin=self.obj_delta_ladder_y_spin, row=11,
+        self.create_spinbox(frame=self.ladders, row=11,
                             column=0, var=delta_ladder_y_editVar, text="Y:", color=5, beg=0, end=430, len=10)
 
         """EPSILON"""
-        self.obj_epsilon_ladder_label = 0
-        self.obj_epsilon_ladder_butt = 0
-        self.obj_epsilon_ladder_x_label = 0
-        self.obj_epsilon_ladder_x_spin = 0
-        self.obj_epsilon_ladder_y_label = 0
-        self.obj_epsilon_ladder_y_spin = 0
-        self.create_checkbutton(frame=self.ladders, label=self.obj_epsilon_ladder_label,
-                                checkbutton=self.obj_epsilon_ladder_butt, row=12,
+        self.create_checkbutton(frame=self.ladders, row=12,
                                 column=0, var=epsilon_ladder_state_editVar, text="Epsilon ladder:", color=5)
-        self.create_spinbox(frame=self.ladders, label=self.obj_epsilon_ladder_y_label,
-                            spin=self.obj_epsilon_ladder_x_spin, row=13,
+        self.create_spinbox(frame=self.ladders, row=13,
                             column=0, var=epsilon_ladder_x_editVar, text="X:", color=5, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.ladders, label=self.obj_epsilon_ladder_x_label,
-                            spin=self.obj_epsilon_ladder_y_spin, row=14,
+        self.create_spinbox(frame=self.ladders, row=14,
                             column=0, var=epsilon_ladder_y_editVar, text="Y:", color=5, beg=0, end=430, len=10)
 
         """ZETA"""
-        self.obj_zeta_ladder_label = 0
-        self.obj_zeta_ladder_butt = 0
-        self.obj_zeta_ladder_x_label = 0
-        self.obj_zeta_ladder_x_spin = 0
-        self.obj_zeta_ladder_y_label = 0
-        self.obj_zeta_ladder_y_spin = 0
-        self.create_checkbutton(frame=self.ladders, label=self.obj_zeta_ladder_label,
-                                checkbutton=self.obj_zeta_ladder_butt, row=15,
+        self.create_checkbutton(frame=self.ladders, row=15,
                                 column=0, var=zeta_ladder_state_editVar, text="Zeta ladder:", color=5)
-        self.create_spinbox(frame=self.ladders, label=self.obj_zeta_ladder_y_label,
-                            spin=self.obj_zeta_ladder_x_spin, row=16,
+        self.create_spinbox(frame=self.ladders, row=16,
                             column=0, var=zeta_ladder_x_editVar, text="X:", color=5, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.ladders, label=self.obj_zeta_ladder_x_label,
-                            spin=self.obj_zeta_ladder_y_spin, row=17,
+        self.create_spinbox(frame=self.ladders, row=17,
                             column=0, var=zeta_ladder_y_editVar, text="Y:", color=5, beg=0, end=430, len=10)
 
     def show_walls(self):
             """ALPHA"""
-            self.obj_alpha_wall_label = 0
-            self.obj_alpha_wall_butt = 0
-            self.obj_alpha_wall_x_label = 0
-            self.obj_alpha_wall_x_spin = 0
-            self.obj_alpha_wall_y_label = 0
-            self.obj_alpha_wall_y_spin = 0
-            self.create_checkbutton(frame=self.walls, label=self.obj_alpha_wall_label,
-                                    checkbutton=self.obj_alpha_wall_butt, row=0,
+            self.create_checkbutton(frame=self.walls, row=0,
                                     column=0, var=alpha_wall_state_editVar, text="Alpha wall:", color=6)
-            self.create_spinbox(frame=self.walls, label=self.obj_alpha_wall_y_label,
-                                spin=self.obj_alpha_wall_x_spin, row=1,
+            self.create_spinbox(frame=self.walls, row=1,
                                 column=0, var=alpha_wall_x_editVar, text="X:", color=6, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.walls, label=self.obj_alpha_wall_x_label,
-                                spin=self.obj_alpha_wall_y_spin, row=2,
+            self.create_spinbox(frame=self.walls, row=2,
                                 column=0, var=alpha_wall_y_editVar, text="Y:", color=6, beg=0, end=430, len=10)
 
             """BETA"""
-            self.obj_beta_wall_label = 0
-            self.obj_beta_wall_butt = 0
-            self.obj_beta_wall_x_label = 0
-            self.obj_beta_wall_x_spin = 0
-            self.obj_beta_wall_y_label = 0
-            self.obj_beta_wall_y_spin = 0
-            self.create_checkbutton(frame=self.walls, label=self.obj_beta_wall_label,
-                                    checkbutton=self.obj_beta_wall_butt, row=3,
+            self.create_checkbutton(frame=self.walls, row=3,
                                     column=0, var=beta_wall_state_editVar, text="Beta wall:", color=6)
-            self.create_spinbox(frame=self.walls, label=self.obj_beta_wall_y_label,
-                                spin=self.obj_beta_wall_x_spin, row=4,
+            self.create_spinbox(frame=self.walls, row=4,
                                 column=0, var=beta_wall_x_editVar, text="X:", color=6, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.walls, label=self.obj_beta_wall_x_label,
-                                spin=self.obj_beta_wall_y_spin, row=5,
+            self.create_spinbox(frame=self.walls, row=5,
                                 column=0, var=beta_wall_y_editVar, text="Y:", color=6, beg=0, end=430, len=10)
 
             """GAMMA"""
-            self.obj_gamma_wall_label = 0
-            self.obj_gamma_wall_butt = 0
-            self.obj_gamma_wall_x_label = 0
-            self.obj_gamma_wall_x_spin = 0
-            self.obj_gamma_wall_y_label = 0
-            self.obj_gamma_wall_y_spin = 0
-            self.create_checkbutton(frame=self.walls, label=self.obj_gamma_wall_label,
-                                    checkbutton=self.obj_gamma_wall_butt, row=6,
+            self.create_checkbutton(frame=self.walls, row=6,
                                     column=0, var=gamma_wall_state_editVar, text="Gamma wall:", color=6)
-            self.create_spinbox(frame=self.walls, label=self.obj_gamma_wall_y_label,
-                                spin=self.obj_gamma_wall_x_spin, row=7,
+            self.create_spinbox(frame=self.walls, row=7,
                                 column=0, var=gamma_wall_x_editVar, text="X:", color=6, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.walls, label=self.obj_gamma_wall_x_label,
-                                spin=self.obj_gamma_wall_y_spin, row=8,
+            self.create_spinbox(frame=self.walls, row=8,
                                 column=0, var=gamma_wall_y_editVar, text="Y:", color=6, beg=0, end=430, len=10)
 
             """DELTA"""
-            self.obj_delta_wall_label = 0
-            self.obj_delta_wall_butt = 0
-            self.obj_delta_wall_x_label = 0
-            self.obj_delta_wall_x_spin = 0
-            self.obj_delta_wall_y_label = 0
-            self.obj_delta_wall_y_spin = 0
-            self.create_checkbutton(frame=self.walls, label=self.obj_delta_wall_label,
-                                    checkbutton=self.obj_delta_wall_butt, row=9,
+            self.create_checkbutton(frame=self.walls, row=9,
                                     column=0, var=delta_wall_state_editVar, text="Delta wall:", color=6)
-            self.create_spinbox(frame=self.walls, label=self.obj_delta_wall_y_label,
-                                spin=self.obj_delta_wall_x_spin, row=10,
+            self.create_spinbox(frame=self.walls, row=10,
                                 column=0, var=delta_wall_x_editVar, text="X:", color=6, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.walls, label=self.obj_delta_wall_x_label,
-                                spin=self.obj_delta_wall_y_spin, row=11,
+            self.create_spinbox(frame=self.walls, row=11,
                                 column=0, var=delta_wall_y_editVar, text="Y:", color=6, beg=0, end=430, len=10)
 
             """EPSILON"""
-            self.obj_epsilon_wall_label = 0
-            self.obj_epsilon_wall_butt = 0
-            self.obj_epsilon_wall_x_label = 0
-            self.obj_epsilon_wall_x_spin = 0
-            self.obj_epsilon_wall_y_label = 0
-            self.obj_epsilon_wall_y_spin = 0
-            self.create_checkbutton(frame=self.walls, label=self.obj_epsilon_wall_label,
-                                    checkbutton=self.obj_epsilon_wall_butt, row=12,
+            self.create_checkbutton(frame=self.walls, row=12,
                                     column=0, var=epsilon_wall_state_editVar, text="Epsilon wall:", color=6)
-            self.create_spinbox(frame=self.walls, label=self.obj_epsilon_wall_y_label,
-                                spin=self.obj_epsilon_wall_x_spin, row=13,
+            self.create_spinbox(frame=self.walls, row=13,
                                 column=0, var=epsilon_wall_x_editVar, text="X:", color=6, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.walls, label=self.obj_epsilon_wall_x_label,
-                                spin=self.obj_epsilon_wall_y_spin, row=14,
+            self.create_spinbox(frame=self.walls, row=14,
                                 column=0, var=epsilon_wall_y_editVar, text="Y:", color=6, beg=0, end=430, len=10)
 
             """ZETA"""
-            self.obj_zeta_wall_label = 0
-            self.obj_zeta_wall_butt = 0
-            self.obj_zeta_wall_x_label = 0
-            self.obj_zeta_wall_x_spin = 0
-            self.obj_zeta_wall_y_label = 0
-            self.obj_zeta_wall_y_spin = 0
-            self.create_checkbutton(frame=self.walls, label=self.obj_zeta_wall_label,
-                                    checkbutton=self.obj_zeta_wall_butt, row=15,
+            self.create_checkbutton(frame=self.walls, row=15,
                                     column=0, var=zeta_wall_state_editVar, text="Zeta wall:", color=6)
-            self.create_spinbox(frame=self.walls, label=self.obj_zeta_wall_y_label,
-                                spin=self.obj_zeta_wall_x_spin, row=16,
+            self.create_spinbox(frame=self.walls, row=16,
                                 column=0, var=zeta_wall_x_editVar, text="X:", color=6, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.walls, label=self.obj_zeta_wall_x_label,
-                                spin=self.obj_zeta_wall_y_spin, row=17,
+            self.create_spinbox(frame=self.walls, row=17,
                                 column=0, var=zeta_wall_y_editVar, text="Y:", color=6, beg=0, end=430, len=10)
 
     def show_savages(self):
             """ALPHA"""
-            self.obj_alpha_savage_label = 0
-            self.obj_alpha_savage_butt = 0
-            self.obj_alpha_savage_x_label = 0
-            self.obj_alpha_savage_x_spin = 0
-            self.obj_alpha_savage_y_label = 0
-            self.obj_alpha_savage_y_spin = 0
-            self.obj_alpha_savage_home_label = 0
-            self.obj_alpha_savage_home_entry = 0
-            self.create_checkbutton(frame=self.savages, label=self.obj_alpha_savage_label,
-                                    checkbutton=self.obj_alpha_savage_butt, row=0,
+
+            self.create_checkbutton(frame=self.savages, row=0,
                                     column=0, var=alpha_savage_state_editVar, text="Alpha savage:", color=7)
-            self.create_spinbox(frame=self.savages, label=self.obj_alpha_savage_y_label,
-                                spin=self.obj_alpha_savage_x_spin, row=1,
+            self.create_spinbox(frame=self.savages, row=1,
                                 column=0, var=alpha_savage_x_editVar, text="X:", color=7, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.savages, label=self.obj_alpha_savage_x_label,
-                                spin=self.obj_alpha_savage_y_spin, row=2,
+            self.create_spinbox(frame=self.savages, row=2,
                                 column=0, var=alpha_savage_y_editVar, text="Y:", color=7, beg=0, end=430, len=10)
-            self.create_entry(frame=self.savages, label=self.obj_alpha_savage_home_label,
-                              entry=self.obj_alpha_savage_home_entry, row=3,
+            self.create_entry(frame=self.savages, row=3,
                               column=0, var=alpha_savage_home_editVar, text="Платформа:", color=7)
 
             """BETA"""
-            self.obj_beta_savage_label = 0
-            self.obj_beta_savage_butt = 0
-            self.obj_beta_savage_x_label = 0
-            self.obj_beta_savage_x_spin = 0
-            self.obj_beta_savage_y_label = 0
-            self.obj_beta_savage_y_spin = 0
-            self.obj_beta_savage_home_label = 0
-            self.obj_beta_savage_home_entry = 0
-            self.create_checkbutton(frame=self.savages, label=self.obj_beta_savage_label,
-                                    checkbutton=self.obj_beta_savage_butt, row=4,
+            self.create_checkbutton(frame=self.savages, row=4,
                                     column=0, var=beta_savage_state_editVar, text="Beta savage:", color=7)
-            self.create_spinbox(frame=self.savages, label=self.obj_beta_savage_y_label,
-                                spin=self.obj_beta_savage_x_spin, row=5,
+            self.create_spinbox(frame=self.savages, row=5,
                                 column=0, var=beta_savage_x_editVar, text="X:", color=7, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.savages, label=self.obj_beta_savage_x_label,
-                                spin=self.obj_beta_savage_y_spin, row=6,
+            self.create_spinbox(frame=self.savages, row=6,
                                 column=0, var=beta_savage_y_editVar, text="Y:", color=7, beg=0, end=430, len=10)
-            self.create_entry(frame=self.savages, label=self.obj_beta_savage_home_label,
-                              entry=self.obj_beta_savage_home_entry, row=7,
+            self.create_entry(frame=self.savages, row=7,
                               column=0, var=beta_savage_home_editVar, text="Платформа:", color=7)
 
             """GAMMA"""
-            self.obj_gamma_savage_label = 0
-            self.obj_gamma_savage_butt = 0
-            self.obj_gamma_savage_x_label = 0
-            self.obj_gamma_savage_x_spin = 0
-            self.obj_gamma_savage_y_label = 0
-            self.obj_gamma_savage_y_spin = 0
-            self.obj_gamma_savage_home_label = 0
-            self.obj_gamma_savage_home_entry = 0
-            self.create_checkbutton(frame=self.savages, label=self.obj_gamma_savage_label,
-                                    checkbutton=self.obj_gamma_savage_butt, row=8,
+            self.create_checkbutton(frame=self.savages, row=8,
                                     column=0, var=gamma_savage_state_editVar, text="Gamma savage:", color=7)
-            self.create_spinbox(frame=self.savages, label=self.obj_gamma_savage_y_label,
-                                spin=self.obj_gamma_savage_x_spin, row=9,
+            self.create_spinbox(frame=self.savages, row=9,
                                 column=0, var=gamma_savage_x_editVar, text="X:", color=7, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.savages, label=self.obj_gamma_savage_x_label,
-                                spin=self.obj_gamma_savage_y_spin, row=10,
+            self.create_spinbox(frame=self.savages, row=10,
                                 column=0, var=gamma_savage_y_editVar, text="Y:", color=7, beg=0, end=430, len=10)
-            self.create_entry(frame=self.savages, label=self.obj_gamma_savage_home_label,
-                              entry=self.obj_gamma_savage_home_entry, row=11,
+            self.create_entry(frame=self.savages, row=11,
                               column=0, var=gamma_savage_home_editVar, text="Платформа:", color=7)
 
             """DELTA"""
-            self.obj_delta_savage_label = 0
-            self.obj_delta_savage_butt = 0
-            self.obj_delta_savage_x_label = 0
-            self.obj_delta_savage_x_spin = 0
-            self.obj_delta_savage_y_label = 0
-            self.obj_delta_savage_y_spin = 0
-            self.obj_delta_savage_home_label = 0
-            self.obj_delta_savage_home_entry = 0
-            self.create_checkbutton(frame=self.savages, label=self.obj_delta_savage_label,
-                                    checkbutton=self.obj_delta_savage_butt, row=12,
+            self.create_checkbutton(frame=self.savages, row=12,
                                     column=0, var=delta_savage_state_editVar, text="Delta savage:", color=7)
-            self.create_spinbox(frame=self.savages, label=self.obj_delta_savage_y_label,
-                                spin=self.obj_delta_savage_x_spin, row=13,
+            self.create_spinbox(frame=self.savages, row=13,
                                 column=0, var=delta_savage_x_editVar, text="X:", color=7, beg=0, end=610, len=10)
-            self.create_spinbox(frame=self.savages, label=self.obj_delta_savage_x_label,
-                                spin=self.obj_delta_savage_y_spin, row=14,
+            self.create_spinbox(frame=self.savages, row=14,
                                 column=0, var=delta_savage_y_editVar, text="Y:", color=7, beg=0, end=430, len=10)
-            self.create_entry(frame=self.savages, label=self.obj_delta_savage_home_label,
-                              entry=self.obj_delta_savage_home_entry, row=15,
+            self.create_entry(frame=self.savages, row=15,
                               column=0, var=delta_savage_home_editVar, text="Платформа:", color=7)
         
     def show_mushrooms(self):
         """ALPHA FAST"""
-        self.obj_alpha_fastroom_label = 0
-        self.obj_alpha_fastroom_butt = 0
-        self.obj_alpha_fastroom_x_label = 0
-        self.obj_alpha_fastroom_x_spin = 0
-        self.obj_alpha_fastroom_y_label = 0
-        self.obj_alpha_fastroom_y_spin = 0
-        self.create_checkbutton(frame=self.fastrooms, label=self.obj_alpha_fastroom_label,
-                                checkbutton=self.obj_alpha_fastroom_butt, row=0,
+        self.create_checkbutton(frame=self.fastrooms, row=0,
                                 column=0, var=alpha_fastroom_state_editVar, text="Alpha fastroom:", color=8)
-        self.create_spinbox(frame=self.fastrooms, label=self.obj_alpha_fastroom_y_label,
-                            spin=self.obj_alpha_fastroom_x_spin, row=1,
+        self.create_spinbox(frame=self.fastrooms, row=1,
                             column=0, var=alpha_fastroom_x_editVar, text="X:", color=8, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.fastrooms, label=self.obj_alpha_fastroom_x_label,
-                            spin=self.obj_alpha_fastroom_y_spin, row=2,
+        self.create_spinbox(frame=self.fastrooms, row=2,
                             column=0, var=alpha_fastroom_y_editVar, text="Y:", color=8, beg=0, end=430, len=10)
 
         """BETA FAST"""
-        self.obj_beta_fastroom_label = 0
-        self.obj_beta_fastroom_butt = 0
-        self.obj_beta_fastroom_x_label = 0
-        self.obj_beta_fastroom_x_spin = 0
-        self.obj_beta_fastroom_y_label = 0
-        self.obj_beta_fastroom_y_spin = 0
-        self.create_checkbutton(frame=self.fastrooms, label=self.obj_beta_fastroom_label,
-                                checkbutton=self.obj_beta_fastroom_butt, row=3,
+        self.create_checkbutton(frame=self.fastrooms, row=3,
                                 column=0, var=beta_fastroom_state_editVar, text="Beta fastroom:", color=8)
-        self.create_spinbox(frame=self.fastrooms, label=self.obj_beta_fastroom_y_label,
-                            spin=self.obj_beta_fastroom_x_spin, row=4,
+        self.create_spinbox(frame=self.fastrooms, row=4,
                             column=0, var=beta_fastroom_x_editVar, text="X:", color=8, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.fastrooms, label=self.obj_beta_fastroom_x_label,
-                            spin=self.obj_beta_fastroom_y_spin, row=5,
+        self.create_spinbox(frame=self.fastrooms, row=5,
                             column=0, var=beta_fastroom_y_editVar, text="Y:", color=8, beg=0, end=430, len=10)
 
         """ALPHA SLOW"""
-        self.obj_alpha_slowroom_label = 0
-        self.obj_alpha_slowroom_butt = 0
-        self.obj_alpha_slowroom_x_label = 0
-        self.obj_alpha_slowroom_x_spin = 0
-        self.obj_alpha_slowroom_y_label = 0
-        self.obj_alpha_slowroom_y_spin = 0
-        self.create_checkbutton(frame=self.slowrooms, label=self.obj_alpha_slowroom_label,
-                                checkbutton=self.obj_alpha_slowroom_butt, row=0,
+        self.create_checkbutton(frame=self.slowrooms, row=0,
                                 column=0, var=alpha_slowroom_state_editVar, text="Alpha slowroom:", color=9)
-        self.create_spinbox(frame=self.slowrooms, label=self.obj_alpha_slowroom_y_label,
-                            spin=self.obj_alpha_slowroom_x_spin, row=1,
+        self.create_spinbox(frame=self.slowrooms, row=1,
                             column=0, var=alpha_slowroom_x_editVar, text="X:", color=9, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.slowrooms, label=self.obj_alpha_slowroom_x_label,
-                            spin=self.obj_alpha_slowroom_y_spin, row=2,
+        self.create_spinbox(frame=self.slowrooms, row=2,
                             column=0, var=alpha_slowroom_y_editVar, text="Y:", color=9, beg=0, end=430, len=10)
 
         """BETA SLOW"""
-        self.obj_beta_slowroom_label = 0
-        self.obj_beta_slowroom_butt = 0
-        self.obj_beta_slowroom_x_label = 0
-        self.obj_beta_slowroom_x_spin = 0
-        self.obj_beta_slowroom_y_label = 0
-        self.obj_beta_slowroom_y_spin = 0
-        self.create_checkbutton(frame=self.slowrooms, label=self.obj_beta_slowroom_label,
-                                checkbutton=self.obj_beta_slowroom_butt, row=3,
+        self.create_checkbutton(frame=self.slowrooms, row=3,
                                 column=0, var=beta_slowroom_state_editVar, text="Beta slowroom:", color=9)
-        self.create_spinbox(frame=self.slowrooms, label=self.obj_beta_slowroom_y_label,
-                            spin=self.obj_beta_slowroom_x_spin, row=4,
+        self.create_spinbox(frame=self.slowrooms, row=4,
                             column=0, var=beta_slowroom_x_editVar, text="X:", color=9, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.slowrooms, label=self.obj_beta_slowroom_x_label,
-                            spin=self.obj_beta_slowroom_y_spin, row=5,
+        self.create_spinbox(frame=self.slowrooms, row=5,
                             column=0, var=beta_slowroom_y_editVar, text="Y:", color=9, beg=0, end=430, len=10)
 
         """ALPHA GRAV"""
-        self.obj_alpha_gravroom_label = 0
-        self.obj_alpha_gravroom_butt = 0
-        self.obj_alpha_gravroom_x_label = 0
-        self.obj_alpha_gravroom_x_spin = 0
-        self.obj_alpha_gravroom_y_label = 0
-        self.obj_alpha_gravroom_y_spin = 0
-        self.create_checkbutton(frame=self.gravrooms, label=self.obj_alpha_gravroom_label,
-                                checkbutton=self.obj_alpha_gravroom_butt, row=0,
+        self.create_checkbutton(frame=self.gravrooms, row=0,
                                 column=0, var=alpha_gravroom_state_editVar, text="Alpha gravroom:", color=10)
-        self.create_spinbox(frame=self.gravrooms, label=self.obj_alpha_gravroom_y_label,
-                            spin=self.obj_alpha_gravroom_x_spin, row=1,
+        self.create_spinbox(frame=self.gravrooms, row=1,
                             column=0, var=alpha_gravroom_x_editVar, text="X:", color=10, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.gravrooms, label=self.obj_alpha_gravroom_x_label,
-                            spin=self.obj_alpha_gravroom_y_spin, row=2,
+        self.create_spinbox(frame=self.gravrooms, row=2,
                             column=0, var=alpha_gravroom_y_editVar, text="Y:", color=10, beg=0, end=430, len=10)
 
         """BETA GRAV"""
-        self.obj_beta_gravroom_label = 0
-        self.obj_beta_gravroom_butt = 0
-        self.obj_beta_gravroom_x_label = 0
-        self.obj_beta_gravroom_x_spin = 0
-        self.obj_beta_gravroom_y_label = 0
-        self.obj_beta_gravroom_y_spin = 0
-        self.create_checkbutton(frame=self.gravrooms, label=self.obj_beta_gravroom_label,
-                                checkbutton=self.obj_beta_gravroom_butt, row=3,
+        self.create_checkbutton(frame=self.gravrooms, row=3,
                                 column=0, var=beta_gravroom_state_editVar, text="Beta gravroom:", color=10)
-        self.create_spinbox(frame=self.gravrooms, label=self.obj_beta_gravroom_y_label,
-                            spin=self.obj_beta_gravroom_x_spin, row=4,
+        self.create_spinbox(frame=self.gravrooms, row=4,
                             column=0, var=beta_gravroom_x_editVar, text="X:", color=10, beg=0, end=610, len=10)
-        self.create_spinbox(frame=self.gravrooms, label=self.obj_beta_gravroom_x_label,
-                            spin=self.obj_beta_gravroom_y_spin, row=5,
+        self.create_spinbox(frame=self.gravrooms, row=5,
                             column=0, var=beta_gravroom_y_editVar, text="Y:", color=10, beg=0, end=430, len=10)
 
-    def create_spinbox(self, frame, label, spin, row, column, var, text, color, beg, end, len, state=NORMAL):
-        label = Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E, width =len)
-        spin = Spinbox(frame, font=("Arial", 8), bg=lev_colors[color], textvariable=var, from_=beg, to=end,
-                       width=len, state=state)
-        label.grid(row=row, column=column, padx=0, pady=0)
-        spin.grid(row=row, column=column+1, padx=5, pady=0)
+    def create_spinbox(self, frame, row, column, var, text, color, beg, end, len, state=NORMAL):
+        Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E,
+              width = len).grid(row=row, column=column, padx=0, pady=0)
+        Spinbox(frame, font=("Arial", 8), bg=lev_colors[color], textvariable=var, from_=beg, to=end,
+                       width=len, state=state).grid(row=row, column=column+1, padx=5, pady=0)
 
-    def create_entry(self, frame, label, entry, row, column, var, text, color):
-        label = Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E, width =10)
-        entry = Entry(frame, font=("Arial", 8), bg=lev_colors[color], textvariable=var, width =12)
-        label.grid(row=row, column=column, padx=0, pady=0)
-        entry.grid(row=row, column=column+1, padx=5, pady=0)
+    def create_entry(self, frame, row, column, var, text, color):
+        Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E,
+              width =10).grid(row=row, column=column, padx=0, pady=0)
+        Entry(frame, font=("Arial", 8), bg=lev_colors[color], textvariable=var,
+              width =12).grid(row=row, column=column+1, padx=5, pady=0)
 
-    def create_radiobutton(self, frame, label, radiobutton, row, column, var, text, color, value):
-        label = Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E, width =14)
-        radiobutton = Radiobutton(frame, bg=lev_colors[color], variable=var, value=value)
-        label.grid(row=row, column=column, padx=0, pady=0)
-        radiobutton.grid(row=row, column=column+1, padx=5, pady=0)
+    def create_radiobutton(self, frame, row, column, var, text, color, value):
+        Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E,
+              width =14).grid(row=row, column=column, padx=0, pady=0)
+        Radiobutton(frame, bg=lev_colors[color], variable=var,
+                    value=value).grid(row=row, column=column+1, padx=5, pady=0)
 
-    def create_checkbutton(self, frame, label, checkbutton, row, column, var, text, color):
-        label = Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E, width =14)
-        checkbutton = Checkbutton(frame, bg=lev_colors[color], variable=var, onvalue=1, offvalue=0)
-        label.grid(row=row, column=column, padx=0, pady=0)
-        checkbutton.grid(row=row, column=column+1, padx=5, pady=0)
+
+    def create_checkbutton(self, frame, row, column, var, text, color):
+        Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E,
+              width =14).grid(row=row, column=column, padx=0, pady=0)
+        Checkbutton(frame, bg=lev_colors[color], variable=var,
+                    onvalue=1, offvalue=0).grid(row=row, column=column+1, padx=5, pady=0)
 
 
 master = Root()
@@ -1874,5 +1397,5 @@ emptylevel = data = {
 			"betaGravroomCoords": [0,0]
         }
 
-
+master.common_information_show(begin=True)
 master.mainloop()

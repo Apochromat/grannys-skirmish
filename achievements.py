@@ -45,8 +45,8 @@ emptydata = {
     "lastscore": 0
 }
 
-class PlayerData:
 
+class PlayerData:
     def __init__(self):
         try:
             self.file = open("player.json", "r", encoding="utf-8")
@@ -56,17 +56,17 @@ class PlayerData:
             self.data = json.load(self.file)
         except json.decoder.JSONDecodeError:
             print("Create player.json")
-            self.eraseData()
+            self.erase_data()
 
-    def writeData(self):
+    def write_data(self):
         with open("player.json", "w", encoding="utf-8") as f:
             f.write(json.dumps(self.data, indent=4, ensure_ascii=False))
 
-    def loadData(self):
+    def load_data(self):
         self.file = open("player.json", "r", encoding="utf-8")
         self.data = json.load(self.file)
 
-    def eraseData(self):
+    def erase_data(self):
         with open("player.json", "w", encoding="utf-8") as f:
             f.write(json.dumps(emptydata, indent=4, ensure_ascii=False))
-        self.loadData()
+        self.load_data()

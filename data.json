@@ -1,6 +1,6 @@
 {
     "title": "Granny`s Skirmish",
-    "version": "v0.9.10 prerelease",
+    "version": "v0.9.11 prerelease",
     "windowsizewin": [
         640,
         540
@@ -47,7 +47,7 @@
     "musicswitch": true,
     "musicvolume": 30,
     "soundswitch": true,
-    "soundvolume": 50,
+    "soundvolume": 30,
     "globals": [
         "Hero",
         "Base",

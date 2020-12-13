@@ -1,8 +1,7 @@
 # Granny`s Skirmish
-# version 0.9.10
+# version 0.9.11
 
 """Импорт"""
-import json
 import platform
 from tkinter import *
 from tkinter import colorchooser as cc
@@ -50,14 +49,14 @@ animationSavageduration = settings['animationSavageduration']  # Задержк�
 backgroundcolor = settings["backgroung"]  # Цвет фона
 
 lasteffecttime = time.time()  # Время последней активации эффекта
-lastframetime = time.time()  # Последнее время кадра
+last_frame_time = time.time()  # Последнее время кадра
 
 isExitActive = False  # Доступен ли выход с уровня
 avoidEffects = False  # Необходимо ли сбросить эффекты
 
 antigrav = False  # Включена ли антигравитация
 simpgrav = False  # Двигается ли персонаж под действием гравитации
-wallside = "0"  # Сторона стенки в которую уперся персонаж
+wall_side = "0"  # Сторона стенки в которую уперся персонаж
 
 isMusicOn = False
 
@@ -91,10 +90,13 @@ if sysName == "Windows":
     root.iconbitmap(image.iconPath)
 """Музыка"""
 mixer.init()
+
+
 def music_stop():
     global isMusicOn
     mixer.music.stop()
     isMusicOn = False
+
 
 def music():
     global isMusicOn, typeMusic
@@ -104,7 +106,7 @@ def music():
     mixer.Channel(2).set_volume(volumeSound / 100)
     mixer.Channel(3).set_volume(volumeSound / 100)
     mixer.Channel(4).set_volume(volumeSound / 100)
-    if musicmode.get() is False:
+    if music_mode.get() is False:
         music_stop()
     if level == 0:
         if typeMusic == 1:
@@ -115,7 +117,7 @@ def music():
             isMusicOn = False
         typeMusic = 1
 
-    if (musicmode.get() is True) & (typeMusic == 0) & (isMusicOn is False):
+    if (music_mode.get() is True) & (typeMusic == 0) & (isMusicOn is False):
         music_stop()
         if sysName == "Windows":
             mixer.music.load(musicPaths.mainmenuWin)
@@ -124,7 +126,7 @@ def music():
         mixer.music.play(loops=200)
         isMusicOn = True
 
-    if (musicmode.get() is True) & (typeMusic == 1) & (isMusicOn is False):
+    if (music_mode.get() is True) & (typeMusic == 1) & (isMusicOn is False):
         music_stop()
         if sysName == "Windows":
             mixer.music.load(musicPaths.levelWin)
@@ -132,9 +134,11 @@ def music():
             mixer.music.load(musicPaths.levelLin)
         mixer.music.play(loops=1000)
         isMusicOn = True
+
+
 """Элементы окна"""
-statusbar = Label(root, justify=LEFT, text="Готов", width=settings["statusbarwidth"], height=1,
-                  bg=backgroundcolor, anchor=W)  # Статусбар
+status_bar = Label(root, justify=LEFT, text="Готов", width=settings["statusbarwidth"], height=1,
+                   bg=backgroundcolor, anchor=W)  # Статусбар
 labelLevel = Label(root, justify=LEFT, text=" ", width=settings["hidwidth"], height=1, bg=backgroundcolor,
                    anchor=W)  # Отображение уровня
 labelCats = Label(root, justify=LEFT, text=" ", width=settings["hidwidth"], height=1, bg=backgroundcolor,
@@ -153,14 +157,16 @@ labelEffect = Label(root, text=" ", width=settings["effectwidth"], height=1, bg=
 labelTime = Label(root, text="Time", width=settings["effectwidth"], height=1, bg="lightcoral")
 labelTimer = Label(root, text="Timer", width=settings["timerwidth"], height=1, bg="lightcoral")
 
+
 # Удаление кнопок с главного меню
-def clearbutt():
+def button_clear():
     newgameButt.place_forget()
     continueButt.place_forget()
     exitgameButt.place_forget()
 
+
 # Начало новой игры
-def newgame():
+def new_game():
     global level
     if (level != 0) | (playerData.data["lastlevel"] != 1) | playerData.data["achievements"]["end"]:
         ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать новую игру? \n"
@@ -168,19 +174,20 @@ def newgame():
         if ask:
             objectsVariable.lives = settings['livesnormal']
             level = 0
-            playerData.eraseData()
+            playerData.erase_data()
             objectsVariable.Score = 0
             objectsVariable.GlobalScore = 0
-            clearbutt()
-            LevelAdd()
+            button_clear()
+            level_adding()
     else:
         objectsVariable.lives = settings['livesnormal']
         level = 0
-        playerData.eraseData()
+        playerData.erase_data()
         objectsVariable.Score = 0
         objectsVariable.GlobalScore = 0
-        clearbutt()
-        LevelAdd()
+        button_clear()
+        level_adding()
+
 
 def continuegame():
     global level
@@ -193,15 +200,16 @@ def continuegame():
         objectsVariable.lives = settings["livesnormal"]
         objectsVariable.Score = 0
         objectsVariable.GlobalScore = 0
-        clearbutt()
-        LevelAdd()
+        button_clear()
+        level_adding()
     else:
         objectsVariable.lives = playerData.data["lastlives"]
         level = playerData.data["lastlevel"]
         objectsVariable.Score = 0
         objectsVariable.GlobalScore = playerData.data["lastscore"]
-        clearbutt()
-        LevelInit()
+        button_clear()
+        level_initialization()
+
 
 # Опрос закрытия программы
 def on_closing():  # Опрос закрытия
@@ -211,95 +219,108 @@ def on_closing():  # Опрос закрытия
         run = False
         root.destroy()
 
-# Кнопки главного меню
-newgameButt = Button(root, image = image.newgame,  command=newgame, borderwidth=0, bd=0)
-continueButt = Button(root, image =image.continuegame, command=continuegame, borderwidth=0, bd=0)
-exitgameButt = Button(root, image =image.quit, command=on_closing, borderwidth=0, bd=0)
 
-"""Добавление элементов в окно"""
-def loadScreen():
+# Кнопки главного меню
+newgameButt = Button(root, image=image.newgame, command=new_game, borderwidth=0, bd=0)
+continueButt = Button(root, image=image.continuegame, command=continuegame, borderwidth=0, bd=0)
+exitgameButt = Button(root, image=image.quit, command=on_closing, borderwidth=0, bd=0)
+
+
+# Добавление элементов в окно
+def load_screen():
     labelLevel.grid(row=0, column=0)
     labelScore.grid(row=0, column=1)
     labelCats.grid(row=0, column=2)
     labelLives.grid(row=0, column=3)
     canvas.grid(row=1, column=0, columnspan=4)
-    statusbar.place(x=0, y=500)
+    status_bar.place(x=0, y=500)
 
-loadScreen()
+
+load_screen()
 
 # Переменная для режимов отладки и музыки
-musicmode = BooleanVar()
-musicmode.set(settings["musicswitch"])
-soundmode = BooleanVar()
-soundmode.set(settings["soundswitch"])
-debugmode = IntVar()
-scalevolumeMusic = IntVar()
-scalevolumeMusic.set(volumeMusic)
-scalevolumeSound = IntVar()
-scalevolumeSound.set(volumeMusic)
+music_mode = BooleanVar()
+music_mode.set(settings["musicswitch"])
+sound_mode = BooleanVar()
+sound_mode.set(settings["soundswitch"])
+debug_mode = IntVar()
+scale_volume_music = IntVar()
+scale_volume_music.set(volumeMusic)
+scale_volume_sound = IntVar()
+scale_volume_sound.set(volumeMusic)
 
 """Окно выбора громкости Музыки"""
-def setvolumemusic():
-    global volumeMusicWindow
-    volumeMusicWindow = Toplevel()
-    volumeMusicWindow.title("Громкость музыки")  # Заголовок окна
-    volumeMusicWindow.configure(bg=backgroundcolor)  # Фон окна
-    volumeMusicWindow.geometry("%ix%i" % (216, 130))  # Размеры окна
-    volumeMusicWindow.resizable(0, 0)  # Запрет на изменение размеров окна
+
+
+def set_music_volume():
+    global volume_music_window
+    volume_music_window = Toplevel()
+    volume_music_window.title("Громкость музыки")  # Заголовок окна
+    volume_music_window.configure(bg=backgroundcolor)  # Фон окна
+    volume_music_window.geometry("%ix%i" % (216, 130))  # Размеры окна
+    volume_music_window.resizable(0, 0)  # Запрет на изменение размеров окна
     if sysName == "Windows":
-        volumeMusicWindow.iconbitmap(image.iconPath)
-    Label(volumeMusicWindow, bg=backgroundcolor, text="Выберите подходящую громкость", font=("Arial", 10)).grid(
+        volume_music_window.iconbitmap(image.iconPath)
+    Label(volume_music_window, bg=backgroundcolor, text="Выберите подходящую громкость", font=("Arial", 10)).grid(
         row=0, column=0, columnspan=2)
-    Label(volumeMusicWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeMusic, font=("Arial", 10)).grid(
+    Label(volume_music_window, bg=backgroundcolor, text="Текущая громкость: %s" % volumeMusic, font=("Arial", 10)).grid(
         row=1, column=0, columnspan=2)
-    Scale(volumeMusicWindow, variable=scalevolumeMusic, bg=backgroundcolor, orient=HORIZONTAL, length=180,
+    Scale(volume_music_window, variable=scale_volume_music, bg=backgroundcolor, orient=HORIZONTAL, length=180,
           font=("Arial", 10)).grid(row=3, column=0, columnspan=2)
-    Button(volumeMusicWindow, text="Сохранить", bg=backgroundcolor, command=savevolumemusic, font=("Arial", 10)).grid(
-        row=4, column=0, pady=10)
-    Button(volumeMusicWindow, text="Отменить", bg=backgroundcolor, command=undovolumemusic, font=("Arial", 10)).grid(
-        row=4, column=1, pady=10)
+    Button(volume_music_window, text="Сохранить", bg=backgroundcolor, command=save_music_volume,
+           font=("Arial", 10)).grid(row=4, column=0, pady=10)
+    Button(volume_music_window, text="Отменить", bg=backgroundcolor, command=undo_music_volume,
+           font=("Arial", 10)).grid(row=4, column=1, pady=10)
 
-def savevolumemusic():
+
+def save_music_volume():
     global volumeMusic
-    volumeMusic = scalevolumeMusic.get()
-    volumeMusicWindow.destroy()
+    volumeMusic = scale_volume_music.get()
+    volume_music_window.destroy()
 
-def undovolumemusic():
-    volumeMusicWindow.destroy()
-    scalevolumeMusic.set(volumeMusic)
 
-"""Окно выбора громкости Звуков"""
-def setvolumesound():
-    global volumeSoundWindow
-    volumeSoundWindow = Toplevel()
-    volumeSoundWindow.title("Громкость pderjd")  # Заголовок окна
-    volumeSoundWindow.configure(bg=backgroundcolor)  # Фон окна
-    volumeSoundWindow.geometry("%ix%i" % (216, 130))  # Размеры окна
-    volumeSoundWindow.resizable(0, 0)  # Запрет на изменение размеров окна
+def undo_music_volume():
+    volume_music_window.destroy()
+    scale_volume_music.set(volumeMusic)
+
+
+# Окно выбора громкости Звуков
+def set_sound_volume():
+    global volume_sound_window
+    volume_sound_window = Toplevel()
+    volume_sound_window.title("Громкость pderjd")  # Заголовок окна
+    volume_sound_window.configure(bg=backgroundcolor)  # Фон окна
+    volume_sound_window.geometry("%ix%i" % (216, 130))  # Размеры окна
+    volume_sound_window.resizable(0, 0)  # Запрет на изменение размеров окна
     if sysName == "Windows":
-        volumeSoundWindow.iconbitmap(image.iconPath)
-    Label(volumeSoundWindow, bg=backgroundcolor, text="Выберите подходящую громкость", font=("Arial", 10)).grid(
+        volume_sound_window.iconbitmap(image.iconPath)
+    Label(volume_sound_window, bg=backgroundcolor, text="Выберите подходящую громкость", font=("Arial", 10)).grid(
         row=0, column=0, columnspan=2)
-    Label(volumeSoundWindow, bg=backgroundcolor, text="Текущая громкость: %s" % volumeSound, font=("Arial", 10)).grid(
+    Label(volume_sound_window, bg=backgroundcolor, text="Текущая громкость: %s" % volumeSound, font=("Arial", 10)).grid(
         row=1, column=0, columnspan=2)
-    Scale(volumeSoundWindow, variable=scalevolumeSound, bg=backgroundcolor, orient=HORIZONTAL, length=180, font=("Arial", 10)).grid(
+    Scale(volume_sound_window, variable=scale_volume_sound, bg=backgroundcolor, orient=HORIZONTAL, length=180,
+          font=("Arial", 10)).grid(
         row=3, column=0, columnspan=2)
-    Button(volumeSoundWindow, text="Сохранить", bg=backgroundcolor, command=savevolumesound, font=("Arial", 10)).grid(
-        row=4, column=0, pady=10)
-    Button(volumeSoundWindow, text="Отменить", bg=backgroundcolor, command=undovolumesound, font=("Arial", 10)).grid(
-        row=4, column=1, pady=10)
+    Button(volume_sound_window, text="Сохранить", bg=backgroundcolor, command=save_sound_volume,
+           font=("Arial", 10)).grid(row=4, column=0, pady=10)
+    Button(volume_sound_window, text="Отменить", bg=backgroundcolor, command=undo_sound_volume,
+           font=("Arial", 10)).grid(row=4, column=1, pady=10)
 
-def savevolumesound():
+
+def save_sound_volume():
     global volumeSound
-    volumeSound = scalevolumeSound.get()
-    volumeSoundWindow.destroy()
+    volumeSound = scale_volume_sound.get()
+    volume_sound_window.destroy()
 
-def undovolumesound():
-    volumeSoundWindow.destroy()
-    scalevolumeSound.set(volumeSound)
-"""Функции окон"""
+
+def undo_sound_volume():
+    volume_sound_window.destroy()
+    scale_volume_sound.set(volumeSound)
+
+
+# Функции окон
 # Открытие главного меню
-def mainmenu_open():  # Открытие главного меню
+def main_menu_open():  # Открытие главного меню
     global level, shouldReloadButtons
     level = 0
     objectsVariable.lives = settings['livesnormal']
@@ -327,57 +348,58 @@ def mainmenu_open():  # Открытие главного меню
     shouldReloadButtons = True
     print("Запуск")
 
+
 # Обновление статусбара
 def status():
-    CatStr = "%s из %s" % (objectsVariable.CatAmountReal, objectsVariable.CatAmountAll)
+    cat_str = "%s из %s" % (objectsVariable.CatAmountReal, objectsVariable.CatAmountAll)
     if Hero.avaible:
-        GrannyPos = str(Hero.coords())
+        granny_pos = str(Hero.coords())
     else:
-        GrannyPos = "None"
+        granny_pos = "None"
     if alphaSavage.avaible:
-        alphaPos = str(alphaSavage.coords())
+        alpha_pos = str(alphaSavage.coords())
     else:
-        alphaPos = "None"
+        alpha_pos = "None"
     if betaSavage.avaible:
-        betaPos = str(betaSavage.coords())
+        beta_pos = str(betaSavage.coords())
     else:
-        betaPos = "None"
+        beta_pos = "None"
     if gammaSavage.avaible:
-        gammaPos = str(gammaSavage.coords())
+        gamma_pos = str(gammaSavage.coords())
     else:
-        gammaPos = "None"
+        gamma_pos = "None"
     if deltaSavage.avaible:
-        deltaPos = str(deltaSavage.coords())
+        delta_pos = str(deltaSavage.coords())
     else:
-        deltaPos = "None"
+        delta_pos = "None"
     if level != 0:
-        labelLevelText = "Уровень: %i" % level
-        labelLevel.config(text=labelLevelText)
-        labelCatsText = "Коты: %s" % CatStr
-        labelCats.config(text=labelCatsText)
-        labelScoreText = "Счет: %i" % (objectsVariable.Score + objectsVariable.GlobalScore)
-        labelScore.config(text=labelScoreText)
-        labelLivesText = "Жизни: %i" % objectsVariable.lives
-        labelLives.config(text=labelLivesText)
+        label_level_text = "Уровень: %i" % level
+        labelLevel.config(text=label_level_text)
+        label_cats_text = "Коты: %s" % cat_str
+        labelCats.config(text=label_cats_text)
+        label_score_text = "Счет: %i" % (objectsVariable.Score + objectsVariable.GlobalScore)
+        labelScore.config(text=label_score_text)
+        label_lives_text = "Жизни: %i" % objectsVariable.lives
+        labelLives.config(text=label_lives_text)
 
-    if debugmode.get() == 1:
+    if debug_mode.get() == 1:
         message = "Plat:%s; Head:%s; Ladd:%s; Barr:%s; Side:%s; GraHitSav:%s; SavHitGra:%s;" % (
-            plat, head, ladd, barr, wallside, GraHitSav[0], SavHitGra)
+            plat, head, ladd, barr, wall_side, GraHitSav[0], SavHitGra)
         if level == 0:
             message = "Готов"
-    elif debugmode.get() == 2:
-        message = "Vent:%s; Flow:%s; Carr:%s; Fast:%s; Slow:%s; Grav:%s; ExitActive:%s;" % (
-            vent, flow, carr, fast, slow, grav, isExitActive)
+    elif debug_mode.get() == 2:
+        message = "Vent:%s; Flow:%s; Fast:%s; Slow:%s; Grav:%s; ExitActive:%s;" % (
+            vent, flow, fast, slow, grav, isExitActive)
         if level == 0:
             message = "Готов"
-    elif debugmode.get() == 3:
-        message = "GrannyPos:%s; alphaPos:%s; betaPos:%s; gammaPos:%s; deltaPos:%s;" % (
-            GrannyPos, alphaPos, betaPos, gammaPos, deltaPos)
+    elif debug_mode.get() == 3:
+        message = "granny_pos:%s; alpha_pos:%s; beta_pos:%s; gamma_pos:%s; delta_pos:%s;" % (
+            granny_pos, alpha_pos, beta_pos, gamma_pos, delta_pos)
         if level == 0:
             message = "Готов"
-    elif debugmode.get() == 4:
+    elif debug_mode.get() == 4:
         message = "System:%s, FPS:%i; Key:%i; Cheat:%s; Music:%s; MVol:%i; Sound:%s; SVol:%i" % (
-            sysName, fpsGlobal, KeySpeed, settings["cheatmode"], musicmode.get(), volumeMusic, soundmode.get(),
+            sysName, fpsGlobal, KeySpeed, settings["cheatmode"], music_mode.get(), volumeMusic, sound_mode.get(),
             volumeSound)
         if level == 0:
             message = "Готов"
@@ -385,7 +407,8 @@ def status():
         message = "Работаю"
     else:
         message = "Готов"
-    statusbar.config(text=message)
+    status_bar.config(text=message)
+
 
 # Очистка зоны рисования
 def clearcanvas():
@@ -400,12 +423,15 @@ def clearcanvas():
     canvas.delete("savage")
     canvas.delete("exit")
 
+
 """Объекты"""
+
+
 # Персонаж
 class Granny:  # Класс персонажа, которым мы управляем
-    def __init__(self, spawncoords, canvas, image):
-        self.image = image
-        self.canvas = canvas
+    def __init__(self, spawncoords, the_canvas, the_image):
+        self.image = the_image
+        self.canvas = the_canvas
         self.id = self.canvas.create_image(spawncoords[0], spawncoords[1], image=self.image["image"], tag="granny")
         self.x = spawncoords[0]  # Координата Х
         self.y = spawncoords[1]  # Координата У
@@ -432,6 +458,9 @@ class Granny:  # Класс персонажа, которым мы управл
         self.lastClimbUpImage = 0  # Последнее использованное изображение для анимации забирания
         self.lastHitEnemyImage = 0  # Последнее использованное изображение для анимации удара
         self.lastanimationtime = time.time()  # Время последнего анимирования
+        self.isFallPlayed = False  # Проигран ли звук падения
+        self.isLandPlayed = True  # Проигран ли звук приземления
+        self.lastLadderSound = 0
 
     def coords(self):  # Массив с координатами
         return [self.x, self.y]
@@ -442,12 +471,12 @@ class Granny:  # Класс персонажа, которым мы управл
     def action_queue(self):  # Сама очередь действий
         if self.action == "turn_left":  # Если нужно повернуть налево
             self.isWalkingLeft = True  # Ставим флаг, что поворачиваем (для анимации)
-            if (self.x > 30) & (wallside != "R"):  # Если не у края и не уперлись в стену
+            if (self.x > 30) & (wall_side != "R"):  # Если не у края и не уперлись в стену
                 self.canvas.move(self.id, -grannyWalkSpeed, 0)  # Двигаемся влево на значение скорости
                 self.x -= grannyWalkSpeed  # Обновляем координату
         if self.action == "turn_right":  # Если нужно повернуть направо
             self.isWalkingRight = True  # Ставим флаг, что поворачиваем
-            if (self.x < 610) & (wallside != "L"):  # Если не у края и не уперлись в стену
+            if (self.x < 610) & (wall_side != "L"):  # Если не у края и не уперлись в стену
                 self.canvas.move(self.id, grannyWalkSpeed, 0)  # Двигаемся вправо на значение скорости
                 self.x += grannyWalkSpeed  # Обновляем координату
         if self.action == "turn_up":  # Если нужно подняться наверх
@@ -462,10 +491,10 @@ class Granny:  # Класс персонажа, которым мы управл
                 self.canvas.move(self.id, 0, grannyWalkSpeed)  # Двигаемся вниз на значение скорости
                 self.y += grannyWalkSpeed  # Обновляем координату
         if self.action == "hit_enemy":  # Если нужно ударить
-            if soundmode.get():
+            if sound_mode.get():
                 mixer.Channel(4).play(mixer.Sound(random.choice(soundPaths.grannyhit)))
             self.isHitEnemy = True  # Ставим флаг, что ударяем
-            savageKill()  # Обьявляем всех Дикарей в зоне мертвыми
+            savage_kill()  # Обьявляем всех Дикарей в зоне мертвыми
         self.action = ""  # Сбрасываем задачу
 
     def turn_left(self, event):  # Движение влево
@@ -502,10 +531,19 @@ class Granny:  # Класс персонажа, которым мы управл
     def hit_area(self):  # Массив зоны удара
         return [self.x - 60, self.x + 60, self.y - 30, self.y + 30]
 
-    def gravitymove(self):  # Движение под действием гравитации
+    def gravity_move(self):  # Движение под действием гравитации
         if ((self.y > 30) & (head is False)) | (gravitySpeed > 0):  # Если не бьемся головой или нормальная гравитация
             self.canvas.move(self.id, 0, gravitySpeed)
             self.y += gravitySpeed
+
+    def ladder_sound(self, kind="up"):
+        if kind == "up":
+            if self.lastLadderSound == 4:
+                self.lastLadderSound = 0
+            mixer.Channel(4).play(mixer.Sound(soundPaths.ladder[self.lastLadderSound]))
+            self.lastLadderSound += 1
+        else:
+            mixer.Channel(4).play(mixer.Sound(soundPaths.ladder[0]))
 
     def animate(self):  # Анимирование
         if (time.time() - self.lastanimationtime) > animationGrannyduration:  # Если прошла задержка
@@ -548,6 +586,7 @@ class Granny:  # Класс персонажа, которым мы управл
                 if self.isClimbingUp:
                     if self.lastClimbUpImage == 3:
                         self.lastClimbUpImage = 0
+                    self.ladder_sound()
                     self.canvas.itemconfig(self.id, image=self.image["grannyClimbUp"][self.lastClimbUpImage])
                     self.lastClimbUpImage += 1
                     self.isClimbingUp = False
@@ -556,27 +595,41 @@ class Granny:  # Класс персонажа, которым мы управл
                         self.lastanimation = "Stand"
 
                 if self.isClimbingDown:
+                    self.ladder_sound("down")
                     self.canvas.itemconfig(self.id, image=self.image["grannyClimbDown"])
                     self.isClimbingDown = False
                     self.lastanimation = "Climbing"
                     if (ladd is False) | (plat is True):
                         self.lastanimation = "Stand"
-                        # Падение
+
             if (plat is False) & (ladd is False):
                 self.canvas.itemconfig(self.id, image=self.image["grannyFall"])
+                if (self.isFallPlayed is False) & (antigrav is False):
+                    mixer.Channel(4).play(mixer.Sound(soundPaths.fall))
+                    self.isFallPlayed = True
+                    self.isLandPlayed = False
                 self.isWalkingLeft = False
                 self.isWalkingRight = False
                 self.lastanimation = "Stand"
+            if ((plat is True) | (ladd is True)) & (self.isLandPlayed is False) & (antigrav is False):
+                mixer.Channel(4).play(mixer.Sound(soundPaths.land))
+                self.isLandPlayed = True
+                self.isFallPlayed = False
+            if antigrav is True:
+                self.isFallPlayed = False
                 # Обновляем таймер анимации
             self.lastanimationtime = time.time()
 
+
 """Уровни"""
+
+
 # Инициальзация уровня по data.json
-def LevelInit():
+def level_initialization():
     playerData.data["lastlevel"] = level
     playerData.data["lastscore"] = objectsVariable.GlobalScore
     playerData.data["lastlives"] = objectsVariable.GlobalLives
-    clearbutt()
+    button_clear()
     clearcanvas()
     global shouldReloadButtons, limitedtime, avoidEffects, limitedFlag, Hero, Base, Exit, alphaPlatform, betaPlatform, gammaPlatform, deltaPlatform, epsilonPlatform, zetaPlatform, etaPlatform, thetaPlatform, iotaPlatform, alphaCat, betaCat, gammaCat, deltaCat, epsilonCat, zetaCat, alphaBonus, betaBonus, gammaBonus, deltaBonus, epsilonBonus, zetaBonus, alphaLadder, betaLadder, gammaLadder, deltaLadder, epsilonLadder, zetaLadder, alphaWall, betaWall, gammaWall, deltaWall, epsilonWall, zetaWall, alphaSavage, betaSavage, gammaSavage, deltaSavage, alphaFastroom, betaFastroom, alphaSlowroom, betaSlowroom, alphaGravroom, betaGravroom
     shouldReloadButtons = True
@@ -798,10 +851,11 @@ def LevelInit():
     else:
         deltaSavage = Empty()
 
-    Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], canvas=canvas, image=image.granny)
+    Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], the_canvas=canvas, the_image=image.granny)
+
 
 # Обработка выбора уровня
-def LevelShoose():
+def level_selection():
     global level
     ask = sd.askinteger(title="Выбор уровня",
                         prompt="Введите номер уровня.\nМаксимальный уровень: %i" % settings["levelamount"], minvalue=1,
@@ -809,33 +863,37 @@ def LevelShoose():
     if type(ask) == int:
         if (level == 0) | settings["cheatmode"]:
             level = ask
-            LevelInit()
+            level_initialization()
+
 
 # Переход на следующий уровень или конец игры
-def LevelAdd():  # Логика переключения
+def level_adding():  # Логика переключения
     global level, shouldReloadButtons
     objectsVariable.GlobalLives = objectsVariable.lives
     objectsVariable.GlobalScore += objectsVariable.Score
     objectsVariable.Score = 0
     if level < settings["levelamount"]:  # Если уровень не последний
-        if (level != 0) & soundmode.get():
+        if (level != 0) & sound_mode.get():
             mixer.Channel(0).play(mixer.Sound(soundPaths.exit))
         level += 1  # Добавляем уровень
-        LevelInit()  # Загружаем уровень
+        level_initialization()  # Загружаем уровень
     elif level == settings["levelamount"]:  # Если уровень последний
-        mixer.Channel(0).play(mixer.Sound(soundPaths.win))
         endgame(win=True)  # Вывод сообшения о победе
     shouldReloadButtons = True
 
+
 # Начать уровень заново
-def LevelRestart():
+def level_restart():
     ask = mb.askyesno(title="Внимание", message="Вы действительно хотите начать уровень заново?")
     if ask:
         objectsVariable.lives = objectsVariable.GlobalLives
         objectsVariable.Score = 0
-        LevelInit()
+        level_initialization()
+
 
 """Доп. Функции"""
+
+
 # Общая проверка по массивам
 def action_check(playerzone, objectzone, index):  # Проверка выхода по массивам
     solution = False
@@ -855,115 +913,101 @@ def action_check(playerzone, objectzone, index):  # Проверка выход�
             solution = True
     return solution
 
+
 # Платформа
 # Над платформой
 def grannyoverplatform():  # Определение платформ на уровнях !!!Не забывать добавлять!!!
     globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    solutionEpsilon = False
-    solutionZeta = False
-    solutionEta = False
-    solutionTheta = False
-    solutionIota = False
-    playertouch = Hero.touch_place()
-    BaseTouch = Base.touch_place()
-    solutionBase = ground_check(playertouch, BaseTouch)
+    solution_alpha = False
+    solution_beta = False
+    solution_gamma = False
+    solution_delta = False
+    solution_epsilon = False
+    solution_zeta = False
+    solution_eta = False
+    solution_theta = False
+    solution_iota = False
+    solution_base = ground_check(Hero, Base)
     if alphaPlatform.avaible:
-        AlphaTouch = alphaPlatform.touch_place()
-        solutionAlpha = ground_check(playertouch, AlphaTouch)
+        solution_alpha = ground_check(Hero, alphaPlatform)
     if betaPlatform.avaible:
-        BetaTouch = betaPlatform.touch_place()
-        solutionBeta = ground_check(playertouch, BetaTouch)
+        solution_beta = ground_check(Hero, betaPlatform)
     if gammaPlatform.avaible:
-        GammaTouch = gammaPlatform.touch_place()
-        solutionGamma = ground_check(playertouch, GammaTouch)
+        solution_gamma = ground_check(Hero, gammaPlatform)
     if deltaPlatform.avaible:
-        DeltaTouch = deltaPlatform.touch_place()
-        solutionDelta = ground_check(playertouch, DeltaTouch)
+        solution_delta = ground_check(Hero, deltaPlatform)
     if epsilonPlatform.avaible:
-        EpsilonTouch = epsilonPlatform.touch_place()
-        solutionEpsilon = ground_check(playertouch, EpsilonTouch)
+        solution_epsilon = ground_check(Hero, epsilonPlatform)
     if zetaPlatform.avaible:
-        ZetaTouch = zetaPlatform.touch_place()
-        solutionZeta = ground_check(playertouch, ZetaTouch)
+        solution_zeta = ground_check(Hero, zetaPlatform)
     if etaPlatform.avaible:
-        EtaTouch = etaPlatform.touch_place()
-        solutionEta = ground_check(playertouch, EtaTouch)
+        solution_eta = ground_check(Hero, etaPlatform)
     if thetaPlatform.avaible:
-        ThetaTouch = thetaPlatform.touch_place()
-        solutionTheta = ground_check(playertouch, ThetaTouch)
+        solution_theta = ground_check(Hero, thetaPlatform)
     if iotaPlatform.avaible:
-        IotaTouch = iotaPlatform.touch_place()
-        solutionIota = ground_check(playertouch, IotaTouch)
+        solution_iota = ground_check(Hero, iotaPlatform)
 
-    if (solutionBase is True) | (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (
-            solutionDelta is True) | (solutionEpsilon is True) | (solutionZeta is True) | (solutionEta is True) | (
-            solutionTheta is True) | (solutionIota is True):
+    if (solution_base is True) | (solution_alpha is True) | (solution_beta is True) | (solution_gamma is True) | (
+            solution_delta is True) | (solution_epsilon is True) | (solution_zeta is True) | (solution_eta is True) | (
+            solution_theta is True) | (solution_iota is True):
         globalsolution = True
     return globalsolution
 
-def ground_check(playertouch, platformtouch):  # Проверка земли под ногами по массивам
+
+def ground_check(player, theplatform):  # Проверка земли под ногами по массивам
     solution = False
+    platformtouch = theplatform.touch_place()
+    playertouch = player.touch_place()
     if platformtouch[0] == playertouch[0]:
         if (playertouch[1] >= platformtouch[1]) & (playertouch[1] <= platformtouch[2]):
             solution = True
         if (playertouch[2] >= platformtouch[1]) & (playertouch[2] <= platformtouch[2]):
             solution = True
     return solution
+
 
 # Под платформой
 def grannyunderplatform():  # Определение платформ на уровнях !!!Не забывать добавлять!!!
     globalsolution = True
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    solutionEpsilon = False
-    solutionZeta = False
-    solutionEta = False
-    solutionTheta = False
-    solutionIota = False
-
-    playertouch = Hero.touch_head()
+    solution_alpha = False
+    solution_beta = False
+    solution_gamma = False
+    solution_delta = False
+    solution_epsilon = False
+    solution_zeta = False
+    solution_eta = False
+    solution_theta = False
+    solution_iota = False
     if alphaPlatform.avaible:
-        AlphaTouch = alphaPlatform.touch_head()
-        solutionAlpha = head_check(playertouch, AlphaTouch)
+        solution_alpha = head_check(Hero, alphaPlatform)
     if betaPlatform.avaible:
-        BetaTouch = betaPlatform.touch_head()
-        solutionBeta = head_check(playertouch, BetaTouch)
+        solution_beta = head_check(Hero, betaPlatform)
     if gammaPlatform.avaible:
-        GammaTouch = gammaPlatform.touch_head()
-        solutionGamma = head_check(playertouch, GammaTouch)
+        solution_gamma = head_check(Hero, gammaPlatform)
     if deltaPlatform.avaible:
-        DeltaTouch = deltaPlatform.touch_head()
-        solutionDelta = head_check(playertouch, DeltaTouch)
+        solution_delta = head_check(Hero, deltaPlatform)
     if epsilonPlatform.avaible:
-        EpsilonTouch = epsilonPlatform.touch_head()
-        solutionEpsilon = head_check(playertouch, EpsilonTouch)
+        solution_epsilon = head_check(Hero, epsilonPlatform)
     if zetaPlatform.avaible:
-        ZetaTouch = zetaPlatform.touch_head()
-        solutionZeta = head_check(playertouch, ZetaTouch)
+        solution_zeta = head_check(Hero, zetaPlatform)
     if etaPlatform.avaible:
-        EtaTouch = etaPlatform.touch_head()
-        solutionEta = head_check(playertouch, EtaTouch)
+        solution_eta = head_check(Hero, etaPlatform)
     if thetaPlatform.avaible:
-        ThetaTouch = thetaPlatform.touch_head()
-        solutionTheta = head_check(playertouch, ThetaTouch)
+        solution_theta = head_check(Hero, thetaPlatform)
     if iotaPlatform.avaible:
-        IotaTouch = iotaPlatform.touch_head()
-        solutionIota = head_check(playertouch, IotaTouch)
+        solution_iota = head_check(Hero, iotaPlatform)
 
-    if (solutionAlpha is False) & (solutionBeta is False) & (solutionGamma is False) & (solutionDelta is False) & (
-            solutionEpsilon is False) & (solutionZeta is False) & (solutionEta is False) & (solutionTheta is False) & (
-            solutionIota is False):
+    if (solution_alpha is False) & (solution_beta is False) & (solution_gamma is False) & (solution_delta is False) & (
+            solution_epsilon is False) & (solution_zeta is False) & (solution_eta is False) & (
+            solution_theta is False) & (solution_iota is False):
         globalsolution = False
     return globalsolution
 
-def head_check(playertouch, platformtouch):  # Проверка земли над головой по массивам
+
+def head_check(player, theplatform):  # Проверка земли над головой по массивам
     solution = False
+    platformtouch = theplatform.touch_head()
+    playertouch = player.touch_head()
     if platformtouch[0] == playertouch[0]:
         if (playertouch[1] >= platformtouch[1]) & (playertouch[1] <= platformtouch[2]):
             solution = True
@@ -971,56 +1015,49 @@ def head_check(playertouch, platformtouch):  # Проверка земли на�
             solution = True
     return solution
 
+
 # Туземец и персонаж
 def savagehitgranny():
     globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    playerzone = Hero.actionzone()
+    solution_alpha = False
+    solution_beta = False
+    solution_gamma = False
+    solution_delta = False
     if alphaSavage.avaible:
-        Alphazone = alphaSavage.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 24)
+        solution_alpha = action_check(Hero.actionzone(), alphaSavage.actionzone(), 24)
     if betaSavage.avaible:
-        Betazone = betaSavage.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 24)
+        solution_beta = action_check(Hero.actionzone(), betaSavage.actionzone(), 24)
     if gammaSavage.avaible:
-        Gammazone = gammaSavage.actionzone()
-        solutionGamma = action_check(playerzone, Gammazone, 24)
+        solution_gamma = action_check(Hero.actionzone(), gammaSavage.actionzone(), 24)
     if deltaSavage.avaible:
-        Deltazone = deltaSavage.actionzone()
-        solutionDelta = action_check(playerzone, Deltazone, 24)
+        solution_delta = action_check(Hero.actionzone(), deltaSavage.actionzone(), 24)
 
-    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True):
+    if (solution_alpha is True) | (solution_beta is True) | (solution_gamma is True) | (solution_delta is True):
         globalsolution = True
 
     return globalsolution
 
+
 def grannyhitsavage():
     globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    playerzone = Hero.hit_area()
+    solution_alpha = False
+    solution_beta = False
+    solution_gamma = False
+    solution_delta = False
     if alphaSavage.avaible:
-        Alphazone = alphaSavage.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 24)
+        solution_alpha = action_check(Hero.hit_area(), alphaSavage.actionzone(), 24)
     if betaSavage.avaible:
-        Betazone = betaSavage.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 24)
+        solution_beta = action_check(Hero.hit_area(), betaSavage.actionzone(), 24)
     if gammaSavage.avaible:
-        Gammazone = gammaSavage.actionzone()
-        solutionGamma = action_check(playerzone, Gammazone, 24)
+        solution_gamma = action_check(Hero.hit_area(), gammaSavage.actionzone(), 24)
     if deltaSavage.avaible:
-        Deltazone = deltaSavage.actionzone()
-        solutionDelta = action_check(playerzone, Deltazone, 24)
+        solution_delta = action_check(Hero.hit_area(), deltaSavage.actionzone(), 24)
 
-    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True):
+    if (solution_alpha is True) | (solution_beta is True) | (solution_gamma is True) | (solution_delta is True):
         globalsolution = True
 
-    return [globalsolution, solutionAlpha, solutionBeta, solutionGamma, solutionDelta]
+    return [globalsolution, solution_alpha, solution_beta, solution_gamma, solution_delta]
+
 
 # Лестница и персонаж
 def topladder(theladder, theplayer):
@@ -1031,47 +1068,41 @@ def topladder(theladder, theplayer):
     else:
         theladder.isLadderTop = False
 
+
+def checkladder(theladder):
+    topladder(theladder, Hero)
+    return action_check(Hero.actionzone(), theladder.actionzone(), 15)
+
+
 def grannyonladder():
     global ladd
-    globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    solutionEpsilon = False
-    solutionZeta = False
-    playerzone = Hero.actionzone()
+    solution = False
+    solution_alpha = False
+    solution_beta = False
+    solution_gamma = False
+    solution_delta = False
+    solution_epsilon = False
+    solution_zeta = False
     if alphaLadder.avaible:
-        Alphazone = alphaLadder.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 15)
-        topladder(alphaLadder, Hero)
+        solution_alpha = checkladder(alphaLadder)
     if betaLadder.avaible:
-        Betazone = betaLadder.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 15)
-        topladder(betaLadder, Hero)
+        solution_beta = checkladder(betaLadder)
     if gammaLadder.avaible:
-        Gammazone = gammaLadder.actionzone()
-        solutionGamma = action_check(playerzone, Gammazone, 15)
-        topladder(gammaLadder, Hero)
+        solution_gamma = checkladder(gammaLadder)
     if deltaLadder.avaible:
-        Deltazone = deltaLadder.actionzone()
-        solutionDelta = action_check(playerzone, Deltazone, 15)
-        topladder(deltaLadder, Hero)
+        solution_delta = checkladder(deltaLadder)
     if epsilonLadder.avaible:
-        Epsilonzone = epsilonLadder.actionzone()
-        solutionEpsilon = action_check(playerzone, Epsilonzone, 15)
-        topladder(epsilonLadder, Hero)
+        solution_epsilon = checkladder(epsilonLadder)
     if zetaLadder.avaible:
-        Zetazone = zetaLadder.actionzone()
-        solutionZeta = action_check(playerzone, Zetazone, 15)
-        topladder(zetaLadder, Hero)
+        solution_zeta = checkladder(zetaLadder)
 
-    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
-            solutionEpsilon is True) | (solutionZeta is True):
-        globalsolution = True
+    if (solution_alpha is True) | (solution_beta is True) | (solution_gamma is True) | (solution_delta is True) | (
+            solution_epsilon is True) | (solution_zeta is True):
+        solution = True
 
     if ((alphaLadder.isLadderTop is True) | (betaLadder.isLadderTop is True) | (gammaLadder.isLadderTop is True) | (
-        deltaLadder.isLadderTop is True) | (epsilonLadder.isLadderTop is True) | (zetaLadder.isLadderTop is True)) & (
+            deltaLadder.isLadderTop is True) | (epsilonLadder.isLadderTop is True) | (
+                zetaLadder.isLadderTop is True)) & (
             Hero.lastanimation == "Climbing"):
         objectsVariable.isLadderTop = True
     else:
@@ -1080,299 +1111,245 @@ def grannyonladder():
     if ladd is False:
         objectsVariable.isLadderTop = False
 
-    return globalsolution
-
-# Кот и персоныж
-def grannycarrycat():
-    globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    solutionEpsilon = False
-    solutionZeta = False
-    playerzone = Hero.actionzone()
-    if alphaCat.avaible:
-        Alphazone = alphaCat.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 12)
-        if solutionAlpha is True:
-            alphaCat.collect()
-            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
-            objectsVariable.CatAmountReal += 1
-    if betaCat.avaible:
-        Betazone = betaCat.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 10)
-        if solutionBeta is True:
-            betaCat.collect()
-            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
-            objectsVariable.CatAmountReal += 1
-    if gammaCat.avaible:
-        Gammazone = gammaCat.actionzone()
-        solutionGamma = action_check(playerzone, Gammazone, 10)
-        if solutionGamma is True:
-            gammaCat.collect()
-            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
-            objectsVariable.CatAmountReal += 1
-    if deltaCat.avaible:
-        Deltazone = deltaCat.actionzone()
-        solutionDelta = action_check(playerzone, Deltazone, 10)
-        if solutionDelta is True:
-            deltaCat.collect()
-            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
-            objectsVariable.CatAmountReal += 1
-    if epsilonCat.avaible:
-        Epsilonzone = epsilonCat.actionzone()
-        solutionEpsilon = action_check(playerzone, Epsilonzone, 10)
-        if solutionEpsilon is True:
-            epsilonCat.collect()
-            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
-            objectsVariable.CatAmountReal += 1
-    if zetaCat.avaible:
-        Zetazone = zetaCat.actionzone()
-        solutionZeta = action_check(playerzone, Zetazone, 10)
-        if solutionZeta is True:
-            zetaCat.collect()
-            objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
-            objectsVariable.CatAmountReal += 1
-    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
-            solutionEpsilon is True) | (solutionZeta is True):
-        if soundmode.get():
-            mixer.Channel(3).play(mixer.Sound(random.choice(soundPaths.cat)))
-        globalsolution = True
-
-    return globalsolution
-
-# Цветочек и персонаж
-def checkbonus(thebonus, playerzone):
-    bonuszone = thebonus.actionzone()
-    solution = action_check(playerzone, bonuszone, 16)
-    if solution is True:
-        objectsVariable.Score += settings["ScoreAddBonus"]
-        thebonus.rise()
-        FlowWatAdd()
     return solution
 
-def grannygetbonus():  # Определение цветочков на уровне !!!Не забывать добавлять!!!
-    globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    solutionEpsilon = False
-    solutionZeta = False
-    playerzone = Hero.actionzone()
+
+# Кот и персоныж
+def checkcat(thecat):
+    solution = action_check(Hero.actionzone(), thecat.actionzone(), 10)
+    if solution is True:
+        thecat.collect()
+        mixer.Channel(3).play(mixer.Sound(random.choice(soundPaths.cat)))
+        objectsVariable.Score += settings["ScoreAddCat"]  # Зачисляем очки
+        objectsVariable.CatAmountReal += 1
+
+
+def grannycarrycat():
+    if alphaCat.avaible:
+        checkcat(alphaCat)
+    if betaCat.avaible:
+        checkcat(betaCat)
+    if gammaCat.avaible:
+        checkcat(gammaCat)
+    if deltaCat.avaible:
+        checkcat(deltaCat)
+    if epsilonCat.avaible:
+        checkcat(epsilonCat)
+    if zetaCat.avaible:
+        checkcat(zetaCat)
+
+
+# Цветочек и персонаж
+def check_bonus(the_bonus, the_player):
+    solution = action_check(the_player.actionzone(), the_bonus.actionzone(), 16)
+    if solution is True:
+        objectsVariable.Score += settings["ScoreAddBonus"]
+        the_bonus.rise()
+        flower_water_add_score()
+    return solution
+
+
+def granny_get_bonus():  # Определение цветочков на уровне !!!Не забывать добавлять!!!
+    solution = False
+    solution_alpha = False
+    solution_beta = False
+    solution_gamma = False
+    solution_delta = False
+    solution_epsilon = False
+    solution_zeta = False
     if alphaBonus.avaible:
-        solutionAlpha = checkbonus(alphaBonus, playerzone)
+        solution_alpha = check_bonus(alphaBonus, Hero)
     if betaBonus.avaible:
-        solutionBeta = checkbonus(betaBonus, playerzone)
+        solution_beta = check_bonus(betaBonus, Hero)
     if gammaBonus.avaible:
-        solutionGamma = checkbonus(gammaBonus, playerzone)
+        solution_gamma = check_bonus(gammaBonus, Hero)
     if deltaBonus.avaible:
-        solutionDelta = checkbonus(deltaBonus, playerzone)
+        solution_delta = check_bonus(deltaBonus, Hero)
     if epsilonBonus.avaible:
-        solutionEpsilon = checkbonus(epsilonBonus, playerzone)
+        solution_epsilon = check_bonus(epsilonBonus, Hero)
     if zetaBonus.avaible:
-        solutionZeta = checkbonus(zetaBonus, playerzone)
-    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
-            solutionEpsilon is True) | (solutionZeta is True):
-        globalsolution = True
-        if soundmode.get():
+        solution_zeta = check_bonus(zetaBonus, Hero)
+    if (solution_alpha is True) | (solution_beta is True) | (solution_gamma is True) | (solution_delta is True) | (
+            solution_epsilon is True) | (solution_zeta is True):
+        solution = True
+        if sound_mode.get():
             mixer.Channel(1).play(mixer.Sound(soundPaths.bonus))
-    return globalsolution
+    return solution
+
 
 # Грибочки и персонаж
-def grannyfastroom():
-    globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    playerzone = Hero.actionzone()
+def check_mushroom(mushroom, kind):
+    solution = action_check(Hero.actionzone(), mushroom.actionzone(), 15)
+    if solution is True:
+        if kind == "fast":
+            objectsVariable.isFastEffect = True
+        if kind == "slow":
+            objectsVariable.isSlowEffect = True
+        if kind == "grav":
+            objectsVariable.isGravEffect = True
+    return solution
+
+
+def granny_and_fast():
+    solution = False
+    solution_alpha = False
+    solution_beta = False
     if alphaFastroom.avaible:
-        Alphazone = alphaFastroom.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 15)
-        if solutionAlpha is True:
-            objectsVariable.isFastEffect = True
+        solution_alpha = check_mushroom(alphaFastroom, kind="fast")
     if betaFastroom.avaible:
-        Betazone = betaFastroom.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 15)
-        if solutionBeta is True:
-            objectsVariable.isFastEffect = True
-    if (solutionAlpha is True) | (solutionBeta is True):
-        globalsolution = True
+        solution_beta = check_mushroom(betaFastroom, kind="fast")
+    if (solution_alpha is True) | (solution_beta is True):
+        solution = True
         if objectsVariable.isFastroomSoundPlayed is False:
-            if soundmode.get():
+            if sound_mode.get():
                 mixer.Channel(2).play(mixer.Sound(soundPaths.mushroom))
             objectsVariable.isFastroomSoundPlayed = True
     else:
         objectsVariable.isFastroomSoundPlayed = False
 
-    return globalsolution
+    return solution
 
-def grannyslowroom():
-    globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    playerzone = Hero.actionzone()
+
+def granny_and_slow():
+    solution = False
+    solution_alpha = False
+    solution_beta = False
     if alphaSlowroom.avaible:
-        Alphazone = alphaSlowroom.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 15)
-        if solutionAlpha is True:
-            objectsVariable.isSlowEffect = True
+        solution_alpha = check_mushroom(alphaSlowroom, kind="slow")
     if betaSlowroom.avaible:
-        Betazone = betaSlowroom.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 15)
-        if solutionBeta is True:
-            objectsVariable.isSlowEffect = True
-    if (solutionAlpha is True) | (solutionBeta is True):
-        globalsolution = True
+        solution_beta = check_mushroom(betaSlowroom, kind="slow")
+    if (solution_alpha is True) | (solution_beta is True):
+        solution = True
         if objectsVariable.isSlowroomSoundPlayed is False:
-            if soundmode.get():
+            if sound_mode.get():
                 mixer.Channel(2).play(mixer.Sound(soundPaths.mushroom))
             objectsVariable.isSlowroomSoundPlayed = True
     else:
         objectsVariable.isSlowroomSoundPlayed = False
 
-    return globalsolution
+    return solution
 
-def grannygravroom():
-    globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    playerzone = Hero.actionzone()
+
+def granny_and_grav():
+    solution = False
+    solution_alpha = False
+    solution_beta = False
     if alphaGravroom.avaible:
-        Alphazone = alphaGravroom.actionzone()
-        solutionAlpha = action_check(playerzone, Alphazone, 15)
-        if solutionAlpha is True:
-            objectsVariable.isGravEffect = True
+        solution_alpha = check_mushroom(alphaGravroom, kind="grav")
     if betaGravroom.avaible:
-        Betazone = betaGravroom.actionzone()
-        solutionBeta = action_check(playerzone, Betazone, 15)
-        if solutionBeta is True:
-            objectsVariable.isGravEffect = True
-    if (solutionAlpha is True) | (solutionBeta is True):
-        globalsolution = True
+        solution_beta = check_mushroom(betaGravroom, kind="grav")
+    if (solution_alpha is True) | (solution_beta is True):
+        solution = True
         if objectsVariable.isGravroomSoundPlayed is False:
-            if soundmode.get():
+            if sound_mode.get():
                 mixer.Channel(2).play(mixer.Sound(soundPaths.mushroom))
             objectsVariable.isGravroomSoundPlayed = True
     else:
         objectsVariable.isGravroomSoundPlayed = False
 
-    return globalsolution
+    return solution
+
 
 # Выход с уровня
-def grannyinexit():  # Определение выхода на уровне
-    globalsolution = False
-    if level != 0:
-        playerzone = Hero.actionzone()
-        Exitzone = Exit.actionzone()
-        globalsolution = action_check(playerzone, Exitzone, 30)
-    return globalsolution
+def granny_in_exit():
+    return action_check(Hero.actionzone(), Exit.actionzone(), 30)
+
 
 # Стены для персонажа и дикаря
-def grannyandwall():
-    global wallside
-    globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    solutionEpsilon = False
-    solutionZeta = False
-    playerzone = Hero.actionzone()
-    if alphaWall.avaible:
-        Alphazone = alphaWall.actionzone()
-        solutionAlpha = wall_check(playerzone, Alphazone, None)
-    if betaWall.avaible:
-        Betazone = betaWall.actionzone()
-        solutionBeta = wall_check(playerzone, Betazone, None)
-    if gammaWall.avaible:
-        Gammazone = gammaWall.actionzone()
-        solutionGamma = wall_check(playerzone, Gammazone, None)
-    if deltaWall.avaible:
-        Deltazone = deltaWall.actionzone()
-        solutionDelta = wall_check(playerzone, Deltazone, None)
-    if epsilonWall.avaible:
-        Epsilonzone = epsilonWall.actionzone()
-        solutionEpsilon = wall_check(playerzone, Epsilonzone, None)
-    if zetaWall.avaible:
-        Zetazone = zetaWall.actionzone()
-        solutionZeta = wall_check(playerzone, Zetazone, None)
-    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
-            solutionEpsilon is True) | (solutionZeta is True):
-        globalsolution = True
-
-    if globalsolution is False:
-        wallside = "0"
-
-    return globalsolution
-
-def wall_check(playerzone, wallzone, thesavage):  # Проверка стен по массивам
-    global wallside
+def granny_and_wall():
+    global wall_side
     solution = False
-    if (playerzone[0] + 16 >= wallzone[0]) & (playerzone[0] + 16 <= wallzone[1]):
-        if (playerzone[2] >= wallzone[2]) & (playerzone[2] <= wallzone[3]):
+    solution_alpha = False
+    solution_beta = False
+    solution_gamma = False
+    solution_delta = False
+    solution_epsilon = False
+    solution_zeta = False
+    if alphaWall.avaible:
+        solution_alpha = wall_check(Hero.actionzone(), alphaWall.actionzone(), None)
+    if betaWall.avaible:
+        solution_beta = wall_check(Hero.actionzone(), betaWall.actionzone(), None)
+    if gammaWall.avaible:
+        solution_gamma = wall_check(Hero.actionzone(), gammaWall.actionzone(), None)
+    if deltaWall.avaible:
+        solution_delta = wall_check(Hero.actionzone(), deltaWall.actionzone(), None)
+    if epsilonWall.avaible:
+        solution_epsilon = wall_check(Hero.actionzone(), epsilonWall.actionzone(), None)
+    if zetaWall.avaible:
+        solution_zeta = wall_check(Hero.actionzone(), zetaWall.actionzone(), None)
+    if (solution_alpha is True) | (solution_beta is True) | (solution_gamma is True) | (solution_delta is True) | (
+            solution_epsilon is True) | (solution_zeta is True):
+        solution = True
+
+    if solution is False:
+        wall_side = "0"
+
+    return solution
+
+
+def wall_check(player_zone, wall_zone, the_savage):  # Проверка стен по массивам
+    global wall_side
+    solution = False
+    if (player_zone[0] + 16 >= wall_zone[0]) & (player_zone[0] + 16 <= wall_zone[1]):
+        if (player_zone[2] >= wall_zone[2]) & (player_zone[2] <= wall_zone[3]):
             solution = True
-        if (playerzone[3] >= wallzone[2]) & (playerzone[3] <= wallzone[3]):
-            if thesavage is None:
-                wallside = "R"
+        if (player_zone[3] >= wall_zone[2]) & (player_zone[3] <= wall_zone[3]):
+            if the_savage is None:
+                wall_side = "R"
             else:
-                thesavage.wallside = "R"
+                the_savage.wall_side = "R"
             solution = True
-    if (playerzone[1] - 16 >= wallzone[0]) & (playerzone[1] - 16 <= wallzone[1]):
-        if (playerzone[2] >= wallzone[2]) & (playerzone[2] <= wallzone[3]):
+    if (player_zone[1] - 16 >= wall_zone[0]) & (player_zone[1] - 16 <= wall_zone[1]):
+        if (player_zone[2] >= wall_zone[2]) & (player_zone[2] <= wall_zone[3]):
             solution = True
-        if (playerzone[3] >= wallzone[2]) & (playerzone[3] <= wallzone[3]):
-            if thesavage is None:
-                wallside = "L"
+        if (player_zone[3] >= wall_zone[2]) & (player_zone[3] <= wall_zone[3]):
+            if the_savage is None:
+                wall_side = "L"
             else:
-                thesavage.wallside = "L"
+                the_savage.wall_side = "L"
             solution = True
     return solution
 
-def anysavageandwall(theobject):     # Проверяет столкновение для одного любого Дикаря
-    globalsolution = False
-    solutionAlpha = False
-    solutionBeta = False
-    solutionGamma = False
-    solutionDelta = False
-    solutionEpsilon = False
-    solutionZeta = False
-    savagezone = theobject.actionzone()
+
+def any_savage_and_wall(the_object):  # Проверяет столкновение для одного любого Дикаря
+    solution = False
+    solution_alpha = False
+    solution_beta = False
+    solution_gamma = False
+    solution_delta = False
+    solution_epsilon = False
+    solution_zeta = False
     if alphaWall.avaible:
-        Alphazone = alphaWall.actionzone()
-        solutionAlpha = wall_check(savagezone, Alphazone, theobject)
+        solution_alpha = wall_check(the_object.actionzone(), alphaWall.actionzone(), the_object)
     if betaWall.avaible:
-        Betazone = betaWall.actionzone()
-        solutionBeta = wall_check(savagezone, Betazone, theobject)
+        solution_beta = wall_check(the_object.actionzone(), betaWall.actionzone(), the_object)
     if gammaWall.avaible:
-        Gammazone = gammaWall.actionzone()
-        solutionGamma = wall_check(savagezone, Gammazone, theobject)
+        solution_gamma = wall_check(the_object.actionzone(), gammaWall.actionzone(), the_object)
     if deltaWall.avaible:
-        Deltazone = deltaWall.actionzone()
-        solutionDelta = wall_check(savagezone, Deltazone, theobject)
+        solution_delta = wall_check(the_object.actionzone(), deltaWall.actionzone(), the_object)
     if epsilonWall.avaible:
-        Epsilonzone = epsilonWall.actionzone()
-        solutionEpsilon = wall_check(savagezone, Epsilonzone, theobject)
+        solution_epsilon = wall_check(the_object.actionzone(), epsilonWall.actionzone(), the_object)
     if zetaWall.avaible:
-        Zetazone = zetaWall.actionzone()
-        solutionZeta = wall_check(savagezone, Zetazone, theobject)
-    if (solutionAlpha is True) | (solutionBeta is True) | (solutionGamma is True) | (solutionDelta is True) | (
-            solutionEpsilon is True) | (solutionZeta is True):
-        globalsolution = True
+        solution_zeta = wall_check(the_object.actionzone(), zetaWall.actionzone(), the_object)
+    if (solution_alpha is True) | (solution_beta is True) | (solution_gamma is True) | (solution_delta is True) | (
+            solution_epsilon is True) | (solution_zeta is True):
+        solution = True
 
-    if globalsolution is False:
-        theobject.wallside = "0"
+    if solution is False:
+        the_object.wall_side = "0"
 
-    return globalsolution
+    return solution
+
 
 # Гравитация
 def gravity():  # Если персонаж не на платформн и не на лестнице, на нее действует гравитация
     global simpgrav
     if ((plat is False) | (antigrav is True)) & (ladd is False):
         simpgrav = True
-        Hero.gravitymove()
+        Hero.gravity_move()
     else:
         simpgrav = False
+
 
 # Эффекты грибов
 def effects():
@@ -1413,31 +1390,34 @@ def effects():
         grannyWalkSpeed = grannyWalkSpeedNormal
         gravitySpeed = gravitySpeedNormal
 
-# Убийства
-def savageDeath(thesavage):
-    canvas.delete(thesavage.id)
-    SavKillAdd()
 
-def savageKill():
+# Убийства
+def savage_death(the_savage):
+    canvas.delete(the_savage.id)
+    savage_kill_add_score()
+
+
+def savage_kill():
     global alphaSavage, betaSavage, gammaSavage, deltaSavage
     if GraHitSav[0]:
         if alphaSavage.avaible & GraHitSav[1]:
-            savageDeath(alphaSavage)
+            savage_death(alphaSavage)
             alphaSavage = Empty()
         if betaSavage.avaible & GraHitSav[2]:
-            savageDeath(betaSavage)
+            savage_death(betaSavage)
             betaSavage = Empty()
         if gammaSavage.avaible & GraHitSav[3]:
-            savageDeath(gammaSavage)
+            savage_death(gammaSavage)
             gammaSavage = Empty()
         if deltaSavage.avaible & GraHitSav[4]:
-            savageDeath(deltaSavage)
+            savage_death(deltaSavage)
             deltaSavage = Empty()
 
-def grannyKill():
+
+def granny_kill():
     global Hero, avoidEffects
     if SavHitGra:
-        if soundmode.get():
+        if sound_mode.get():
             mixer.Channel(1).play(mixer.Sound(random.choice(soundPaths.savagehit)))
         canvas.delete(Hero.id)
         objectsVariable.lives -= 1
@@ -1445,124 +1425,122 @@ def grannyKill():
             endgame(win=False)
         else:
             avoidEffects = True
-            Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], canvas=canvas, image=image.granny)
+            Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], the_canvas=canvas,
+                          the_image=image.granny)
+
 
 # Функции Дикаря
 # Платформа по которой он ходит
-def chooseWayPlate(thesavage, theplatform):
-    if theplatform.avaible:
-        thesavage.way = theplatform.border()
+def select_way_plate(the_savage, the_platform):
+    if the_platform.avaible:
+        the_savage.way = the_platform.border()
     else:
-        thesavage.way = Base.border()
+        the_savage.way = Base.border()
 
-def savagePlates(thesavage, homeplatform):
-    if homeplatform == "base":
-        thesavage.way = Base.border()
-    if homeplatform == "alpha":
-        chooseWayPlate(thesavage, alphaPlatform)
-    if homeplatform == "beta":
-        chooseWayPlate(thesavage, betaPlatform)
-    if homeplatform == "gamma":
-        chooseWayPlate(thesavage, gammaPlatform)
-    if homeplatform == "delta":
-        chooseWayPlate(thesavage, deltaPlatform)
-    if homeplatform == "epsilon":
-        chooseWayPlate(thesavage, epsilonPlatform)
-    if homeplatform == "zeta":
-        chooseWayPlate(thesavage, zetaPlatform)
-    if homeplatform == "eta":
-        chooseWayPlate(thesavage, etaPlatform)
-    if homeplatform == "theta":
-        chooseWayPlate(thesavage, thetaPlatform)
-    if homeplatform == "iota":
-        chooseWayPlate(thesavage, iotaPlatform)
+
+def savage_plates(the_savage, home_platform):
+    if home_platform == "base":
+        the_savage.way = Base.border()
+    if home_platform == "alpha":
+        select_way_plate(the_savage, alphaPlatform)
+    if home_platform == "beta":
+        select_way_plate(the_savage, betaPlatform)
+    if home_platform == "gamma":
+        select_way_plate(the_savage, gammaPlatform)
+    if home_platform == "delta":
+        select_way_plate(the_savage, deltaPlatform)
+    if home_platform == "epsilon":
+        select_way_plate(the_savage, epsilonPlatform)
+    if home_platform == "zeta":
+        select_way_plate(the_savage, zetaPlatform)
+    if home_platform == "eta":
+        select_way_plate(the_savage, etaPlatform)
+    if home_platform == "theta":
+        select_way_plate(the_savage, thetaPlatform)
+    if home_platform == "iota":
+        select_way_plate(the_savage, iotaPlatform)
+
 
 # Изменение направления при встрече с концом платформы
-def savageDirection(thesavage):
-    coords = thesavage.coords()
-    way = thesavage.way
+def savage_direction(the_savage):
+    coords = the_savage.coords()
+    way = the_savage.way
     if coords[0] <= way[0]:
-        thesavage.changedirection()
+        the_savage.changedirection()
     elif coords[0] >= way[1]:
-        thesavage.changedirection()
+        the_savage.changedirection()
+
 
 # Установка платформ и направлений
-def savageWalking():
+def savage_walking():
     if alphaSavage.avaible:
-        homeplatform = settings["levels"][level]["alphaSavagePlatform"]
-        savagePlates(alphaSavage, homeplatform)
-        if anysavageandwall(alphaSavage):
+        savage_plates(alphaSavage, settings["levels"][level]["alphaSavagePlatform"])
+        if any_savage_and_wall(alphaSavage):
             alphaSavage.changedirection()
         else:
-            savageDirection(alphaSavage)
+            savage_direction(alphaSavage)
     if betaSavage.avaible:
-        homeplatform = settings["levels"][level]["betaSavagePlatform"]
-        savagePlates(betaSavage, homeplatform)
-        if anysavageandwall(betaSavage):
+        savage_plates(betaSavage, settings["levels"][level]["betaSavagePlatform"])
+        if any_savage_and_wall(betaSavage):
             betaSavage.changedirection()
         else:
-            savageDirection(betaSavage)
+            savage_direction(betaSavage)
     if gammaSavage.avaible:
-        homeplatform = settings["levels"][level]["gammaSavagePlatform"]
-        savagePlates(gammaSavage, homeplatform)
-        if anysavageandwall(gammaSavage):
+        savage_plates(gammaSavage, settings["levels"][level]["gammaSavagePlatform"])
+        if any_savage_and_wall(gammaSavage):
             gammaSavage.changedirection()
         else:
-            savageDirection(gammaSavage)
+            savage_direction(gammaSavage)
     if deltaSavage.avaible:
-        homeplatform = settings["levels"][level]["deltaSavagePlatform"]
-        savagePlates(deltaSavage, homeplatform)
-        if anysavageandwall(deltaSavage):
+        savage_plates(deltaSavage, settings["levels"][level]["deltaSavagePlatform"])
+        if any_savage_and_wall(deltaSavage):
             deltaSavage.changedirection()
         else:
-            savageDirection(deltaSavage)
+            savage_direction(deltaSavage)
+
 
 # Организация движений
-def savageMove(thesavage):
-    if thesavage.direction == "right":
-        thesavage.turn_right()
+def savage_moving(the_savage):
+    if the_savage.direction == "right":
+        the_savage.turn_right()
     else:
-        thesavage.turn_left()
+        the_savage.turn_left()
+
 
 # Вызов очереди действий существующих дикарей
-def savageActions():
+def savage_actions():
     if alphaSavage.avaible:
-        savageMove(alphaSavage)
+        savage_moving(alphaSavage)
         alphaSavage.action_queue()
-    if betaSavage.avaible:
-        savageMove(betaSavage)
-        betaSavage.action_queue()
-    if gammaSavage.avaible:
-        savageMove(gammaSavage)
-        gammaSavage.action_queue()
-    if deltaSavage.avaible:
-        savageMove(deltaSavage)
-        deltaSavage.action_queue()
-
-# Анимация существующих дикарей
-def savageAnimate():
-    if alphaSavage.avaible:
         alphaSavage.animate()
     if betaSavage.avaible:
+        savage_moving(betaSavage)
+        betaSavage.action_queue()
         betaSavage.animate()
     if gammaSavage.avaible:
+        savage_moving(gammaSavage)
+        gammaSavage.action_queue()
         gammaSavage.animate()
     if deltaSavage.avaible:
+        savage_moving(deltaSavage)
+        deltaSavage.action_queue()
         deltaSavage.animate()
 
+
 # Проверка на сбор котиков. Открытие цветка и выход с уровня
-def recquecountertoexit():
+def cat_counter_for_exit():
     global isExitActive
-    if objectsVariable.CatAmountReal == objectsVariable.CatAmountAll:
+    if objectsVariable.CatAmountReal >= objectsVariable.CatAmountAll:
         isExitActive = True
         Exit.opening()
-        if grannyinexit() is True:
-            LevelAdd()
+        if granny_in_exit() is True:
+            level_adding()
     else:
         isExitActive = False
 
+
 # Организация временных ограничений уровней
-def levelLimit():
+def level_limits():
     global limitedFlag, limitedtime
     if settings["levels"][level]["limited"]:
         if limitedFlag is False:
@@ -1572,12 +1550,12 @@ def levelLimit():
             labelTimer.place(x=90, y=475)
         elif limitedFlag is True:
             if time.time() - limitedtime < settings["levels"][level]["time"]:
-                TimeStr = "%.2f с" % (settings["levels"][level]["time"] - (time.time() - limitedtime))
-                labelTimer.config(text=TimeStr)
+                time_str = "%.2f с" % (settings["levels"][level]["time"] - (time.time() - limitedtime))
+                labelTimer.config(text=time_str)
             if (time.time() - limitedtime) > settings["levels"][level]["time"]:
                 limitedFlag = False
                 if settings["levels"][level]["limittype"] == "NEXT":
-                    LevelAdd()
+                    level_adding()
                 elif settings["levels"][level]["limittype"] == "LOSE":
                     endgame(win=False)
     else:
@@ -1585,9 +1563,11 @@ def levelLimit():
         labelTime.place_forget()
         labelTimer.place_forget()
 
+
 # Организация конца игры, вывод сообщений о выйгрыше/проигрыше
 def endgame(win):
     if win:
+        mixer.Channel(0).play(mixer.Sound(soundPaths.win))
         objectsVariable.GlobalScore += objectsVariable.Score
         message = "Поздравляем с победой! \nВы набрали %i из %i очков" % (
             objectsVariable.GlobalScore, settings["ScoreMax"])
@@ -1597,8 +1577,9 @@ def endgame(win):
         playerData.data["achievements"]["end"] = True
         playerData.data["islevelcyclecompleted"] = True
         mb.showinfo(title="Победа", message=message)
-        mainmenu_open()
+        main_menu_open()
     else:
+        mixer.Channel(0).play(mixer.Sound(soundPaths.lose))
         objectsVariable.GlobalScore += objectsVariable.Score
         message = "К сожалению, Вы проиграли. \nВы набрали %i из %i очков" % (
             objectsVariable.GlobalScore, settings["ScoreMax"])
@@ -1606,7 +1587,8 @@ def endgame(win):
         playerData.data["lastscore"] = emptydata["lastscore"]
         playerData.data["lastlives"] = settings["livesnormal"]
         mb.showinfo(title="Проигрыш", message=message)
-        mainmenu_open()
+        main_menu_open()
+
 
 # Подсчет кликов и кадров
 def timer():
@@ -1620,15 +1602,17 @@ def timer():
     if KeySpeed > settings["keyboardLimit"]:
         message = "Скорость клавиатуры превышает допустимую. \n Допустимая: %i \n Текущая: %i \n" % (
             settings["keyboardLimit"], KeySpeed) + "Измените скорость в настройках компьютера на %i пунктов" % (
-            settings["keyboardLimit"] - KeySpeed)
+                          settings["keyboardLimit"] - KeySpeed)
         mb.showwarning(title="Настройте клавиатуру", message=message)
+
 
 # Выбор цвета фона
 def color():
     global backgroundcolor
     newbackground = cc.askcolor()
     backgroundcolor = newbackground[1]
-    reloadScreen()
+    reload_screen()
+
 
 # Получение достижений
 def achievements_give():
@@ -1643,13 +1627,13 @@ def achievements_give():
     if objectsVariable.GlobalScore == settings["ScoreMax"]:
         playerData.data["achievements"]["maximalist"] = True
 
+
 # Окно достижений
 def achievements_window():
     global achWindow, pacifistFrame
     achWindow = Toplevel(root)
     achWindow.title("Достижения")  # Заголовок окна
     achWindow.configure(bg=backgroundcolor)  # Фон окна
-    achWindow.geometry("620x235")  # Размеры окна
     achWindow.resizable(0, 0)  # Запрет на изменение размеров окна
     if sysName == "Windows":
         achWindow.iconbitmap(image.iconPath)
@@ -1666,138 +1650,145 @@ def achievements_window():
     create_achievement_card(frame=achWindow, images=image.ach_end, achname="end",
                             state=playerData.data["achievements"]["end"], row=4, column=2)
 
+
 def create_achievement_card(frame, images, achname, state, row, column):
     Label(frame, image=images[int(state)], bg=backgroundcolor).grid(row=row, column=column, rowspan=2, padx=5, pady=5)
     Label(frame, font=("Arial", 14), text=achievementsNames[achname]["name"], anchor=W,
-          bg=backgroundcolor).grid(row=row, column=column+1, sticky=W)
+          bg=backgroundcolor).grid(row=row, column=column + 1, sticky=W)
     Label(frame, font=("Arial", 12), text=achievementsNames[achname]["description"], anchor=W,
-          bg=backgroundcolor).grid(row=row+1, column=column+1, sticky=NW)
+          bg=backgroundcolor).grid(row=row + 1, column=column + 1, sticky=NW)
+
 
 # Включение и отключение кнопок меню сверху
 def buttonstate():
     global shouldReloadButtons
     if shouldReloadButtons:
         if level == 0:
-            gamemenu.entryconfig("Выход в меню", state="disabled")
-            gamemenu.entryconfig("Начать уровень заново", state="disabled")
-            gamemenu.entryconfig("Выбор уровня", state="normal")
+            game_menu.entryconfig("Выход в меню", state="disabled")
+            game_menu.entryconfig("Начать уровень заново", state="disabled")
+            game_menu.entryconfig("Выбор уровня", state="normal")
         else:
-            gamemenu.entryconfig("Выход в меню", state="normal")
-            gamemenu.entryconfig("Начать уровень заново", state="normal")
+            game_menu.entryconfig("Выход в меню", state="normal")
+            game_menu.entryconfig("Начать уровень заново", state="normal")
             if not settings["cheatmode"]:
-                gamemenu.entryconfig("Выбор уровня", state="disabled")
+                game_menu.entryconfig("Выбор уровня", state="disabled")
 
     shouldReloadButtons = False
 
+
 # Опрос выхода в главное меню
-def on_mainmenu():
+def exit_in_main_menu():
     ask = mb.askyesno(title="Выход в меню", message="Вы действительно хотите выйти в меню?")
     if ask:
-        mainmenu_open()
+        main_menu_open()
+
 
 # Составление меню
 def menu():  # Описание меню(сверху полоска)
-    global gamemenu
-    mainmenu = Menu(root)
-    gamemenu = Menu(mainmenu, tearoff=0, bg=backgroundcolor)
-    gamemenu.add_command(label="Новая игра", command=newgame)
-    gamemenu.add_command(label="Начать уровень заново", command=LevelRestart)
-    gamemenu.add_command(label="Выбор уровня", command=LevelShoose)
-    gamemenu.add_separator()
-    optionmenu = Menu(gamemenu, tearoff=1, bg=backgroundcolor)
-    musicmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
-    musicmenu.add_command(label="Громкость", command=setvolumemusic)
-    musicmenu.add_radiobutton(label="Включена", value=True, variable=musicmode)
-    musicmenu.add_radiobutton(label="Отключена", value=False, variable=musicmode)
-    soundmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
-    soundmenu.add_command(label="Громкость", command=setvolumesound)
-    soundmenu.add_radiobutton(label="Включена", value=True, variable=soundmode)
-    soundmenu.add_radiobutton(label="Отключена", value=False, variable=soundmode)
-    debugmenu = Menu(optionmenu, tearoff=1, bg=backgroundcolor)
-    debugmenu.add_radiobutton(label="Отключена", value=0, variable=debugmode)
-    debugmenu.add_radiobutton(label="Флаги персонажа", value=1, variable=debugmode)
-    debugmenu.add_radiobutton(label="Флаги обьектов", value=2, variable=debugmode)
-    debugmenu.add_radiobutton(label="Положение", value=3, variable=debugmode)
-    debugmenu.add_radiobutton(label="Системное", value=4, variable=debugmode)
-    gamemenu.add_cascade(label="Настройки", menu=optionmenu)
-    optionmenu.add_cascade(label="Музыка", menu=musicmenu)
-    optionmenu.add_cascade(label="Звуки", menu=soundmenu)
-    optionmenu.add_command(label="Выбрать цвет фона", command=color)
-    optionmenu.add_cascade(label="Отладка", menu=debugmenu)
-    gamemenu.add_separator()
-    gamemenu.add_command(label="Выход в меню", command=on_mainmenu)
-    gamemenu.add_command(label="Выход", command=on_closing)
-    aboutmenu = Menu(mainmenu, tearoff=0, bg=backgroundcolor)
-    aboutmenu.add_command(label="Авторы", command=lambda: mb.showinfo(title="Авторы", message=authorsmessage))
-    aboutmenu.add_command(label="Об игре", command=lambda: mb.showinfo(title="Об игре", message=aboutmessage))
-    progressmenu = Menu(mainmenu, tearoff=0, bg=backgroundcolor)
-    progressmenu.add_command(label="Достижения", command=achievements_window)
-    progressmenu.add_command(label="Сбростить прогресс", command=clearprogress)
-    mainmenu.add_cascade(label="Игра", menu=gamemenu)
-    mainmenu.add_cascade(label="Достижения", menu=progressmenu)
-    mainmenu.add_cascade(label="Справка", menu=aboutmenu)
-    root.config(menu=mainmenu)
+    global game_menu
+    main_menu = Menu(root)
+    game_menu = Menu(main_menu, tearoff=0, bg=backgroundcolor)
+    game_menu.add_command(label="Новая игра", command=new_game)
+    game_menu.add_command(label="Начать уровень заново", command=level_restart)
+    game_menu.add_command(label="Выбор уровня", command=level_selection)
+    game_menu.add_separator()
+    game_menu.add_command(label="Выход в меню", command=exit_in_main_menu)
+    game_menu.add_command(label="Выход", command=on_closing)
+    option_menu = Menu(main_menu, tearoff=1, bg=backgroundcolor)
+    music_menu = Menu(option_menu, tearoff=1, bg=backgroundcolor)
+    music_menu.add_command(label="Громкость", command=set_music_volume)
+    music_menu.add_radiobutton(label="Включена", value=True, variable=music_mode)
+    music_menu.add_radiobutton(label="Отключена", value=False, variable=music_mode)
+    sound_menu = Menu(option_menu, tearoff=1, bg=backgroundcolor)
+    sound_menu.add_command(label="Громкость", command=set_sound_volume)
+    sound_menu.add_radiobutton(label="Включена", value=True, variable=sound_mode)
+    sound_menu.add_radiobutton(label="Отключена", value=False, variable=sound_mode)
+    debug_menu = Menu(option_menu, tearoff=1, bg=backgroundcolor)
+    debug_menu.add_radiobutton(label="Отключена", value=0, variable=debug_mode)
+    debug_menu.add_radiobutton(label="Флаги персонажа", value=1, variable=debug_mode)
+    debug_menu.add_radiobutton(label="Флаги обьектов", value=2, variable=debug_mode)
+    debug_menu.add_radiobutton(label="Положение", value=3, variable=debug_mode)
+    debug_menu.add_radiobutton(label="Системное", value=4, variable=debug_mode)
+    option_menu.add_cascade(label="Музыка", menu=music_menu)
+    option_menu.add_cascade(label="Звуки", menu=sound_menu)
+    option_menu.add_command(label="Выбрать цвет фона", command=color)
+    option_menu.add_cascade(label="Отладка", menu=debug_menu)
+    about_menu = Menu(main_menu, tearoff=0, bg=backgroundcolor)
+    about_menu.add_command(label="Авторы", command=lambda: mb.showinfo(title="Авторы", message=authorsmessage))
+    about_menu.add_command(label="Об игре", command=lambda: mb.showinfo(title="Об игре", message=aboutmessage))
+    progress_menu = Menu(main_menu, tearoff=0, bg=backgroundcolor)
+    progress_menu.add_command(label="Достижения", command=achievements_window)
+    progress_menu.add_command(label="Сбростить прогресс", command=clear_progress)
+    main_menu.add_cascade(label="Игра", menu=game_menu)
+    main_menu.add_cascade(label="Достижения", menu=progress_menu)
+    main_menu.add_cascade(label="Опции", menu=option_menu)
+    main_menu.add_cascade(label="Справка", menu=about_menu)
+    root.config(menu=main_menu)
+
 
 # Перезагрузка экрана
-def reloadScreen():
+def reload_screen():
     labelLevel.grid_forget()
     labelScore.grid_forget()
     labelCats.grid_forget()
     labelLives.grid_forget()
-    statusbar.place_forget()
+    status_bar.place_forget()
     labelLevel.config(bg=backgroundcolor)
     labelScore.config(bg=backgroundcolor)
     labelCats.config(bg=backgroundcolor)
     labelLives.config(bg=backgroundcolor)
-    statusbar.config(bg=backgroundcolor)
+    status_bar.config(bg=backgroundcolor)
     root.configure(bg=backgroundcolor)
     root.geometry("%ix%i" % (windowSize[0], windowSize[1]))
-    loadScreen()
+    load_screen()
     menu()
 
+
 # Добавляем +1 к убитым Дикарям
-def SavKillAdd():
+def savage_kill_add_score():
     playerData.data["killedsavages"] += 1
 
+
 # Добавляем +1 к политым цветам
-def FlowWatAdd():
+def flower_water_add_score():
     playerData.data["wateredflowers"] += 1
 
-def clearprogress():
+
+def clear_progress():
     if mb.askyesno(title="Сброс", message="Вы уверены, что хотите сбросить прогресс?"):
-        playerData.eraseData()
-        mainmenu_open()
+        playerData.erase_data()
+        main_menu_open()
+
 
 Hero = Empty()
 Exit = Empty()
 menu()  # Создаем меню
-mainmenu_open()  # Запускаем заглавный экран
+main_menu_open()  # Запускаем заглавный экран
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Обработка выхода при нажатии на крестик
 # Главный цикл
 while run:
-    if (time.time() - lastframetime) >= settings["frametime"]:
+    if (time.time() - last_frame_time) >= settings["frametime"]:
         fps += 1
         music()
         if level != 0:  # Если игра идет
-            plat = grannyoverplatform()  # Cтоит ли персонаж на платформе
-            carr = grannycarrycat()  # Подбирает ли персонаж котенка
-            vent = grannyinexit()  # Стоит ли персонаж у выходв
-            barr = grannyandwall()  # Стоит ли персонаж у стены
-            flow = grannygetbonus()  # Стоит ли персонаж у цветочка
-            fast = grannyfastroom()  # Стоит ли персонаж у Быстромора
-            grav = grannygravroom()  # Стоит ли персонаж у Вверхшенки
-            slow = grannyslowroom()  # Стоит ли персонаж у Медлянки
+            plat = grannyoverplatform()  # Стоит ли персонаж на платформе
+            grannycarrycat()  # Подбирает ли персонаж котенка
+            vent = granny_in_exit()  # Стоит ли персонаж у выходв
+            barr = granny_and_wall()  # Стоит ли персонаж у стены
+            flow = granny_get_bonus()  # Стоит ли персонаж у цветочка
+            fast = granny_and_fast()  # Стоит ли персонаж у Быстромора
+            grav = granny_and_grav()  # Стоит ли персонаж у Вверхшенки
+            slow = granny_and_slow()  # Стоит ли персонаж у Медлянки
             head = grannyunderplatform()  # Стоит ли персонаж под платформой
             SavHitGra = savagehitgranny()  # Может ли Дикарь убить персонажа
             GraHitSav = grannyhitsavage()  # Может ли персонаж убить Дикаря
-            grannyKill()  # Проверка смерти персонажа
+            granny_kill()  # Проверка смерти персонажа
             effects()  # Применение эффектов от грибов
-            levelLimit()  # Применение временных ограничений
-            recquecountertoexit()  # Делаем проверку готовность выйти с уровня
+            level_limits()  # Применение временных ограничений
+            cat_counter_for_exit()  # Делаем проверку готовность выйти с уровня
             status()  # Обновляем статусбар и данные для пользователя
-            savageWalking()  # Дикарь
-            savageActions()
-            savageAnimate()
+            savage_walking()  # Дикарь
+            savage_actions()
             if Hero.avaible:  # Если герой есть, применяем к нему
                 ladd = grannyonladder()  # Стоит ли персонаж на лестнице
                 Hero.action_queue()  # Выполнение очереди действий
@@ -1805,9 +1796,9 @@ while run:
                 Hero.animate()  # Анимируем персонажа
             if Exit.avaible:  # Если герой есть, применяем к нему
                 Exit.animate()  # Анимируем персонажа
-            playerData.writeData()
+            playerData.write_data()
         buttonstate()
         timer()
         root.update_idletasks()  # Обновляем объекты окна
         root.update()
-        lastframetime = time.time()
+        last_frame_time = time.time()

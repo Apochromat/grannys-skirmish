@@ -1,12 +1,14 @@
 import os
 from PIL import Image, ImageTk
 
-"""Изображения"""
+
+# Изображения
 # Функция загрузки изображений
 def imgload(path):  # Функция загрузки изображений
     img = Image.open(path)
     output = ImageTk.PhotoImage(img)
     return output
+
 
 # Загрузка изображений
 class ImageHeap:

@@ -1,6 +1,7 @@
 import time
 import random
 
+
 class VariableHeap:
     def __init__(self):
         self.isFastEffect = False  # Устанавливается ли эффект быстроты
@@ -24,6 +25,7 @@ class VariableHeap:
 
         self.keyCounter = 0
 
+
 # Базовая платформа
 class PlatformBase:  # Класс базовой платформы, которая присутствует на всех уровнях
     def __init__(self, canvas, image):
@@ -38,6 +40,7 @@ class PlatformBase:  # Класс базовой платформы, котор�
 
     def touch_place(self):  # Массив точек касания верхней линии
         return self.touch
+
 
 # Платформа
 class PlatformSimple:  # Класс обычной платформы, масштабируется и изменяется для каждого уровня
@@ -66,6 +69,7 @@ class PlatformSimple:  # Класс обычной платформы, масш�
         head = [self.coords[0] + 30, self.coords[1], self.coords[2]]
         return head
 
+
 # Стена
 class Wall:
     # Ширина 32, Высота 64
@@ -77,8 +81,9 @@ class Wall:
         self.id = canvas.create_image(self.centre[0], self.centre[1], image=image, tag="wall")
 
     def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 30, self.centre[0] + 30, self.centre[1] - 32, self.centre[1] + 32]
-        return actionArray
+        action_array = [self.centre[0] - 30, self.centre[0] + 30, self.centre[1] - 32, self.centre[1] + 32]
+        return action_array
+
 
 # Лестница
 class Ladder:  # Класс лестницы, позволяет забираться на верх
@@ -92,8 +97,8 @@ class Ladder:  # Класс лестницы, позволяет забират�
         self.isLadderTop = False
 
     def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 10, self.centre[0] + 10, self.centre[1] - 60, self.centre[1] + 60]
-        return actionArray
+        return [self.centre[0] - 10, self.centre[0] + 10, self.centre[1] - 60, self.centre[1] + 60]
+
 
 # Бонусный цветок
 class BonusFlower:
@@ -107,12 +112,12 @@ class BonusFlower:
         self.avaible = True
 
     def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 16, self.centre[0] + 16, self.centre[1] - 18, self.centre[1] + 18]
-        return actionArray
+        return [self.centre[0] - 16, self.centre[0] + 16, self.centre[1] - 18, self.centre[1] + 18]
 
     def rise(self):
         self.avaible = False
         self.canvas.itemconfig(self.id, image=self.imagerise)
+
 
 # Быстромор
 class Fastroom:
@@ -125,8 +130,8 @@ class Fastroom:
         self.avaible = True
 
     def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
-        return actionArray
+        return [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
+
 
 # Медлянка
 class Slowroom:
@@ -139,8 +144,8 @@ class Slowroom:
         self.avaible = True
 
     def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
-        return actionArray
+        return [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
+
 
 # Вверхшенка
 class Gravroom:
@@ -153,8 +158,8 @@ class Gravroom:
         self.avaible = True
 
     def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
-        return actionArray
+        return [self.centre[0] - 12, self.centre[0] + 12, self.centre[1] - 12, self.centre[1] + 12]
+
 
 # Кот
 class Cat:  # Класс котика, которых мы спасаем
@@ -173,6 +178,7 @@ class Cat:  # Класс котика, которых мы спасаем
         self.avaible = False
         self.canvas.delete(self.id)
 
+
 # Дикарь
 class Savage:
     # Ширина 48 Высота 64
@@ -187,7 +193,7 @@ class Savage:
         self.avaible = True
         self.action = ""
         self.way = [0, 640]
-        self.wallside = 0
+        self.wall_side = 0
         self.direction = random.choice(["left", "right"])
         self.lastWalkRightImage = 0
         self.lastWalkLeftImage = 0
@@ -246,6 +252,7 @@ class Savage:
             # Обновляем таймер кадра
             self.lastSavageanimationtime = time.time()
 
+
 # Выход
 class ExitFlower:  # Класс цветка-выхода
     # Ширина 60, Высота 60
@@ -262,8 +269,7 @@ class ExitFlower:  # Класс цветка-выхода
         self.id = self.canvas.create_image(self.centre[0], self.centre[1], image=self.image[0], tag="exit")
 
     def actionzone(self):  # Зона активности (совершения действий)
-        actionArray = [self.centre[0] - 30, self.centre[0] + 30, self.centre[1] - 30, self.centre[1] + 30]
-        return actionArray
+        return [self.centre[0] - 30, self.centre[0] + 30, self.centre[1] - 30, self.centre[1] + 30]
 
     def opening(self):  # Открытие цветка
         self.open = True
@@ -275,6 +281,7 @@ class ExitFlower:  # Класс цветка-выхода
             self.lastImage += 1
             if self.lastImage == 5:
                 self.lastImage = 1
+
 
 # Пустой объект
 class Empty:
