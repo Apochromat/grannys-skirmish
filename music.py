@@ -20,6 +20,7 @@ class SoundPathHeap:
         self.lose = os.path.join('assets', 'sound', 'lose.ogg')
         self.fall = os.path.join('assets', 'sound', 'fall.ogg')
         self.land = os.path.join('assets', 'sound', 'land.ogg')
+        self.drum = os.path.join('assets', 'sound', 'drum.ogg')
         self.ladder = [os.path.join('assets', 'sound', 'ladder1.ogg'),
                        os.path.join('assets', 'sound', 'ladder2.ogg'),
                        os.path.join('assets', 'sound', 'ladder3.ogg'),

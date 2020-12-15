@@ -1,6 +1,6 @@
 {
     "title": "Granny`s Skirmish",
-    "version": "v0.9.11 prerelease",
+    "version": "v0.9.12 prerelease",
     "windowsizewin": [
         640,
         540
@@ -113,6 +113,13 @@
                 400
             ],
             "CatAmountAll": 0,
+            "maskFlag": false,
+            "maskKind": "bless",
+            "maskChance": 0.3,
+            "maskCoords": [
+                0,
+                0
+            ],
             "alphaPlatformFlag": false,
             "alphaPlatformCoords": [
                 0,
@@ -356,6 +363,13 @@
                 270
             ],
             "CatAmountAll": 1,
+            "maskFlag": false,
+            "maskKind": "bless",
+            "maskChance": 0.3,
+            "maskCoords": [
+                0,
+                0
+            ],
             "alphaPlatformFlag": true,
             "alphaPlatformCoords": [
                 330,
@@ -599,6 +613,13 @@
                 400
             ],
             "CatAmountAll": 2,
+            "maskFlag": false,
+            "maskKind": "bless",
+            "maskChance": 0.3,
+            "maskCoords": [
+                0,
+                0
+            ],
             "alphaPlatformFlag": true,
             "alphaPlatformCoords": [
                 330,

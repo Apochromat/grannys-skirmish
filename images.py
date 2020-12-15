@@ -110,6 +110,11 @@ class ImageHeap:
                               imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_24.png')),
                               imgload(os.path.join('assets', 'graphics', 'platform', 'parts', 'part_25.png'))]
 
+        self.mask = {"bless": imgload(os.path.join('assets', 'graphics', 'mask', 'mask_bless.png')),
+                     "joy": imgload(os.path.join('assets', 'graphics', 'mask', 'mask_joy.png')),
+                     "luck": imgload(os.path.join('assets', 'graphics', 'mask', 'mask_luck.png')),
+                     "rage": imgload(os.path.join('assets', 'graphics', 'mask', 'mask_rage.png'))}
+
         self.ach_pacifist = [imgload(os.path.join('assets', 'graphics', 'achievements', 'pacifist_inactive.png')),
                              imgload(os.path.join('assets', 'graphics', 'achievements', 'pacifist_active.png'))]
 
@@ -122,8 +127,8 @@ class ImageHeap:
         self.ach_nonbeliever = [imgload(os.path.join('assets', 'graphics', 'achievements', 'nonbeliever_inactive.png')),
                                 imgload(os.path.join('assets', 'graphics', 'achievements', 'nonbeliever_active.png'))]
 
-        self.ach_maximalist = [imgload(os.path.join('assets', 'graphics', 'achievements', 'maximalist_inactive.png')),
-                               imgload(os.path.join('assets', 'graphics', 'achievements', 'maximalist_active.png'))]
+        self.ach_masquer = [imgload(os.path.join('assets', 'graphics', 'achievements', 'masquer_inactive.png')),
+                            imgload(os.path.join('assets', 'graphics', 'achievements', 'masquer_active.png'))]
 
         self.ach_end = [imgload(os.path.join('assets', 'graphics', 'achievements', 'end_inactive.png')),
                         imgload(os.path.join('assets', 'graphics', 'achievements', 'end_active.png'))]

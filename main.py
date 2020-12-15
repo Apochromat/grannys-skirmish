@@ -1,7 +1,7 @@
 # Granny`s Skirmish
-# version 0.9.11
+# version 0.9.12
 
-"""Импорт"""
+# Импорт
 import platform
 from tkinter import *
 from tkinter import colorchooser as cc
@@ -13,14 +13,14 @@ from objects import *
 from music import *
 from achievements import *
 
-"""Файл настроек"""
+# Файл настроек
 with open("data.json", 'r', encoding="utf-8") as file:  # Открываем файл с настройками
     settings = json.load(file)  # Записываем как словарь в переменную
 
-"""Данные игрока"""
+# Данные игрока
 playerData = PlayerData()
 playerData.data["lastlives"] = settings["livesnormal"]
-"""Переменные"""
+# Переменные
 sysName = platform.uname().system
 objectsVariable = VariableHeap()
 musicPaths = MusicPathHeap()
@@ -79,7 +79,8 @@ volumeSound = settings["soundvolume"]
 shouldReloadButtons = True
 
 ladd = False
-"""Построение окна"""
+
+# Построение окна
 root = Tk()  # Создаем окно
 root.title(settings['title'])  # Заголовок окна
 root.configure(bg=backgroundcolor)  # Фон окна
@@ -88,7 +89,8 @@ root.resizable(0, 0)  # Запрет на изменение размеров о
 image = ImageHeap()
 if sysName == "Windows":
     root.iconbitmap(image.iconPath)
-"""Музыка"""
+
+# Музыка
 mixer.init()
 
 
@@ -106,6 +108,7 @@ def music():
     mixer.Channel(2).set_volume(volumeSound / 100)
     mixer.Channel(3).set_volume(volumeSound / 100)
     mixer.Channel(4).set_volume(volumeSound / 100)
+    mixer.Channel(5).set_volume(1)
     if music_mode.get() is False:
         music_stop()
     if level == 0:
@@ -136,7 +139,7 @@ def music():
         isMusicOn = True
 
 
-"""Элементы окна"""
+# Элементы окна
 status_bar = Label(root, justify=LEFT, text="Готов", width=settings["statusbarwidth"], height=1,
                    bg=backgroundcolor, anchor=W)  # Статусбар
 labelLevel = Label(root, justify=LEFT, text=" ", width=settings["hidwidth"], height=1, bg=backgroundcolor,
@@ -249,9 +252,7 @@ scale_volume_music.set(volumeMusic)
 scale_volume_sound = IntVar()
 scale_volume_sound.set(volumeMusic)
 
-"""Окно выбора громкости Музыки"""
-
-
+# Окно выбора громкости Музыки
 def set_music_volume():
     global volume_music_window
     volume_music_window = Toplevel()
@@ -421,10 +422,8 @@ def clearcanvas():
     canvas.delete("bonus")
     canvas.delete("granny")
     canvas.delete("savage")
+    canvas.delete("mask")
     canvas.delete("exit")
-
-
-"""Объекты"""
 
 
 # Персонаж
@@ -621,9 +620,7 @@ class Granny:  # Класс персонажа, которым мы управл
             self.lastanimationtime = time.time()
 
 
-"""Уровни"""
-
-
+# Уровни
 # Инициальзация уровня по data.json
 def level_initialization():
     playerData.data["lastlevel"] = level
@@ -631,7 +628,7 @@ def level_initialization():
     playerData.data["lastlives"] = objectsVariable.GlobalLives
     button_clear()
     clearcanvas()
-    global shouldReloadButtons, limitedtime, avoidEffects, limitedFlag, Hero, Base, Exit, alphaPlatform, betaPlatform, gammaPlatform, deltaPlatform, epsilonPlatform, zetaPlatform, etaPlatform, thetaPlatform, iotaPlatform, alphaCat, betaCat, gammaCat, deltaCat, epsilonCat, zetaCat, alphaBonus, betaBonus, gammaBonus, deltaBonus, epsilonBonus, zetaBonus, alphaLadder, betaLadder, gammaLadder, deltaLadder, epsilonLadder, zetaLadder, alphaWall, betaWall, gammaWall, deltaWall, epsilonWall, zetaWall, alphaSavage, betaSavage, gammaSavage, deltaSavage, alphaFastroom, betaFastroom, alphaSlowroom, betaSlowroom, alphaGravroom, betaGravroom
+    global shouldReloadButtons, limitedtime, avoidEffects, limitedFlag, Hero, Base, Exit, Artifact, alphaPlatform, betaPlatform, gammaPlatform, deltaPlatform, epsilonPlatform, zetaPlatform, etaPlatform, thetaPlatform, iotaPlatform, alphaCat, betaCat, gammaCat, deltaCat, epsilonCat, zetaCat, alphaBonus, betaBonus, gammaBonus, deltaBonus, epsilonBonus, zetaBonus, alphaLadder, betaLadder, gammaLadder, deltaLadder, epsilonLadder, zetaLadder, alphaWall, betaWall, gammaWall, deltaWall, epsilonWall, zetaWall, alphaSavage, betaSavage, gammaSavage, deltaSavage, alphaFastroom, betaFastroom, alphaSlowroom, betaSlowroom, alphaGravroom, betaGravroom
     shouldReloadButtons = True
     limitedFlag = False
     avoidEffects = True
@@ -642,7 +639,7 @@ def level_initialization():
                       animationexitduration=settings["animationExitduration"])
     objectsVariable.CatAmountAll = settings['levels'][level]['CatAmountAll']
     objectsVariable.CatAmountReal = 0
-    """Платформы"""
+    # Платформы
     if settings['levels'][level]['alphaPlatformFlag']:
         alphaPlatform = PlatformSimple(settings['levels'][level]['alphaPlatformCoords'], canvas=canvas,
                                        image=image.platformparts)
@@ -689,7 +686,7 @@ def level_initialization():
     else:
         iotaPlatform = Empty()
 
-    """Лестницы"""
+    # Лестницы
     if settings['levels'][level]['alphaLadderFlag']:
         alphaLadder = Ladder(settings['levels'][level]['alphaLadderCoords'], canvas=canvas, image=image.ladder)
     else:
@@ -715,7 +712,7 @@ def level_initialization():
     else:
         zetaLadder = Empty()
 
-    """Стены"""
+    # Стены
     if settings['levels'][level]['alphaWallFlag']:
         alphaWall = Wall(settings['levels'][level]['alphaWallCoords'], canvas=canvas, image=image.wallImage)
     else:
@@ -741,7 +738,7 @@ def level_initialization():
     else:
         zetaWall = Empty()
 
-    """Коты"""
+    # Коты
     if settings['levels'][level]['alphaCatFlag']:
         alphaCat = Cat(settings['levels'][level]['alphaCatCoords'], canvas=canvas, image=image.cats)
     else:
@@ -767,7 +764,7 @@ def level_initialization():
     else:
         zetaCat = Empty()
 
-    """Цветочки"""
+    # Цветочки
     if settings['levels'][level]['alphaBonusFlag']:
         alphaBonus = BonusFlower(settings['levels'][level]['alphaBonusCoords'], canvas=canvas,
                                  imagerise=random.choice(image.bonus), imageseed=image.bonusSeed)
@@ -799,7 +796,7 @@ def level_initialization():
     else:
         zetaBonus = Empty()
 
-    """Быстромор"""
+    # Быстромор
     if settings['levels'][level]['alphaFastroomFlag']:
         alphaFastroom = Fastroom(settings['levels'][level]['alphaFastroomCoords'], canvas=canvas, image=image.mushroom)
     else:
@@ -809,7 +806,7 @@ def level_initialization():
     else:
         betaFastroom = Empty()
 
-    """Медлянка"""
+    # Медлянка
     if settings['levels'][level]['alphaSlowroomFlag']:
         alphaSlowroom = Slowroom(settings['levels'][level]['alphaSlowroomCoords'], canvas=canvas, image=image.mushroom)
     else:
@@ -819,7 +816,7 @@ def level_initialization():
     else:
         betaSlowroom = Empty()
 
-    """Вверхшенка"""
+    # Вверхшенка
     if settings['levels'][level]['alphaGravroomFlag']:
         alphaGravroom = Gravroom(settings['levels'][level]['alphaGravroomCoords'], canvas=canvas, image=image.mushroom)
     else:
@@ -829,7 +826,7 @@ def level_initialization():
     else:
         betaGravroom = Empty()
 
-    """Туземец"""
+    # Туземец
     if settings['levels'][level]['alphaSavageFlag']:
         alphaSavage = Savage(settings['levels'][level]['alphaSavageCoords'], canvas=canvas, image=image.savage,
                              animationsavageduration=animationSavageduration, savagespeed=savageSpeed)
@@ -851,19 +848,27 @@ def level_initialization():
     else:
         deltaSavage = Empty()
 
+    # Маска
+    if settings['levels'][level]['maskFlag'] & chance_check(settings['levels'][level]['maskChance']) & (playerData.data[
+        "masks"][settings['levels'][level]['maskKind']] is False):
+        Artifact = Mask(settings['levels'][level]['maskCoords'], canvas=canvas, image=image.mask,
+                        kind=settings['levels'][level]['maskKind'])
+    else:
+        Artifact = Empty()
+
     Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], the_canvas=canvas, the_image=image.granny)
 
 
 # Обработка выбора уровня
 def level_selection():
     global level
-    ask = sd.askinteger(title="Выбор уровня",
+    if settings["cheatmode"]:
+        ask = sd.askinteger(title="Выбор уровня",
                         prompt="Введите номер уровня.\nМаксимальный уровень: %i" % settings["levelamount"], minvalue=1,
                         maxvalue=settings["levelamount"])
     if type(ask) == int:
-        if (level == 0) | settings["cheatmode"]:
-            level = ask
-            level_initialization()
+        level = ask
+        level_initialization()
 
 
 # Переход на следующий уровень или конец игры
@@ -891,9 +896,7 @@ def level_restart():
         level_initialization()
 
 
-"""Доп. Функции"""
-
-
+# Доп. Функции
 # Общая проверка по массивам
 def action_check(playerzone, objectzone, index):  # Проверка выхода по массивам
     solution = False
@@ -1341,6 +1344,14 @@ def any_savage_and_wall(the_object):  # Проверяет столкновен�
     return solution
 
 
+# Маски
+def granny_and_masks():
+    if Artifact.avaible:
+        if action_check(Hero.actionzone(), Artifact.actionzone(), 20):
+            Artifact.collect()
+            mixer.Channel(5).play(mixer.Sound(soundPaths.drum))
+            playerData.data["masks"][Artifact.kind] = True
+
 # Гравитация
 def gravity():  # Если персонаж не на платформн и не на лестнице, на нее действует гравитация
     global simpgrav
@@ -1624,8 +1635,9 @@ def achievements_give():
         playerData.data["achievements"]["florist"] = True
     if playerData.data["killedsavages"] == settings["savagesamount"]:
         playerData.data["achievements"]["bloodmary"] = True
-    if objectsVariable.GlobalScore == settings["ScoreMax"]:
-        playerData.data["achievements"]["maximalist"] = True
+    if (playerData.data["masks"]["bless"] is True) & (playerData.data["masks"]["joy"] is True) & (
+            playerData.data["masks"]["luck"] is True) & (playerData.data["masks"]["rage"] is True):
+        playerData.data["achievements"]["masquer"] = True
 
 
 # Окно достижений
@@ -1645,8 +1657,8 @@ def achievements_window():
                             state=playerData.data["achievements"]["florist"], row=0, column=2)
     create_achievement_card(frame=achWindow, images=image.ach_nonbeliever, achname="nonbeliever",
                             state=playerData.data["achievements"]["nonbeliever"], row=2, column=2)
-    create_achievement_card(frame=achWindow, images=image.ach_maximalist, achname="maximalist",
-                            state=playerData.data["achievements"]["maximalist"], row=4, column=0)
+    create_achievement_card(frame=achWindow, images=image.ach_masquer, achname="masquer",
+                            state=playerData.data["achievements"]["masquer"], row=4, column=0)
     create_achievement_card(frame=achWindow, images=image.ach_end, achname="end",
                             state=playerData.data["achievements"]["end"], row=4, column=2)
 
@@ -1760,8 +1772,16 @@ def clear_progress():
         main_menu_open()
 
 
+def chance_check(chance):
+    if (random.randrange(0, 100)/100) <= chance:
+        return True
+    else:
+        return False
+
+
 Hero = Empty()
 Exit = Empty()
+Artifact = Empty()
 menu()  # Создаем меню
 main_menu_open()  # Запускаем заглавный экран
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Обработка выхода при нажатии на крестик
@@ -1791,6 +1811,7 @@ while run:
             savage_actions()
             if Hero.avaible:  # Если герой есть, применяем к нему
                 ladd = grannyonladder()  # Стоит ли персонаж на лестнице
+                granny_and_masks()
                 Hero.action_queue()  # Выполнение очереди действий
                 gravity()  # Применяем к персонажу фактор графитации
                 Hero.animate()  # Анимируем персонажа

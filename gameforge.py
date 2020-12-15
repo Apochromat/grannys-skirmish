@@ -1,4 +1,4 @@
-""" Gameforge 1.2"""
+""" Gameforge 1.3"""
 
 import json
 import sys
@@ -17,15 +17,16 @@ class Empty():
 """Переменные"""
 colors = ["wheat1", "aquamarine", "palegreen1", "plum1", "grey80", "lightblue"]
 lev_colors = ["wheat1", "plum1", "lightblue", "pink2", "palegreen1", "lemonchiffon", "grey80", "mediumpurple1",
-              "orchid2", "khaki1","paleturquoise2"]
+              "orchid2", "khaki1","paleturquoise2", "burlywood1"]
 background_color = "lavender"
 is_level_editing = False
 Level = Empty()
 levelinforge = 0
-hint = "Координата Персонажа и выхода лежит в границах: \n X - [30; 610], Y - [30; 430]\n" \
-       "Координаты других объектов лежат в границах:\n X - [0; 610], Y - [0; 430]\n" \
+hint = "Персонаж/Выход: X [30; 610], Y [30; 430]\n" \
+       "Остальное: X [0; 610], Y [0; 430]\n" \
        "X1 должен быть меньше X2\n"\
-       "Дикарь/Платформа принимает значения: base, alpha, beta,\n gamma, delta, epsilon, zeta, eta, theta, iota"
+       "Дикарь (Платформа) значения:\n base, alpha, beta, gamma, delta,\n epsilon, zeta, eta, theta, iota\n"\
+       "Тип маски: bless, joy, luck, rage"
 
 """Функции"""
 def openfile():
@@ -58,8 +59,8 @@ def load_vars():
         openfile()
         
 def load_level_vars(level):
-    """Переменные Уровня"""
-    """Основное"""
+    # Переменные Уровня"""
+    # Основное"""
     level_editVar.set(settings["levels"][level]["level"])
     limit_editVar.set(settings["levels"][level]["limited"])
     if settings["levels"][level]["limittype"] == "NEXT":
@@ -73,7 +74,14 @@ def load_level_vars(level):
     exit_y_editVar.set(settings["levels"][level]["exitCoords"][1])
     cats_editVar.set(settings["levels"][level]["CatAmountAll"])
 
-    """Платформы"""
+    # Маски
+    mask_state_editVar.set(settings["levels"][level]["maskFlag"])
+    mask_kind_editVar.set(settings["levels"][level]["maskKind"])
+    mask_chance_editVar.set(settings["levels"][level]["maskChance"]*100)
+    mask_x_editVar.set(settings["levels"][level]["maskCoords"][0])
+    mask_y_editVar.set(settings["levels"][level]["maskCoords"][1])
+
+    # Платформы
     alpha_platform_state_editVar.set(settings["levels"][level]["alphaPlatformFlag"])
     alpha_platform_y_editVar.set(settings["levels"][level]["alphaPlatformCoords"][0])
     alpha_platform_x1_editVar.set(settings["levels"][level]["alphaPlatformCoords"][1])
@@ -111,7 +119,7 @@ def load_level_vars(level):
     iota_platform_x1_editVar.set(settings["levels"][level]["iotaPlatformCoords"][1])
     iota_platform_x2_editVar.set(settings["levels"][level]["iotaPlatformCoords"][2])
 
-    """Коты"""
+    # Коты
     alpha_cat_state_editVar.set(settings["levels"][level]["alphaCatFlag"])
     alpha_cat_x_editVar.set(settings["levels"][level]["alphaCatCoords"][0])
     alpha_cat_y_editVar.set(settings["levels"][level]["alphaCatCoords"][1])
@@ -131,7 +139,7 @@ def load_level_vars(level):
     zeta_cat_x_editVar.set(settings["levels"][level]["zetaCatCoords"][0])
     zeta_cat_y_editVar.set(settings["levels"][level]["zetaCatCoords"][1])
 
-    """Бонусы"""
+    # Бонусы
     alpha_bonus_state_editVar.set(settings["levels"][level]["alphaBonusFlag"])
     alpha_bonus_x_editVar.set(settings["levels"][level]["alphaBonusCoords"][0])
     alpha_bonus_y_editVar.set(settings["levels"][level]["alphaBonusCoords"][1])
@@ -151,7 +159,7 @@ def load_level_vars(level):
     zeta_bonus_x_editVar.set(settings["levels"][level]["zetaBonusCoords"][0])
     zeta_bonus_y_editVar.set(settings["levels"][level]["zetaBonusCoords"][1])
 
-    """Лестницы"""
+    # Лестницы
     alpha_ladder_state_editVar.set(settings["levels"][level]["alphaLadderFlag"])
     alpha_ladder_x_editVar.set(settings["levels"][level]["alphaLadderCoords"][0])
     alpha_ladder_y_editVar.set(settings["levels"][level]["alphaLadderCoords"][1])
@@ -171,7 +179,7 @@ def load_level_vars(level):
     zeta_ladder_x_editVar.set(settings["levels"][level]["zetaLadderCoords"][0])
     zeta_ladder_y_editVar.set(settings["levels"][level]["zetaLadderCoords"][1])
 
-    """Стены"""
+    # Стены
     alpha_wall_state_editVar.set(settings["levels"][level]["alphaWallFlag"])
     alpha_wall_x_editVar.set(settings["levels"][level]["alphaWallCoords"][0])
     alpha_wall_y_editVar.set(settings["levels"][level]["alphaWallCoords"][1])
@@ -191,7 +199,7 @@ def load_level_vars(level):
     zeta_wall_x_editVar.set(settings["levels"][level]["zetaWallCoords"][0])
     zeta_wall_y_editVar.set(settings["levels"][level]["zetaWallCoords"][1])
 
-    """Дикари"""
+    # Дикари
     alpha_savage_state_editVar.set(settings["levels"][level]["alphaSavageFlag"])
     alpha_savage_x_editVar.set(settings["levels"][level]["alphaSavageCoords"][0])
     alpha_savage_y_editVar.set(settings["levels"][level]["alphaSavageCoords"][1])
@@ -209,7 +217,7 @@ def load_level_vars(level):
     delta_savage_y_editVar.set(settings["levels"][level]["deltaSavageCoords"][1])
     delta_savage_home_editVar.set(settings["levels"][level]["deltaSavagePlatform"])
 
-    """Грибы"""
+    # Грибы
     alpha_fastroom_state_editVar.set(settings["levels"][level]["alphaFastroomFlag"])
     alpha_fastroom_x_editVar.set(settings["levels"][level]["alphaFastroomCoords"][0])
     alpha_fastroom_y_editVar.set(settings["levels"][level]["alphaFastroomCoords"][1])
@@ -345,7 +353,7 @@ def level_edit_close():
         Level = Empty()
 
 def level_edit_save():
-    """Основное"""
+    # Основное
     settings["levels"][levelinforge]["level"] = level_editVar.get()
     settings["levels"][levelinforge]["limited"] = limit_editVar.get()
     if limit_type_editVar.get() == 0:
@@ -357,7 +365,14 @@ def level_edit_save():
     settings["levels"][levelinforge]["exitCoords"] = [exit_x_editVar.get(), exit_y_editVar.get()]
     settings["levels"][levelinforge]["CatAmountAll"] = cats_editVar.get()
 
-    """Платформы"""
+    # Маски
+    settings["levels"][levelinforge]["maskFlag"] = mask_state_editVar.get()
+    settings["levels"][levelinforge]["maskCoords"] = [mask_x_editVar.get(),
+                                                          mask_y_editVar.get()]
+    settings["levels"][levelinforge]["maskKind"] = mask_kind_editVar.get()
+    settings["levels"][levelinforge]["maskChance"] = mask_chance_editVar.get()/100
+
+    # Платформы
     settings["levels"][levelinforge]["alphaPlatformFlag"] = alpha_platform_state_editVar.get()
     settings["levels"][levelinforge]["alphaPlatformCoords"] = [alpha_platform_y_editVar.get(),
                                                                alpha_platform_x1_editVar.get(),
@@ -395,7 +410,7 @@ def level_edit_save():
                                                               iota_platform_x1_editVar.get(),
                                                               iota_platform_x2_editVar.get()]
 
-    """Коты"""
+    # Коты
     settings["levels"][levelinforge]["alphaCatFlag"] = alpha_cat_state_editVar.get()
     settings["levels"][levelinforge]["alphaCatCoords"] = [alpha_cat_x_editVar.get(),
                                                           alpha_cat_y_editVar.get()]
@@ -415,7 +430,7 @@ def level_edit_save():
     settings["levels"][levelinforge]["zetaCatCoords"] = [zeta_cat_x_editVar.get(),
                                                          zeta_cat_y_editVar.get()]
 
-    """Бонусы"""
+    # Бонусы
     settings["levels"][levelinforge]["alphaBonusFlag"] = alpha_bonus_state_editVar.get()
     settings["levels"][levelinforge]["alphaBonusCoords"] = [alpha_bonus_x_editVar.get(),
                                                             alpha_bonus_y_editVar.get()]
@@ -435,7 +450,7 @@ def level_edit_save():
     settings["levels"][levelinforge]["zetaBonusCoords"] = [zeta_bonus_x_editVar.get(),
                                                            zeta_bonus_y_editVar.get()]
 
-    """Лестницы"""
+    # Лестницы
     settings["levels"][levelinforge]["alphaLadderFlag"] = alpha_ladder_state_editVar.get()
     settings["levels"][levelinforge]["alphaLadderCoords"] = [alpha_ladder_x_editVar.get(),
                                                              alpha_ladder_y_editVar.get()]
@@ -455,7 +470,7 @@ def level_edit_save():
     settings["levels"][levelinforge]["zetaLadderCoords"] = [zeta_ladder_x_editVar.get(),
                                                             zeta_ladder_y_editVar.get()]
 
-    """Стены"""
+    # Стены
     settings["levels"][levelinforge]["alphaWallFlag"] = alpha_wall_state_editVar.get()
     settings["levels"][levelinforge]["alphaWallCoords"] = [alpha_wall_x_editVar.get(),
                                                            alpha_wall_y_editVar.get()]
@@ -475,7 +490,7 @@ def level_edit_save():
     settings["levels"][levelinforge]["zetaWallCoords"] = [zeta_wall_x_editVar.get(),
                                                           zeta_wall_y_editVar.get()]
 
-    """Дикари"""
+    # Дикари
     settings["levels"][levelinforge]["alphaSavageFlag"] = alpha_savage_state_editVar.get()
     settings["levels"][levelinforge]["alphaSavageCoords"] = [alpha_savage_x_editVar.get(),
                                                              alpha_savage_y_editVar.get()]
@@ -493,7 +508,7 @@ def level_edit_save():
                                                              delta_savage_y_editVar.get()]
     settings["levels"][levelinforge]["deltaSavagePlatform"] = delta_savage_home_editVar.get()
 
-    """Грибы"""
+    # Грибы
     settings["levels"][levelinforge]["alphaFastroomFlag"] = alpha_fastroom_state_editVar.get()
     settings["levels"][levelinforge]["alphaFastroomCoords"] = [alpha_fastroom_x_editVar.get(),
                                                            alpha_fastroom_y_editVar.get()]
@@ -623,6 +638,7 @@ class LevelEdit():
         self.fastrooms = LabelFrame(self.window, bg=lev_colors[8], text="Быстроморы")
         self.slowrooms = LabelFrame(self.window, bg=lev_colors[9], text="Медлянки")
         self.gravrooms = LabelFrame(self.window, bg=lev_colors[10], text="Вверхшенки")
+        self.masks = LabelFrame(self.window, bg=lev_colors[11], text="Маски")
         self.platforms = LabelFrame(self.window, bg=lev_colors[2], text="Платформы")
         self.cats = LabelFrame(self.window, bg=lev_colors[3], text="Коты")
         self.bonuses = LabelFrame(self.window, bg=lev_colors[4], text="Цветочки")
@@ -635,7 +651,8 @@ class LevelEdit():
         self.fastrooms.grid(row=1, column=2, sticky=E)
         self.slowrooms.grid(row=1, column=3, sticky=E)
         self.gravrooms.grid(row=1, column=4, sticky=E)
-        self.hints.grid(row=1, column=5, columnspan=2, sticky=NW)
+        self.masks.grid(row=1, column=5, sticky=E)
+        self.hints.grid(row=1, column=6, sticky=NW)
         self.platforms.grid(row=2, column=0, columnspan=2, sticky=N)
         self.cats.grid(row=2, column=2, sticky=N)
         self.bonuses.grid(row=2, column=3, sticky=N)
@@ -653,7 +670,8 @@ class LevelEdit():
         self.show_walls()
         self.show_savages()
         self.show_mushrooms()
-        Label(self.hints, text=hint, bg=lev_colors[1], anchor=W).grid(sticky=NW)
+        self.show_mask()
+        Label(self.hints, text=hint, bg=lev_colors[1], font=("Arial", 8), anchor=W).grid(sticky=W)
         self.level_save_butt = Button(self.window, bg="palegreen", text="Сохранить", command=level_edit_save,
                                       font=("Arial", 12))
         self.level_close_butt = Button(self.window, bg="pink3", text="Выход",command=level_edit_close,
@@ -1074,6 +1092,20 @@ class LevelEdit():
         self.create_spinbox(frame=self.gravrooms, row=5,
                             column=0, var=beta_gravroom_y_editVar, text="Y:", color=10, beg=0, end=430, len=10)
 
+    def show_mask(self):
+        self.create_checkbutton(frame=self.masks, row=0,
+                                column=0, var=mask_state_editVar, text="Mask :", color=11)
+        self.create_spinbox(frame=self.masks, row=1,
+                            column=0, var=mask_chance_editVar, text="Шанс (%):", color=11, beg=0, end=100, len=10)
+        self.create_entry(frame=self.masks, row=2,
+                          column=0, var=mask_kind_editVar, text="Тип:", color=11)
+        self.create_spinbox(frame=self.masks, row=3,
+                            column=0, var=mask_x_editVar, text="X:", color=11, beg=0, end=610, len=10)
+        self.create_spinbox(frame=self.masks, row=4,
+                            column=0, var=mask_y_editVar, text="Y:", color=11, beg=0, end=430, len=10)
+
+
+
     def create_spinbox(self, frame, row, column, var, text, color, beg, end, len, state=NORMAL):
         Label(frame, text=text, font=("Arial", 8), bg=lev_colors[color], anchor=E,
               width = len).grid(row=row, column=column, padx=0, pady=0)
@@ -1101,7 +1133,7 @@ class LevelEdit():
 
 
 master = Root()
-"""Переменные Общей информации"""
+# Переменные Общей информации
 versionVar = StringVar()
 livesVar = IntVar()
 catscoreVar = IntVar()
@@ -1116,8 +1148,8 @@ musicVar = BooleanVar()
 soundVar = BooleanVar()
 editlevelVar = IntVar()
 
-"""Переменные Уровня"""
-"""Основное"""
+# Переменные Уровня
+# Основное
 level_editVar = IntVar()
 limit_editVar = BooleanVar()
 limit_type_editVar = BooleanVar()
@@ -1128,7 +1160,14 @@ exit_x_editVar = IntVar()
 exit_y_editVar = IntVar()
 cats_editVar = IntVar()
 
-"""Платформы"""
+# Маски
+mask_state_editVar = BooleanVar()
+mask_kind_editVar = StringVar()
+mask_chance_editVar = IntVar()
+mask_x_editVar = IntVar()
+mask_y_editVar = IntVar()
+
+# Платформы
 alpha_platform_state_editVar = BooleanVar()
 alpha_platform_y_editVar = IntVar()
 alpha_platform_x1_editVar = IntVar()
@@ -1166,7 +1205,7 @@ iota_platform_y_editVar = IntVar()
 iota_platform_x1_editVar = IntVar()
 iota_platform_x2_editVar = IntVar()
 
-"""Коты"""
+# Коты
 alpha_cat_state_editVar = BooleanVar()
 alpha_cat_x_editVar = IntVar()
 alpha_cat_y_editVar = IntVar()
@@ -1186,7 +1225,7 @@ zeta_cat_state_editVar = BooleanVar()
 zeta_cat_x_editVar = IntVar()
 zeta_cat_y_editVar = IntVar()
 
-"""Бонусы"""
+# Бонусы
 alpha_bonus_state_editVar = BooleanVar()
 alpha_bonus_x_editVar = IntVar()
 alpha_bonus_y_editVar = IntVar()
@@ -1206,7 +1245,7 @@ zeta_bonus_state_editVar = BooleanVar()
 zeta_bonus_x_editVar = IntVar()
 zeta_bonus_y_editVar = IntVar()
 
-"""Лестницы"""
+# Лестницы
 alpha_ladder_state_editVar = BooleanVar()
 alpha_ladder_x_editVar = IntVar()
 alpha_ladder_y_editVar = IntVar()
@@ -1226,7 +1265,7 @@ zeta_ladder_state_editVar = BooleanVar()
 zeta_ladder_x_editVar = IntVar()
 zeta_ladder_y_editVar = IntVar()
 
-"""Стены"""
+# Стены
 alpha_wall_state_editVar = BooleanVar()
 alpha_wall_x_editVar = IntVar()
 alpha_wall_y_editVar = IntVar()
@@ -1246,7 +1285,7 @@ zeta_wall_state_editVar = BooleanVar()
 zeta_wall_x_editVar = IntVar()
 zeta_wall_y_editVar = IntVar()
 
-"""Дикари"""
+# Дикари
 alpha_savage_state_editVar = BooleanVar()
 alpha_savage_x_editVar = IntVar()
 alpha_savage_y_editVar = IntVar()
@@ -1264,7 +1303,7 @@ delta_savage_x_editVar = IntVar()
 delta_savage_y_editVar = IntVar()
 delta_savage_home_editVar = StringVar()
 
-"""Грибы"""
+# Грибы
 alpha_fastroom_state_editVar = BooleanVar()
 alpha_fastroom_x_editVar = IntVar()
 alpha_fastroom_y_editVar = IntVar()
@@ -1284,7 +1323,7 @@ beta_gravroom_state_editVar = BooleanVar()
 beta_gravroom_x_editVar = IntVar()
 beta_gravroom_y_editVar = IntVar()
 
-"""Шаблон уровня"""
+# Шаблон уровня
 emptylevel = data = {
             "level": 0,
 
@@ -1296,6 +1335,11 @@ emptylevel = data = {
 			"spawnCoords": [60, 400],
 
 			"CatAmountAll": 0,
+
+            "maskFlag": False,
+            "maskKind": "bless",
+            "maskChance": 0.3,
+            "maskCoords": [0, 0],
 
             "alphaPlatformFlag": False,
 			"alphaPlatformCoords": [0,0,0],

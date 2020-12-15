@@ -253,6 +253,25 @@ class Savage:
             self.lastSavageanimationtime = time.time()
 
 
+# Маска
+class Mask:  # Класс котика, которых мы спасаем
+    # Ширина 48, Высота 32
+    def __init__(self, coordsarray, canvas, image, kind):  # ax by (Верхний левый угол)
+        self.canvas = canvas
+        self.coords = coordsarray
+        self.centre = [self.coords[0] + 24, self.coords[1] + 20]
+        self.kind = kind
+        self.id = self.canvas.create_image(self.centre[0], self.centre[1], image=image[kind], tag="mask")
+        self.avaible = True
+
+    def actionzone(self):  # Зона активности (совершения действий)
+        return [self.centre[0] - 24, self.centre[0] + 24, self.centre[1] - 20, self.centre[1] + 20]
+
+    def collect(self):  # Собрать маску
+        self.avaible = False
+        self.canvas.delete(self.id)
+
+
 # Выход
 class ExitFlower:  # Класс цветка-выхода
     # Ширина 60, Высота 60
@@ -288,6 +307,7 @@ class Empty:
     def __init__(self):
         self.avaible = False
         self.id = None
+        self.kind = None
         self.isLadderTop = False
         self.lastanimation = None
 
@@ -309,7 +329,7 @@ class Empty:
     def hit_area(self):
         pass
 
-    def gravitymove(self):
+    def gravity_move(self):
         pass
 
     def animate(self):

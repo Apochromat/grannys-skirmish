@@ -7,19 +7,19 @@ achievementsNames = {
         },
     "nonbeliever": {
             "name": "Неверующий",
-            "description": "Не умереть ни разу"
+            "description": "Не умереть за всю игру ни разу"
         },
     "florist": {
             "name": "Флорист",
-            "description": "Полить все цветочки в игре"
+            "description": "Полить все цветочки"
         },
     "bloodmary": {
             "name": "Кровавая Мери",
-            "description": "Убить всех дикарей в игре"
+            "description": "Убить всех дикарей"
         },
-    "maximalist": {
-            "name": "Максималист",
-            "description": "Собрать все очки"
+    "masquer": {
+            "name": "Масочный режим",
+            "description": "Найти все маски"
         },
     "end": {
             "name": "Конец?",
@@ -35,8 +35,14 @@ emptydata = {
         "nonbeliever": False,
         "florist": False,
         "bloodmary": False,
-        "maximalist": False,
+        "masquer": False,
         "end": False
+    },
+    "masks": {
+        "bless": False,
+        "joy": False,
+        "luck": False,
+        "rage": False
     },
     "killedsavages": 0,
     "wateredflowers": 0,
