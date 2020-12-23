@@ -17,11 +17,17 @@ class ImageHeap:
         self.quit = imgload(os.path.join('assets', 'graphics', 'ui', 'quit.png'))
         self.newgame = imgload(os.path.join('assets', 'graphics', 'ui', 'newgame.png'))
         self.continuegame = imgload(os.path.join('assets', 'graphics', 'ui', 'continue.png'))
-        self.mainmenuBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'menu_background.png'))
-        self.jungleBackgroung = imgload(os.path.join('assets', 'graphics', 'background', 'jungle_background.jpg'))
+        self.mainmenuBackgroung = imgload(os.path.join('assets', 'graphics', 'ui', 'menu_background.png'))
+        self.jungleBackgroung = imgload(os.path.join('assets', 'graphics', 'ui', 'jungle_background.jpg'))
         self.baseplatform = imgload(os.path.join('assets', 'graphics', 'platform', 'platformbase.png'))
-        self.ladder = imgload(os.path.join('assets', 'graphics', 'ladder.png'))
-        self.wallImage = imgload(os.path.join('assets', 'graphics', 'wall.png'))
+        self.ladder = [imgload(os.path.join('assets', 'graphics', 'ladder', 'ladder_dark_oak.png')),
+                       imgload(os.path.join('assets', 'graphics', 'ladder', 'ladder_oak.png')),
+                       imgload(os.path.join('assets', 'graphics', 'ladder', 'ladder_rust.png')),
+                       imgload(os.path.join('assets', 'graphics', 'ladder', 'ladder_spruce.png'))]
+        self.wallImage = [imgload(os.path.join('assets', 'graphics', 'wall', 'wall_cracked.png')),
+                          imgload(os.path.join('assets', 'graphics', 'wall', 'wall_mossy.png')),
+                          imgload(os.path.join('assets', 'graphics', 'wall', 'wall_root_1.png')),
+                          imgload(os.path.join('assets', 'graphics', 'wall', 'wall_root_2.png'))]
 
         self.cats = [imgload(os.path.join('assets', 'graphics', 'cat', 'cat_1.png')),
                      imgload(os.path.join('assets', 'graphics', 'cat', 'cat_2.png')),

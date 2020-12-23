@@ -1,8 +1,8 @@
 # Granny`s Skirmish
-# version 0.9.12
+# version 1.0
 
 # Импорт
-import platform
+import platform, math
 from tkinter import *
 from tkinter import colorchooser as cc
 from tkinter import messagebox as mb
@@ -46,7 +46,7 @@ effectduration = settings['effectduration']  # Длительность эффе
 animationGrannyduration = settings['animationGrannyduration']  # Задержки анимации персонажа
 animationSavageduration = settings['animationSavageduration']  # Задержки анимации Дикаря
 
-backgroundcolor = settings["backgroung"]  # Цвет фона
+backgroundcolor = settings["background"]  # Цвет фона
 
 lasteffecttime = time.time()  # Время последней активации эффекта
 last_frame_time = time.time()  # Последнее время кадра
@@ -76,9 +76,15 @@ typeMusic = 0
 volumeMusic = settings["musicvolume"]
 volumeSound = settings["soundvolume"]
 
+walkStepDelay = 1/settings["keyboardLimit"] # Задержка между шагами
+walkLoopDelay = 0.05 # Задержка изменения кнопки
+lastWalkLoop = time.time()
+lastStepLoop = time.time()
+
 shouldReloadButtons = True
 
 ladd = False
+bottom_koeff = 2.6
 
 # Построение окна
 root = Tk()  # Создаем окно
@@ -108,7 +114,7 @@ def music():
     mixer.Channel(2).set_volume(volumeSound / 100)
     mixer.Channel(3).set_volume(volumeSound / 100)
     mixer.Channel(4).set_volume(volumeSound / 100)
-    mixer.Channel(5).set_volume(1)
+    mixer.Channel(5).set_volume(volumeSound / 100)
     if music_mode.get() is False:
         music_stop()
     if level == 0:
@@ -252,11 +258,12 @@ scale_volume_music.set(volumeMusic)
 scale_volume_sound = IntVar()
 scale_volume_sound.set(volumeMusic)
 
+
 # Окно выбора громкости Музыки
 def set_music_volume():
     global volume_music_window
     volume_music_window = Toplevel()
-    volume_music_window.title("Громкость музыки")  # Заголовок окна
+    volume_music_window.title("Музыка")  # Заголовок окна
     volume_music_window.configure(bg=backgroundcolor)  # Фон окна
     volume_music_window.geometry("%ix%i" % (216, 130))  # Размеры окна
     volume_music_window.resizable(0, 0)  # Запрет на изменение размеров окна
@@ -289,7 +296,7 @@ def undo_music_volume():
 def set_sound_volume():
     global volume_sound_window
     volume_sound_window = Toplevel()
-    volume_sound_window.title("Громкость pderjd")  # Заголовок окна
+    volume_sound_window.title("Звуки")  # Заголовок окна
     volume_sound_window.configure(bg=backgroundcolor)  # Фон окна
     volume_sound_window.geometry("%ix%i" % (216, 130))  # Размеры окна
     volume_sound_window.resizable(0, 0)  # Запрет на изменение размеров окна
@@ -495,31 +502,32 @@ class Granny:  # Класс персонажа, которым мы управл
             self.isHitEnemy = True  # Ставим флаг, что ударяем
             savage_kill()  # Обьявляем всех Дикарей в зоне мертвыми
         self.action = ""  # Сбрасываем задачу
+        objectsVariable.isDo = False
 
     def turn_left(self, event):  # Движение влево
-        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
-            self.action = "turn_left"
         objectsVariable.keyCounter += 1
+        objectsVariable.isDo = True
+        self.action = "turn_left"
 
     def turn_right(self, event):  # Движение вправо
-        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
-            self.action = "turn_right"
         objectsVariable.keyCounter += 1
+        objectsVariable.isDo = True
+        self.action = "turn_right"
 
     def turn_up(self, event):  # Движение вверх до потолка
-        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
-            self.action = "turn_up"
         objectsVariable.keyCounter += 1
+        objectsVariable.isDo = True
+        self.action = "turn_up"
 
     def turn_down(self, event):  # Движение вниз
-        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
-            self.action = "turn_down"
         objectsVariable.keyCounter += 1
+        objectsVariable.isDo = True
+        self.action = "turn_down"
 
     def hit_enemy(self, event):  # Удар
-        if objectsVariable.keyCounter <= settings["keyboardLimit"]:
-            self.action = "hit_enemy"
         objectsVariable.keyCounter += 1
+        objectsVariable.isDo = True
+        self.action = "hit_enemy"
 
     def touch_place(self):  # Массив точек касания нижней линии
         return [self.y + 30, self.x + 5, self.x - 5]
@@ -639,6 +647,15 @@ def level_initialization():
                       animationexitduration=settings["animationExitduration"])
     objectsVariable.CatAmountAll = settings['levels'][level]['CatAmountAll']
     objectsVariable.CatAmountReal = 0
+
+    # Маска
+    if settings['levels'][level]['maskFlag'] & chance_check(settings['levels'][level]['maskChance']) & \
+            (playerData.data["masks"][settings['levels'][level]['maskKind']] is False):
+        Artifact = Mask(settings['levels'][level]['maskCoords'], canvas=canvas, image=image.mask,
+                        kind=settings['levels'][level]['maskKind'])
+    else:
+        Artifact = Empty()
+
     # Платформы
     if settings['levels'][level]['alphaPlatformFlag']:
         alphaPlatform = PlatformSimple(settings['levels'][level]['alphaPlatformCoords'], canvas=canvas,
@@ -848,13 +865,6 @@ def level_initialization():
     else:
         deltaSavage = Empty()
 
-    # Маска
-    if settings['levels'][level]['maskFlag'] & chance_check(settings['levels'][level]['maskChance']) & (playerData.data[
-        "masks"][settings['levels'][level]['maskKind']] is False):
-        Artifact = Mask(settings['levels'][level]['maskCoords'], canvas=canvas, image=image.mask,
-                        kind=settings['levels'][level]['maskKind'])
-    else:
-        Artifact = Empty()
 
     Hero = Granny(spawncoords=settings['levels'][level]['spawnCoords'], the_canvas=canvas, the_image=image.granny)
 
@@ -864,11 +874,11 @@ def level_selection():
     global level
     if settings["cheatmode"]:
         ask = sd.askinteger(title="Выбор уровня",
-                        prompt="Введите номер уровня.\nМаксимальный уровень: %i" % settings["levelamount"], minvalue=1,
-                        maxvalue=settings["levelamount"])
-    if type(ask) == int:
-        level = ask
-        level_initialization()
+                            prompt="Введите номер уровня.\nМаксимальный уровень: %i" % settings["levelamount"],
+                            minvalue=1, maxvalue=settings["levelamount"])
+        if type(ask) == int:
+            level = ask
+            level_initialization()
 
 
 # Переход на следующий уровень или конец игры
@@ -961,7 +971,7 @@ def ground_check(player, theplatform):  # Проверка земли под н�
     solution = False
     platformtouch = theplatform.touch_place()
     playertouch = player.touch_place()
-    if platformtouch[0] == playertouch[0]:
+    if math.fabs(platformtouch[0] - playertouch[0]) <= bottom_koeff:
         if (playertouch[1] >= platformtouch[1]) & (playertouch[1] <= platformtouch[2]):
             solution = True
         if (playertouch[2] >= platformtouch[1]) & (playertouch[2] <= platformtouch[2]):
@@ -1066,7 +1076,8 @@ def grannyhitsavage():
 def topladder(theladder, theplayer):
     ladderaction = theladder.actionzone()
     playeraction = theplayer.actionzone()
-    if ladderaction[2] == playeraction[3]:
+    if (ladderaction[2] == playeraction[3]) and ((abs(ladderaction[1] - playeraction[1]) <= 50) or (
+            abs(ladderaction[2] - playeraction[2]) <= 50)):
         theladder.isLadderTop = True
     else:
         theladder.isLadderTop = False
@@ -1352,6 +1363,7 @@ def granny_and_masks():
             mixer.Channel(5).play(mixer.Sound(soundPaths.drum))
             playerData.data["masks"][Artifact.kind] = True
 
+
 # Гравитация
 def gravity():  # Если персонаж не на платформн и не на лестнице, на нее действует гравитация
     global simpgrav
@@ -1603,18 +1615,15 @@ def endgame(win):
 
 # Подсчет кликов и кадров
 def timer():
-    global keytime, KeySpeed, fps, fpsGlobal
+    global keytime, KeySpeed, fps, fpsGlobal, walkLoopDelay
     if (time.time() - keytime) >= 1:
         KeySpeed = objectsVariable.keyCounter
         fpsGlobal = fps
         fps = 0
         objectsVariable.keyCounter = 0
         keytime = time.time()
-    if KeySpeed > settings["keyboardLimit"]:
-        message = "Скорость клавиатуры превышает допустимую. \n Допустимая: %i \n Текущая: %i \n" % (
-            settings["keyboardLimit"], KeySpeed) + "Измените скорость в настройках компьютера на %i пунктов" % (
-                          settings["keyboardLimit"] - KeySpeed)
-        mb.showwarning(title="Настройте клавиатуру", message=message)
+    if KeySpeed != 0:
+        walkLoopDelay = min(walkLoopDelay, (1 / KeySpeed))
 
 
 # Выбор цвета фона
@@ -1671,6 +1680,15 @@ def create_achievement_card(frame, images, achname, state, row, column):
           bg=backgroundcolor).grid(row=row + 1, column=column + 1, sticky=NW)
 
 
+def key_hold():
+    global lastStepLoop, lastWalkLoop
+    if (time.time() - lastWalkLoop <= walkLoopDelay) and objectsVariable.isDo:
+        if time.time() - lastStepLoop >= walkStepDelay:
+            lastStepLoop = time.time()
+            Hero.action_queue()
+    else:
+        objectsVariable.isWalk = False
+        lastWalkLoop = time.time()
 # Включение и отключение кнопок меню сверху
 def buttonstate():
     global shouldReloadButtons
@@ -1678,12 +1696,9 @@ def buttonstate():
         if level == 0:
             game_menu.entryconfig("Выход в меню", state="disabled")
             game_menu.entryconfig("Начать уровень заново", state="disabled")
-            game_menu.entryconfig("Выбор уровня", state="normal")
         else:
             game_menu.entryconfig("Выход в меню", state="normal")
             game_menu.entryconfig("Начать уровень заново", state="normal")
-            if not settings["cheatmode"]:
-                game_menu.entryconfig("Выбор уровня", state="disabled")
 
     shouldReloadButtons = False
 
@@ -1697,12 +1712,13 @@ def exit_in_main_menu():
 
 # Составление меню
 def menu():  # Описание меню(сверху полоска)
-    global game_menu
+    global game_menu, shouldReloadButtons
     main_menu = Menu(root)
     game_menu = Menu(main_menu, tearoff=0, bg=backgroundcolor)
     game_menu.add_command(label="Новая игра", command=new_game)
     game_menu.add_command(label="Начать уровень заново", command=level_restart)
-    game_menu.add_command(label="Выбор уровня", command=level_selection)
+    if settings["cheatmode"]:
+        game_menu.add_command(label="Выбор уровня", command=level_selection)
     game_menu.add_separator()
     game_menu.add_command(label="Выход в меню", command=exit_in_main_menu)
     game_menu.add_command(label="Выход", command=on_closing)
@@ -1736,6 +1752,7 @@ def menu():  # Описание меню(сверху полоска)
     main_menu.add_cascade(label="Опции", menu=option_menu)
     main_menu.add_cascade(label="Справка", menu=about_menu)
     root.config(menu=main_menu)
+    shouldReloadButtons = True
 
 
 # Перезагрузка экрана
@@ -1773,7 +1790,7 @@ def clear_progress():
 
 
 def chance_check(chance):
-    if (random.randrange(0, 100)/100) <= chance:
+    if (random.randrange(0, 100) / 100) <= chance:
         return True
     else:
         return False
@@ -1787,6 +1804,8 @@ main_menu_open()  # Запускаем заглавный экран
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Обработка выхода при нажатии на крестик
 # Главный цикл
 while run:
+    if Hero.avaible:
+        key_hold()
     if (time.time() - last_frame_time) >= settings["frametime"]:
         fps += 1
         music()
@@ -1805,14 +1824,13 @@ while run:
             granny_kill()  # Проверка смерти персонажа
             effects()  # Применение эффектов от грибов
             level_limits()  # Применение временных ограничений
-            cat_counter_for_exit()  # Делаем проверку готовность выйти с уровня
+            cat_counter_for_exit()  # Делаем проверку готовности выйти с уровня
             status()  # Обновляем статусбар и данные для пользователя
             savage_walking()  # Дикарь
             savage_actions()
             if Hero.avaible:  # Если герой есть, применяем к нему
                 ladd = grannyonladder()  # Стоит ли персонаж на лестнице
                 granny_and_masks()
-                Hero.action_queue()  # Выполнение очереди действий
                 gravity()  # Применяем к персонажу фактор графитации
                 Hero.animate()  # Анимируем персонажа
             if Exit.avaible:  # Если герой есть, применяем к нему

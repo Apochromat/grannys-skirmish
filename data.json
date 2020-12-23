@@ -1,6 +1,6 @@
 {
     "title": "Granny`s Skirmish",
-    "version": "v0.9.12 prerelease",
+    "version": "v1.0",
     "windowsizewin": [
         640,
         540
@@ -13,7 +13,7 @@
         640,
         480
     ],
-    "backgroung": "thistle2",
+    "background": "thistle2",
     "statusbarwidth": 80,
     "hidwidth": 19,
     "effectwidth": 5,
@@ -25,7 +25,7 @@
         "slow": 2.5,
         "fast": 10
     },
-    "savagespeed": 1,
+    "savagespeed": 0.5,
     "gravity": {
         "normal": 2.5,
         "inverted": -2.5
@@ -33,19 +33,19 @@
     "livesnormal": 5,
     "ScoreAddCat": 10,
     "ScoreAddBonus": 15,
-    "ScoreMax": 60,
-    "effectduration": 3,
-    "keyboardLimit": 25,
+    "ScoreMax": 920,
+    "effectduration": 4,
+    "keyboardLimit": 30,
     "animationGrannyduration": 0.15,
     "animationSavageduration": 0.1,
     "animationExitduration": 0.4,
     "frametime": 0.015,
-    "levelamount": 2,
-    "savagesamount": 1,
-    "flowersamount": 2,
+    "levelamount": 10,
+    "savagesamount": 16,
+    "flowersamount": 36,
     "cheatmode": false,
     "musicswitch": true,
-    "musicvolume": 30,
+    "musicvolume": 20,
     "soundswitch": true,
     "soundvolume": 30,
     "globals": [
@@ -359,10 +359,10 @@
                 390
             ],
             "spawnCoords": [
-                200,
+                180,
                 270
             ],
-            "CatAmountAll": 1,
+            "CatAmountAll": 2,
             "maskFlag": false,
             "maskKind": "bless",
             "maskChance": 0.3,
@@ -376,17 +376,17 @@
                 150,
                 350
             ],
-            "betaPlatformFlag": false,
+            "betaPlatformFlag": true,
             "betaPlatformCoords": [
-                0,
-                0,
-                0
+                210,
+                250,
+                400
             ],
-            "gammaPlatformFlag": false,
+            "gammaPlatformFlag": true,
             "gammaPlatformCoords": [
-                0,
-                0,
-                0
+                330,
+                400,
+                610
             ],
             "deltaPlatformFlag": false,
             "deltaPlatformCoords": [
@@ -426,13 +426,13 @@
             ],
             "alphaCatFlag": true,
             "alphaCatCoords": [
-                250,
+                270,
                 298
             ],
-            "betaCatFlag": false,
+            "betaCatFlag": true,
             "betaCatCoords": [
-                0,
-                0
+                300,
+                177
             ],
             "gammaCatFlag": false,
             "gammaCatCoords": [
@@ -454,10 +454,10 @@
                 0,
                 0
             ],
-            "alphaBonusFlag": false,
+            "alphaBonusFlag": true,
             "alphaBonusCoords": [
-                0,
-                0
+                420,
+                294
             ],
             "betaBonusFlag": false,
             "betaBonusCoords": [
@@ -489,10 +489,10 @@
                 100,
                 330
             ],
-            "betaLadderFlag": false,
+            "betaLadderFlag": true,
             "betaLadderCoords": [
-                0,
-                0
+                200,
+                210
             ],
             "gammaLadderFlag": false,
             "gammaLadderCoords": [
@@ -514,7 +514,7 @@
                 0,
                 0
             ],
-            "alphaWallFlag": true,
+            "alphaWallFlag": false,
             "alphaWallCoords": [
                 500,
                 388
@@ -544,7 +544,7 @@
                 0,
                 0
             ],
-            "alphaSavageFlag": true,
+            "alphaSavageFlag": false,
             "alphaSavageCoords": [
                 350,
                 418
@@ -605,8 +605,8 @@
             "limittype": "NEXT",
             "time": 1,
             "exitCoords": [
-                400,
-                270
+                330,
+                140
             ],
             "spawnCoords": [
                 60,
@@ -626,11 +626,11 @@
                 350,
                 600
             ],
-            "betaPlatformFlag": false,
+            "betaPlatformFlag": true,
             "betaPlatformCoords": [
-                0,
-                0,
-                0
+                200,
+                250,
+                400
             ],
             "gammaPlatformFlag": false,
             "gammaPlatformCoords": [
@@ -734,7 +734,7 @@
                 0,
                 0
             ],
-            "alphaLadderFlag": true,
+            "alphaLadderFlag": false,
             "alphaLadderCoords": [
                 300,
                 330
@@ -818,7 +818,7 @@
                 0
             ],
             "deltaSavagePlatform": "base",
-            "alphaFastroomFlag": true,
+            "alphaFastroomFlag": false,
             "alphaFastroomCoords": [
                 450,
                 426
@@ -828,7 +828,7 @@
                 0,
                 0
             ],
-            "alphaSlowroomFlag": true,
+            "alphaSlowroomFlag": false,
             "alphaSlowroomCoords": [
                 360,
                 306
@@ -842,6 +842,2006 @@
             "alphaGravroomCoords": [
                 560,
                 426
+            ],
+            "betaGravroomFlag": true,
+            "betaGravroomCoords": [
+                150,
+                426
+            ]
+        },
+        {
+            "level": 3,
+            "limited": false,
+            "limittype": "NEXT",
+            "time": 1,
+            "exitCoords": [
+                30,
+                390
+            ],
+            "spawnCoords": [
+                200,
+                270
+            ],
+            "CatAmountAll": 3,
+            "maskFlag": true,
+            "maskKind": "bless",
+            "maskChance": 0.9,
+            "maskCoords": [
+                550,
+                45
+            ],
+            "alphaPlatformFlag": true,
+            "alphaPlatformCoords": [
+                330,
+                150,
+                410
+            ],
+            "betaPlatformFlag": true,
+            "betaPlatformCoords": [
+                210,
+                200,
+                280
+            ],
+            "gammaPlatformFlag": true,
+            "gammaPlatformCoords": [
+                90,
+                60,
+                200
+            ],
+            "deltaPlatformFlag": true,
+            "deltaPlatformCoords": [
+                90,
+                400,
+                610
+            ],
+            "epsilonPlatformFlag": true,
+            "epsilonPlatformCoords": [
+                210,
+                330,
+                480
+            ],
+            "zetaPlatformFlag": false,
+            "zetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "etaPlatformFlag": false,
+            "etaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "thetaPlatformFlag": false,
+            "thetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "iotaPlatformFlag": false,
+            "iotaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "alphaCatFlag": true,
+            "alphaCatCoords": [
+                550,
+                418
+            ],
+            "betaCatFlag": true,
+            "betaCatCoords": [
+                96,
+                58
+            ],
+            "gammaCatFlag": true,
+            "gammaCatCoords": [
+                450,
+                177
+            ],
+            "deltaCatFlag": false,
+            "deltaCatCoords": [
+                0,
+                0
+            ],
+            "epsilonCatFlag": false,
+            "epsilonCatCoords": [
+                0,
+                0
+            ],
+            "zetaCatFlag": false,
+            "zetaCatCoords": [
+                0,
+                0
+            ],
+            "alphaBonusFlag": true,
+            "alphaBonusCoords": [
+                260,
+                414
+            ],
+            "betaBonusFlag": true,
+            "betaBonusCoords": [
+                375,
+                294
+            ],
+            "gammaBonusFlag": true,
+            "gammaBonusCoords": [
+                512,
+                54
+            ],
+            "deltaBonusFlag": false,
+            "deltaBonusCoords": [
+                0,
+                0
+            ],
+            "epsilonBonusFlag": false,
+            "epsilonBonusCoords": [
+                0,
+                0
+            ],
+            "zetaBonusFlag": false,
+            "zetaBonusCoords": [
+                0,
+                0
+            ],
+            "alphaLadderFlag": true,
+            "alphaLadderCoords": [
+                100,
+                330
+            ],
+            "betaLadderFlag": true,
+            "betaLadderCoords": [
+                280,
+                210
+            ],
+            "gammaLadderFlag": true,
+            "gammaLadderCoords": [
+                200,
+                90
+            ],
+            "deltaLadderFlag": true,
+            "deltaLadderCoords": [
+                350,
+                90
+            ],
+            "epsilonLadderFlag": false,
+            "epsilonLadderCoords": [
+                0,
+                0
+            ],
+            "zetaLadderFlag": false,
+            "zetaLadderCoords": [
+                0,
+                0
+            ],
+            "alphaWallFlag": false,
+            "alphaWallCoords": [
+                0,
+                0
+            ],
+            "betaWallFlag": false,
+            "betaWallCoords": [
+                0,
+                0
+            ],
+            "gammaWallFlag": false,
+            "gammaWallCoords": [
+                0,
+                0
+            ],
+            "deltaWallFlag": false,
+            "deltaWallCoords": [
+                0,
+                0
+            ],
+            "epsilonWallFlag": false,
+            "epsilonWallCoords": [
+                0,
+                0
+            ],
+            "zetaWallFlag": false,
+            "zetaWallCoords": [
+                0,
+                0
+            ],
+            "alphaSavageFlag": true,
+            "alphaSavageCoords": [
+                300,
+                418
+            ],
+            "alphaSavagePlatform": "base",
+            "betaSavageFlag": true,
+            "betaSavageCoords": [
+                430,
+                57
+            ],
+            "betaSavagePlatform": "delta",
+            "gammaSavageFlag": false,
+            "gammaSavageCoords": [
+                0,
+                0
+            ],
+            "gammaSavagePlatform": "base",
+            "deltaSavageFlag": false,
+            "deltaSavageCoords": [
+                0,
+                0
+            ],
+            "deltaSavagePlatform": "base",
+            "alphaFastroomFlag": true,
+            "alphaFastroomCoords": [
+                380,
+                426
+            ],
+            "betaFastroomFlag": false,
+            "betaFastroomCoords": [
+                0,
+                0
+            ],
+            "alphaSlowroomFlag": true,
+            "alphaSlowroomCoords": [
+                260,
+                186
+            ],
+            "betaSlowroomFlag": false,
+            "betaSlowroomCoords": [
+                0,
+                0
+            ],
+            "alphaGravroomFlag": false,
+            "alphaGravroomCoords": [
+                0,
+                0
+            ],
+            "betaGravroomFlag": false,
+            "betaGravroomCoords": [
+                0,
+                0
+            ]
+        },
+        {
+            "level": 4,
+            "limited": false,
+            "limittype": "NEXT",
+            "time": 1,
+            "exitCoords": [
+                500,
+                390
+            ],
+            "spawnCoords": [
+                120,
+                400
+            ],
+            "CatAmountAll": 4,
+            "maskFlag": false,
+            "maskKind": "bless",
+            "maskChance": 0.3,
+            "maskCoords": [
+                0,
+                0
+            ],
+            "alphaPlatformFlag": true,
+            "alphaPlatformCoords": [
+                330,
+                100,
+                300
+            ],
+            "betaPlatformFlag": true,
+            "betaPlatformCoords": [
+                330,
+                350,
+                610
+            ],
+            "gammaPlatformFlag": true,
+            "gammaPlatformCoords": [
+                210,
+                200,
+                550
+            ],
+            "deltaPlatformFlag": false,
+            "deltaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "epsilonPlatformFlag": false,
+            "epsilonPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "zetaPlatformFlag": false,
+            "zetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "etaPlatformFlag": false,
+            "etaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "thetaPlatformFlag": false,
+            "thetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "iotaPlatformFlag": false,
+            "iotaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "alphaCatFlag": true,
+            "alphaCatCoords": [
+                200,
+                298
+            ],
+            "betaCatFlag": true,
+            "betaCatCoords": [
+                575,
+                418
+            ],
+            "gammaCatFlag": true,
+            "gammaCatCoords": [
+                30,
+                418
+            ],
+            "deltaCatFlag": true,
+            "deltaCatCoords": [
+                320,
+                178
+            ],
+            "epsilonCatFlag": false,
+            "epsilonCatCoords": [
+                0,
+                0
+            ],
+            "zetaCatFlag": false,
+            "zetaCatCoords": [
+                0,
+                0
+            ],
+            "alphaBonusFlag": true,
+            "alphaBonusCoords": [
+                450,
+                294
+            ],
+            "betaBonusFlag": true,
+            "betaBonusCoords": [
+                110,
+                294
+            ],
+            "gammaBonusFlag": true,
+            "gammaBonusCoords": [
+                510,
+                174
+            ],
+            "deltaBonusFlag": false,
+            "deltaBonusCoords": [
+                0,
+                0
+            ],
+            "epsilonBonusFlag": false,
+            "epsilonBonusCoords": [
+                0,
+                0
+            ],
+            "zetaBonusFlag": false,
+            "zetaBonusCoords": [
+                0,
+                0
+            ],
+            "alphaLadderFlag": true,
+            "alphaLadderCoords": [
+                300,
+                330
+            ],
+            "betaLadderFlag": true,
+            "betaLadderCoords": [
+                547,
+                210
+            ],
+            "gammaLadderFlag": false,
+            "gammaLadderCoords": [
+                0,
+                0
+            ],
+            "deltaLadderFlag": false,
+            "deltaLadderCoords": [
+                0,
+                0
+            ],
+            "epsilonLadderFlag": false,
+            "epsilonLadderCoords": [
+                0,
+                0
+            ],
+            "zetaLadderFlag": false,
+            "zetaLadderCoords": [
+                0,
+                0
+            ],
+            "alphaWallFlag": false,
+            "alphaWallCoords": [
+                0,
+                0
+            ],
+            "betaWallFlag": false,
+            "betaWallCoords": [
+                0,
+                0
+            ],
+            "gammaWallFlag": false,
+            "gammaWallCoords": [
+                0,
+                0
+            ],
+            "deltaWallFlag": false,
+            "deltaWallCoords": [
+                0,
+                0
+            ],
+            "epsilonWallFlag": false,
+            "epsilonWallCoords": [
+                0,
+                0
+            ],
+            "zetaWallFlag": false,
+            "zetaWallCoords": [
+                0,
+                0
+            ],
+            "alphaSavageFlag": true,
+            "alphaSavageCoords": [
+                450,
+                177
+            ],
+            "alphaSavagePlatform": "gamma",
+            "betaSavageFlag": true,
+            "betaSavageCoords": [
+                410,
+                297
+            ],
+            "betaSavagePlatform": "beta",
+            "gammaSavageFlag": false,
+            "gammaSavageCoords": [
+                0,
+                0
+            ],
+            "gammaSavagePlatform": "base",
+            "deltaSavageFlag": false,
+            "deltaSavageCoords": [
+                0,
+                0
+            ],
+            "deltaSavagePlatform": "base",
+            "alphaFastroomFlag": false,
+            "alphaFastroomCoords": [
+                0,
+                0
+            ],
+            "betaFastroomFlag": false,
+            "betaFastroomCoords": [
+                0,
+                0
+            ],
+            "alphaSlowroomFlag": true,
+            "alphaSlowroomCoords": [
+                400,
+                426
+            ],
+            "betaSlowroomFlag": true,
+            "betaSlowroomCoords": [
+                410,
+                306
+            ],
+            "alphaGravroomFlag": true,
+            "alphaGravroomCoords": [
+                140,
+                306
+            ],
+            "betaGravroomFlag": false,
+            "betaGravroomCoords": [
+                0,
+                0
+            ]
+        },
+        {
+            "level": 5,
+            "limited": true,
+            "limittype": "NEXT",
+            "time": 90,
+            "exitCoords": [
+                50,
+                390
+            ],
+            "spawnCoords": [
+                130,
+                400
+            ],
+            "CatAmountAll": 6,
+            "maskFlag": false,
+            "maskKind": "bless",
+            "maskChance": 0.3,
+            "maskCoords": [
+                0,
+                0
+            ],
+            "alphaPlatformFlag": true,
+            "alphaPlatformCoords": [
+                150,
+                100,
+                300
+            ],
+            "betaPlatformFlag": true,
+            "betaPlatformCoords": [
+                330,
+                350,
+                580
+            ],
+            "gammaPlatformFlag": true,
+            "gammaPlatformCoords": [
+                330,
+                10,
+                200
+            ],
+            "deltaPlatformFlag": true,
+            "deltaPlatformCoords": [
+                100,
+                400,
+                605
+            ],
+            "epsilonPlatformFlag": true,
+            "epsilonPlatformCoords": [
+                220,
+                550,
+                610
+            ],
+            "zetaPlatformFlag": false,
+            "zetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "etaPlatformFlag": false,
+            "etaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "thetaPlatformFlag": false,
+            "thetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "iotaPlatformFlag": false,
+            "iotaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "alphaCatFlag": true,
+            "alphaCatCoords": [
+                605,
+                418
+            ],
+            "betaCatFlag": true,
+            "betaCatCoords": [
+                150,
+                118
+            ],
+            "gammaCatFlag": true,
+            "gammaCatCoords": [
+                100,
+                297
+            ],
+            "deltaCatFlag": true,
+            "deltaCatCoords": [
+                375,
+                297
+            ],
+            "epsilonCatFlag": true,
+            "epsilonCatCoords": [
+                540,
+                68
+            ],
+            "zetaCatFlag": true,
+            "zetaCatCoords": [
+                240,
+                418
+            ],
+            "alphaBonusFlag": true,
+            "alphaBonusCoords": [
+                220,
+                114
+            ],
+            "betaBonusFlag": true,
+            "betaBonusCoords": [
+                420,
+                294
+            ],
+            "gammaBonusFlag": true,
+            "gammaBonusCoords": [
+                15,
+                414
+            ],
+            "deltaBonusFlag": true,
+            "deltaBonusCoords": [
+                22,
+                294
+            ],
+            "epsilonBonusFlag": true,
+            "epsilonBonusCoords": [
+                490,
+                64
+            ],
+            "zetaBonusFlag": true,
+            "zetaBonusCoords": [
+                580,
+                184
+            ],
+            "alphaLadderFlag": true,
+            "alphaLadderCoords": [
+                300,
+                330
+            ],
+            "betaLadderFlag": false,
+            "betaLadderCoords": [
+                0,
+                0
+            ],
+            "gammaLadderFlag": false,
+            "gammaLadderCoords": [
+                0,
+                0
+            ],
+            "deltaLadderFlag": false,
+            "deltaLadderCoords": [
+                0,
+                0
+            ],
+            "epsilonLadderFlag": false,
+            "epsilonLadderCoords": [
+                0,
+                0
+            ],
+            "zetaLadderFlag": false,
+            "zetaLadderCoords": [
+                0,
+                0
+            ],
+            "alphaWallFlag": true,
+            "alphaWallCoords": [
+                100,
+                86
+            ],
+            "betaWallFlag": false,
+            "betaWallCoords": [
+                0,
+                0
+            ],
+            "gammaWallFlag": false,
+            "gammaWallCoords": [
+                0,
+                0
+            ],
+            "deltaWallFlag": false,
+            "deltaWallCoords": [
+                0,
+                0
+            ],
+            "epsilonWallFlag": false,
+            "epsilonWallCoords": [
+                0,
+                0
+            ],
+            "zetaWallFlag": false,
+            "zetaWallCoords": [
+                0,
+                0
+            ],
+            "alphaSavageFlag": false,
+            "alphaSavageCoords": [
+                0,
+                0
+            ],
+            "alphaSavagePlatform": "base",
+            "betaSavageFlag": false,
+            "betaSavageCoords": [
+                0,
+                0
+            ],
+            "betaSavagePlatform": "base",
+            "gammaSavageFlag": false,
+            "gammaSavageCoords": [
+                0,
+                0
+            ],
+            "gammaSavagePlatform": "base",
+            "deltaSavageFlag": false,
+            "deltaSavageCoords": [
+                0,
+                0
+            ],
+            "deltaSavagePlatform": "base",
+            "alphaFastroomFlag": true,
+            "alphaFastroomCoords": [
+                270,
+                426
+            ],
+            "betaFastroomFlag": false,
+            "betaFastroomCoords": [
+                0,
+                0
+            ],
+            "alphaSlowroomFlag": true,
+            "alphaSlowroomCoords": [
+                460,
+                306
+            ],
+            "betaSlowroomFlag": false,
+            "betaSlowroomCoords": [
+                0,
+                0
+            ],
+            "alphaGravroomFlag": true,
+            "alphaGravroomCoords": [
+                520,
+                306
+            ],
+            "betaGravroomFlag": true,
+            "betaGravroomCoords": [
+                570,
+                75
+            ]
+        },
+        {
+            "level": 6,
+            "limited": false,
+            "limittype": "NEXT",
+            "time": 1,
+            "exitCoords": [
+                100,
+                90
+            ],
+            "spawnCoords": [
+                30,
+                400
+            ],
+            "CatAmountAll": 3,
+            "maskFlag": true,
+            "maskKind": "rage",
+            "maskChance": 0.7,
+            "maskCoords": [
+                200,
+                100
+            ],
+            "alphaPlatformFlag": true,
+            "alphaPlatformCoords": [
+                150,
+                100,
+                300
+            ],
+            "betaPlatformFlag": true,
+            "betaPlatformCoords": [
+                330,
+                350,
+                580
+            ],
+            "gammaPlatformFlag": true,
+            "gammaPlatformCoords": [
+                90,
+                500,
+                610
+            ],
+            "deltaPlatformFlag": true,
+            "deltaPlatformCoords": [
+                290,
+                100,
+                225
+            ],
+            "epsilonPlatformFlag": false,
+            "epsilonPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "zetaPlatformFlag": false,
+            "zetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "etaPlatformFlag": false,
+            "etaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "thetaPlatformFlag": false,
+            "thetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "iotaPlatformFlag": false,
+            "iotaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "alphaCatFlag": true,
+            "alphaCatCoords": [
+                270,
+                418
+            ],
+            "betaCatFlag": true,
+            "betaCatCoords": [
+                440,
+                418
+            ],
+            "gammaCatFlag": true,
+            "gammaCatCoords": [
+                500,
+                297
+            ],
+            "deltaCatFlag": false,
+            "deltaCatCoords": [
+                0,
+                0
+            ],
+            "epsilonCatFlag": false,
+            "epsilonCatCoords": [
+                0,
+                0
+            ],
+            "zetaCatFlag": false,
+            "zetaCatCoords": [
+                0,
+                0
+            ],
+            "alphaBonusFlag": true,
+            "alphaBonusCoords": [
+                180,
+                254
+            ],
+            "betaBonusFlag": true,
+            "betaBonusCoords": [
+                400,
+                294
+            ],
+            "gammaBonusFlag": true,
+            "gammaBonusCoords": [
+                140,
+                414
+            ],
+            "deltaBonusFlag": true,
+            "deltaBonusCoords": [
+                580,
+                54
+            ],
+            "epsilonBonusFlag": false,
+            "epsilonBonusCoords": [
+                0,
+                0
+            ],
+            "zetaBonusFlag": false,
+            "zetaBonusCoords": [
+                0,
+                0
+            ],
+            "alphaLadderFlag": true,
+            "alphaLadderCoords": [
+                580,
+                330
+            ],
+            "betaLadderFlag": false,
+            "betaLadderCoords": [
+                0,
+                0
+            ],
+            "gammaLadderFlag": false,
+            "gammaLadderCoords": [
+                0,
+                0
+            ],
+            "deltaLadderFlag": false,
+            "deltaLadderCoords": [
+                0,
+                0
+            ],
+            "epsilonLadderFlag": false,
+            "epsilonLadderCoords": [
+                0,
+                0
+            ],
+            "zetaLadderFlag": false,
+            "zetaLadderCoords": [
+                0,
+                0
+            ],
+            "alphaWallFlag": true,
+            "alphaWallCoords": [
+                100,
+                386
+            ],
+            "betaWallFlag": true,
+            "betaWallCoords": [
+                400,
+                386
+            ],
+            "gammaWallFlag": true,
+            "gammaWallCoords": [
+                100,
+                226
+            ],
+            "deltaWallFlag": true,
+            "deltaWallCoords": [
+                100,
+                322
+            ],
+            "epsilonWallFlag": false,
+            "epsilonWallCoords": [
+                0,
+                0
+            ],
+            "zetaWallFlag": false,
+            "zetaWallCoords": [
+                0,
+                0
+            ],
+            "alphaSavageFlag": true,
+            "alphaSavageCoords": [
+                200,
+                417
+            ],
+            "alphaSavagePlatform": "base",
+            "betaSavageFlag": false,
+            "betaSavageCoords": [
+                0,
+                0
+            ],
+            "betaSavagePlatform": "base",
+            "gammaSavageFlag": false,
+            "gammaSavageCoords": [
+                0,
+                0
+            ],
+            "gammaSavagePlatform": "base",
+            "deltaSavageFlag": false,
+            "deltaSavageCoords": [
+                0,
+                0
+            ],
+            "deltaSavagePlatform": "base",
+            "alphaFastroomFlag": true,
+            "alphaFastroomCoords": [
+                140,
+                266
+            ],
+            "betaFastroomFlag": true,
+            "betaFastroomCoords": [
+                530,
+                66
+            ],
+            "alphaSlowroomFlag": true,
+            "alphaSlowroomCoords": [
+                160,
+                126
+            ],
+            "betaSlowroomFlag": false,
+            "betaSlowroomCoords": [
+                0,
+                0
+            ],
+            "alphaGravroomFlag": true,
+            "alphaGravroomCoords": [
+                65,
+                426
+            ],
+            "betaGravroomFlag": true,
+            "betaGravroomCoords": [
+                200,
+                426
+            ]
+        },
+        {
+            "level": 7,
+            "limited": false,
+            "limittype": "NEXT",
+            "time": 1,
+            "exitCoords": [
+                310,
+                390
+            ],
+            "spawnCoords": [
+                100,
+                250
+            ],
+            "CatAmountAll": 4,
+            "maskFlag": true,
+            "maskKind": "joy",
+            "maskChance": 0.5,
+            "maskCoords": [
+                100,
+                30
+            ],
+            "alphaPlatformFlag": true,
+            "alphaPlatformCoords": [
+                330,
+                50,
+                500
+            ],
+            "betaPlatformFlag": true,
+            "betaPlatformCoords": [
+                210,
+                200,
+                550
+            ],
+            "gammaPlatformFlag": true,
+            "gammaPlatformCoords": [
+                80,
+                50,
+                200
+            ],
+            "deltaPlatformFlag": false,
+            "deltaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "epsilonPlatformFlag": false,
+            "epsilonPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "zetaPlatformFlag": false,
+            "zetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "etaPlatformFlag": false,
+            "etaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "thetaPlatformFlag": false,
+            "thetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "iotaPlatformFlag": false,
+            "iotaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "alphaCatFlag": true,
+            "alphaCatCoords": [
+                600,
+                418
+            ],
+            "betaCatFlag": true,
+            "betaCatCoords": [
+                300,
+                296
+            ],
+            "gammaCatFlag": true,
+            "gammaCatCoords": [
+                380,
+                178
+            ],
+            "deltaCatFlag": true,
+            "deltaCatCoords": [
+                75,
+                48
+            ],
+            "epsilonCatFlag": false,
+            "epsilonCatCoords": [
+                0,
+                0
+            ],
+            "zetaCatFlag": false,
+            "zetaCatCoords": [
+                0,
+                0
+            ],
+            "alphaBonusFlag": true,
+            "alphaBonusCoords": [
+                280,
+                414
+            ],
+            "betaBonusFlag": true,
+            "betaBonusCoords": [
+                390,
+                294
+            ],
+            "gammaBonusFlag": true,
+            "gammaBonusCoords": [
+                430,
+                174
+            ],
+            "deltaBonusFlag": true,
+            "deltaBonusCoords": [
+                150,
+                44
+            ],
+            "epsilonBonusFlag": false,
+            "epsilonBonusCoords": [
+                0,
+                0
+            ],
+            "zetaBonusFlag": false,
+            "zetaBonusCoords": [
+                0,
+                0
+            ],
+            "alphaLadderFlag": true,
+            "alphaLadderCoords": [
+                496,
+                330
+            ],
+            "betaLadderFlag": true,
+            "betaLadderCoords": [
+                154,
+                210
+            ],
+            "gammaLadderFlag": false,
+            "gammaLadderCoords": [
+                0,
+                0
+            ],
+            "deltaLadderFlag": false,
+            "deltaLadderCoords": [
+                0,
+                0
+            ],
+            "epsilonLadderFlag": false,
+            "epsilonLadderCoords": [
+                0,
+                0
+            ],
+            "zetaLadderFlag": false,
+            "zetaLadderCoords": [
+                0,
+                0
+            ],
+            "alphaWallFlag": true,
+            "alphaWallCoords": [
+                250,
+                145
+            ],
+            "betaWallFlag": true,
+            "betaWallCoords": [
+                510,
+                145
+            ],
+            "gammaWallFlag": false,
+            "gammaWallCoords": [
+                0,
+                0
+            ],
+            "deltaWallFlag": false,
+            "deltaWallCoords": [
+                0,
+                0
+            ],
+            "epsilonWallFlag": false,
+            "epsilonWallCoords": [
+                0,
+                0
+            ],
+            "zetaWallFlag": false,
+            "zetaWallCoords": [
+                0,
+                0
+            ],
+            "alphaSavageFlag": true,
+            "alphaSavageCoords": [
+                100,
+                418
+            ],
+            "alphaSavagePlatform": "base",
+            "betaSavageFlag": true,
+            "betaSavageCoords": [
+                315,
+                178
+            ],
+            "betaSavagePlatform": "beta",
+            "gammaSavageFlag": true,
+            "gammaSavageCoords": [
+                450,
+                298
+            ],
+            "gammaSavagePlatform": "alpha",
+            "deltaSavageFlag": true,
+            "deltaSavageCoords": [
+                400,
+                418
+            ],
+            "deltaSavagePlatform": "base",
+            "alphaFastroomFlag": false,
+            "alphaFastroomCoords": [
+                0,
+                0
+            ],
+            "betaFastroomFlag": false,
+            "betaFastroomCoords": [
+                0,
+                0
+            ],
+            "alphaSlowroomFlag": true,
+            "alphaSlowroomCoords": [
+                440,
+                305
+            ],
+            "betaSlowroomFlag": false,
+            "betaSlowroomCoords": [
+                0,
+                0
+            ],
+            "alphaGravroomFlag": true,
+            "alphaGravroomCoords": [
+                470,
+                185
+            ],
+            "betaGravroomFlag": true,
+            "betaGravroomCoords": [
+                215,
+                185
+            ]
+        },
+        {
+            "level": 8,
+            "limited": true,
+            "limittype": "LOSE",
+            "time": 90,
+            "exitCoords": [
+                30,
+                30
+            ],
+            "spawnCoords": [
+                60,
+                400
+            ],
+            "CatAmountAll": 5,
+            "maskFlag": true,
+            "maskKind": "luck",
+            "maskChance": 0.3,
+            "maskCoords": [
+                300,
+                43
+            ],
+            "alphaPlatformFlag": true,
+            "alphaPlatformCoords": [
+                330,
+                10,
+                180
+            ],
+            "betaPlatformFlag": true,
+            "betaPlatformCoords": [
+                330,
+                470,
+                610
+            ],
+            "gammaPlatformFlag": true,
+            "gammaPlatformCoords": [
+                200,
+                10,
+                150
+            ],
+            "deltaPlatformFlag": true,
+            "deltaPlatformCoords": [
+                200,
+                440,
+                610
+            ],
+            "epsilonPlatformFlag": true,
+            "epsilonPlatformCoords": [
+                90,
+                10,
+                180
+            ],
+            "zetaPlatformFlag": true,
+            "zetaPlatformCoords": [
+                90,
+                470,
+                610
+            ],
+            "etaPlatformFlag": true,
+            "etaPlatformCoords": [
+                330,
+                240,
+                410
+            ],
+            "thetaPlatformFlag": true,
+            "thetaPlatformCoords": [
+                200,
+                210,
+                380
+            ],
+            "iotaPlatformFlag": true,
+            "iotaPlatformCoords": [
+                90,
+                240,
+                410
+            ],
+            "alphaCatFlag": true,
+            "alphaCatCoords": [
+                80,
+                298
+            ],
+            "betaCatFlag": true,
+            "betaCatCoords": [
+                240,
+                168
+            ],
+            "gammaCatFlag": true,
+            "gammaCatCoords": [
+                50,
+                168
+            ],
+            "deltaCatFlag": true,
+            "deltaCatCoords": [
+                500,
+                58
+            ],
+            "epsilonCatFlag": true,
+            "epsilonCatCoords": [
+                320,
+                168
+            ],
+            "zetaCatFlag": false,
+            "zetaCatCoords": [
+                0,
+                0
+            ],
+            "alphaBonusFlag": true,
+            "alphaBonusCoords": [
+                130,
+                294
+            ],
+            "betaBonusFlag": true,
+            "betaBonusCoords": [
+                490,
+                164
+            ],
+            "gammaBonusFlag": true,
+            "gammaBonusCoords": [
+                110,
+                54
+            ],
+            "deltaBonusFlag": true,
+            "deltaBonusCoords": [
+                600,
+                414
+            ],
+            "epsilonBonusFlag": true,
+            "epsilonBonusCoords": [
+                500,
+                294
+            ],
+            "zetaBonusFlag": false,
+            "zetaBonusCoords": [
+                0,
+                0
+            ],
+            "alphaLadderFlag": false,
+            "alphaLadderCoords": [
+                0,
+                0
+            ],
+            "betaLadderFlag": false,
+            "betaLadderCoords": [
+                0,
+                0
+            ],
+            "gammaLadderFlag": false,
+            "gammaLadderCoords": [
+                0,
+                0
+            ],
+            "deltaLadderFlag": false,
+            "deltaLadderCoords": [
+                0,
+                0
+            ],
+            "epsilonLadderFlag": false,
+            "epsilonLadderCoords": [
+                0,
+                0
+            ],
+            "zetaLadderFlag": false,
+            "zetaLadderCoords": [
+                0,
+                0
+            ],
+            "alphaWallFlag": true,
+            "alphaWallCoords": [
+                270,
+                136
+            ],
+            "betaWallFlag": false,
+            "betaWallCoords": [
+                0,
+                0
+            ],
+            "gammaWallFlag": false,
+            "gammaWallCoords": [
+                0,
+                0
+            ],
+            "deltaWallFlag": false,
+            "deltaWallCoords": [
+                0,
+                0
+            ],
+            "epsilonWallFlag": false,
+            "epsilonWallCoords": [
+                0,
+                0
+            ],
+            "zetaWallFlag": false,
+            "zetaWallCoords": [
+                0,
+                0
+            ],
+            "alphaSavageFlag": true,
+            "alphaSavageCoords": [
+                560,
+                298
+            ],
+            "alphaSavagePlatform": "beta",
+            "betaSavageFlag": true,
+            "betaSavageCoords": [
+                300,
+                58
+            ],
+            "betaSavagePlatform": "iota",
+            "gammaSavageFlag": false,
+            "gammaSavageCoords": [
+                0,
+                0
+            ],
+            "gammaSavagePlatform": "epsilon",
+            "deltaSavageFlag": false,
+            "deltaSavageCoords": [
+                0,
+                0
+            ],
+            "deltaSavagePlatform": "base",
+            "alphaFastroomFlag": true,
+            "alphaFastroomCoords": [
+                305,
+                425
+            ],
+            "betaFastroomFlag": false,
+            "betaFastroomCoords": [
+                0,
+                0
+            ],
+            "alphaSlowroomFlag": false,
+            "alphaSlowroomCoords": [
+                0,
+                0
+            ],
+            "betaSlowroomFlag": false,
+            "betaSlowroomCoords": [
+                0,
+                0
+            ],
+            "alphaGravroomFlag": true,
+            "alphaGravroomCoords": [
+                170,
+                426
+            ],
+            "betaGravroomFlag": true,
+            "betaGravroomCoords": [
+                430,
+                426
+            ]
+        },
+        {
+            "level": 9,
+            "limited": false,
+            "limittype": "NEXT",
+            "time": 1,
+            "exitCoords": [
+                270,
+                30
+            ],
+            "spawnCoords": [
+                260,
+                270
+            ],
+            "CatAmountAll": 4,
+            "maskFlag": false,
+            "maskKind": "bless",
+            "maskChance": 0.3,
+            "maskCoords": [
+                0,
+                0
+            ],
+            "alphaPlatformFlag": true,
+            "alphaPlatformCoords": [
+                330,
+                250,
+                500
+            ],
+            "betaPlatformFlag": true,
+            "betaPlatformCoords": [
+                210,
+                50,
+                250
+            ],
+            "gammaPlatformFlag": true,
+            "gammaPlatformCoords": [
+                210,
+                400,
+                600
+            ],
+            "deltaPlatformFlag": true,
+            "deltaPlatformCoords": [
+                90,
+                200,
+                450
+            ],
+            "epsilonPlatformFlag": true,
+            "epsilonPlatformCoords": [
+                330,
+                10,
+                150
+            ],
+            "zetaPlatformFlag": false,
+            "zetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "etaPlatformFlag": false,
+            "etaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "thetaPlatformFlag": false,
+            "thetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "iotaPlatformFlag": false,
+            "iotaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "alphaCatFlag": true,
+            "alphaCatCoords": [
+                600,
+                418
+            ],
+            "betaCatFlag": true,
+            "betaCatCoords": [
+                300,
+                298
+            ],
+            "gammaCatFlag": true,
+            "gammaCatCoords": [
+                80,
+                178
+            ],
+            "deltaCatFlag": true,
+            "deltaCatCoords": [
+                360,
+                58
+            ],
+            "epsilonCatFlag": false,
+            "epsilonCatCoords": [
+                0,
+                0
+            ],
+            "zetaCatFlag": false,
+            "zetaCatCoords": [
+                0,
+                0
+            ],
+            "alphaBonusFlag": true,
+            "alphaBonusCoords": [
+                560,
+                174
+            ],
+            "betaBonusFlag": true,
+            "betaBonusCoords": [
+                20,
+                414
+            ],
+            "gammaBonusFlag": true,
+            "gammaBonusCoords": [
+                80,
+                294
+            ],
+            "deltaBonusFlag": true,
+            "deltaBonusCoords": [
+                430,
+                294
+            ],
+            "epsilonBonusFlag": false,
+            "epsilonBonusCoords": [
+                0,
+                0
+            ],
+            "zetaBonusFlag": false,
+            "zetaBonusCoords": [
+                0,
+                0
+            ],
+            "alphaLadderFlag": true,
+            "alphaLadderCoords": [
+                200,
+                330
+            ],
+            "betaLadderFlag": true,
+            "betaLadderCoords": [
+                150,
+                90
+            ],
+            "gammaLadderFlag": true,
+            "gammaLadderCoords": [
+                450,
+                90
+            ],
+            "deltaLadderFlag": true,
+            "deltaLadderCoords": [
+                350,
+                210
+            ],
+            "epsilonLadderFlag": false,
+            "epsilonLadderCoords": [
+                0,
+                0
+            ],
+            "zetaLadderFlag": false,
+            "zetaLadderCoords": [
+                0,
+                0
+            ],
+            "alphaWallFlag": true,
+            "alphaWallCoords": [
+                218,
+                146
+            ],
+            "betaWallFlag": true,
+            "betaWallCoords": [
+                468,
+                266
+            ],
+            "gammaWallFlag": false,
+            "gammaWallCoords": [
+                0,
+                0
+            ],
+            "deltaWallFlag": false,
+            "deltaWallCoords": [
+                0,
+                0
+            ],
+            "epsilonWallFlag": false,
+            "epsilonWallCoords": [
+                0,
+                0
+            ],
+            "zetaWallFlag": false,
+            "zetaWallCoords": [
+                0,
+                0
+            ],
+            "alphaSavageFlag": true,
+            "alphaSavageCoords": [
+                420,
+                177
+            ],
+            "alphaSavagePlatform": "gamma",
+            "betaSavageFlag": true,
+            "betaSavageCoords": [
+                90,
+                177
+            ],
+            "betaSavagePlatform": "beta",
+            "gammaSavageFlag": true,
+            "gammaSavageCoords": [
+                300,
+                418
+            ],
+            "gammaSavagePlatform": "base",
+            "deltaSavageFlag": false,
+            "deltaSavageCoords": [
+                0,
+                0
+            ],
+            "deltaSavagePlatform": "base",
+            "alphaFastroomFlag": true,
+            "alphaFastroomCoords": [
+                420,
+                186
+            ],
+            "betaFastroomFlag": false,
+            "betaFastroomCoords": [
+                0,
+                0
+            ],
+            "alphaSlowroomFlag": true,
+            "alphaSlowroomCoords": [
+                400,
+                425
+            ],
+            "betaSlowroomFlag": true,
+            "betaSlowroomCoords": [
+                220,
+                66
+            ],
+            "alphaGravroomFlag": false,
+            "alphaGravroomCoords": [
+                0,
+                0
+            ],
+            "betaGravroomFlag": false,
+            "betaGravroomCoords": [
+                0,
+                0
+            ]
+        },
+        {
+            "level": 10,
+            "limited": false,
+            "limittype": "LOSE",
+            "time": 1,
+            "exitCoords": [
+                140,
+                30
+            ],
+            "spawnCoords": [
+                100,
+                400
+            ],
+            "CatAmountAll": 5,
+            "maskFlag": false,
+            "maskKind": "rage",
+            "maskChance": 0.4,
+            "maskCoords": [
+                350,
+                55
+            ],
+            "alphaPlatformFlag": true,
+            "alphaPlatformCoords": [
+                330,
+                200,
+                560
+            ],
+            "betaPlatformFlag": true,
+            "betaPlatformCoords": [
+                210,
+                530,
+                610
+            ],
+            "gammaPlatformFlag": true,
+            "gammaPlatformCoords": [
+                90,
+                150,
+                560
+            ],
+            "deltaPlatformFlag": true,
+            "deltaPlatformCoords": [
+                90,
+                10,
+                100
+            ],
+            "epsilonPlatformFlag": true,
+            "epsilonPlatformCoords": [
+                190,
+                10,
+                100
+            ],
+            "zetaPlatformFlag": true,
+            "zetaPlatformCoords": [
+                330,
+                10,
+                100
+            ],
+            "etaPlatformFlag": false,
+            "etaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "thetaPlatformFlag": false,
+            "thetaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "iotaPlatformFlag": false,
+            "iotaPlatformCoords": [
+                0,
+                0,
+                0
+            ],
+            "alphaCatFlag": true,
+            "alphaCatCoords": [
+                360,
+                58
+            ],
+            "betaCatFlag": true,
+            "betaCatCoords": [
+                35,
+                58
+            ],
+            "gammaCatFlag": true,
+            "gammaCatCoords": [
+                500,
+                418
+            ],
+            "deltaCatFlag": true,
+            "deltaCatCoords": [
+                35,
+                298
+            ],
+            "epsilonCatFlag": true,
+            "epsilonCatCoords": [
+                30,
+                418
+            ],
+            "zetaCatFlag": false,
+            "zetaCatCoords": [
+                0,
+                0
+            ],
+            "alphaBonusFlag": true,
+            "alphaBonusCoords": [
+                300,
+                414
+            ],
+            "betaBonusFlag": true,
+            "betaBonusCoords": [
+                400,
+                294
+            ],
+            "gammaBonusFlag": true,
+            "gammaBonusCoords": [
+                45,
+                154
+            ],
+            "deltaBonusFlag": true,
+            "deltaBonusCoords": [
+                320,
+                54
+            ],
+            "epsilonBonusFlag": false,
+            "epsilonBonusCoords": [
+                0,
+                0
+            ],
+            "zetaBonusFlag": false,
+            "zetaBonusCoords": [
+                0,
+                0
+            ],
+            "alphaLadderFlag": true,
+            "alphaLadderCoords": [
+                150,
+                330
+            ],
+            "betaLadderFlag": true,
+            "betaLadderCoords": [
+                560,
+                330
+            ],
+            "gammaLadderFlag": true,
+            "gammaLadderCoords": [
+                480,
+                210
+            ],
+            "deltaLadderFlag": true,
+            "deltaLadderCoords": [
+                560,
+                90
+            ],
+            "epsilonLadderFlag": false,
+            "epsilonLadderCoords": [
+                0,
+                0
+            ],
+            "zetaLadderFlag": false,
+            "zetaLadderCoords": [
+                0,
+                0
+            ],
+            "alphaWallFlag": true,
+            "alphaWallCoords": [
+                360,
+                386
+            ],
+            "betaWallFlag": true,
+            "betaWallCoords": [
+                360,
+                266
+            ],
+            "gammaWallFlag": true,
+            "gammaWallCoords": [
+                220,
+                26
+            ],
+            "deltaWallFlag": true,
+            "deltaWallCoords": [
+                150,
+                120
+            ],
+            "epsilonWallFlag": false,
+            "epsilonWallCoords": [
+                0,
+                0
+            ],
+            "zetaWallFlag": false,
+            "zetaWallCoords": [
+                0,
+                0
+            ],
+            "alphaSavageFlag": true,
+            "alphaSavageCoords": [
+                500,
+                418
+            ],
+            "alphaSavagePlatform": "base",
+            "betaSavageFlag": true,
+            "betaSavageCoords": [
+                300,
+                58
+            ],
+            "betaSavagePlatform": "gamma",
+            "gammaSavageFlag": false,
+            "gammaSavageCoords": [
+                0,
+                0
+            ],
+            "gammaSavagePlatform": "base",
+            "deltaSavageFlag": false,
+            "deltaSavageCoords": [
+                0,
+                0
+            ],
+            "deltaSavagePlatform": "base",
+            "alphaFastroomFlag": true,
+            "alphaFastroomCoords": [
+                538,
+                306
+            ],
+            "betaFastroomFlag": false,
+            "betaFastroomCoords": [
+                0,
+                0
+            ],
+            "alphaSlowroomFlag": false,
+            "alphaSlowroomCoords": [
+                0,
+                0
+            ],
+            "betaSlowroomFlag": false,
+            "betaSlowroomCoords": [
+                0,
+                0
+            ],
+            "alphaGravroomFlag": true,
+            "alphaGravroomCoords": [
+                334,
+                306
             ],
             "betaGravroomFlag": false,
             "betaGravroomCoords": [

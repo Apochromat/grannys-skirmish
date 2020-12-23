@@ -7,14 +7,14 @@ from tkinter import *
 from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 
-"""Пустота"""
+# Пустота
 class Empty():
     def __init__(self):
         self.i = 0
     def protocol(self, u, i):
         pass
 
-"""Переменные"""
+# Переменные
 colors = ["wheat1", "aquamarine", "palegreen1", "plum1", "grey80", "lightblue"]
 lev_colors = ["wheat1", "plum1", "lightblue", "pink2", "palegreen1", "lemonchiffon", "grey80", "mediumpurple1",
               "orchid2", "khaki1","paleturquoise2", "burlywood1"]
@@ -28,7 +28,7 @@ hint = "Персонаж/Выход: X [30; 610], Y [30; 430]\n" \
        "Дикарь (Платформа) значения:\n base, alpha, beta, gamma, delta,\n epsilon, zeta, eta, theta, iota\n"\
        "Тип маски: bless, joy, luck, rage"
 
-"""Функции"""
+# Функции
 def openfile():
     global settings, filepath
     filepath = fd.askopenfilename()

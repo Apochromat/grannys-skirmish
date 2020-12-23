@@ -22,6 +22,7 @@ class VariableHeap:
         self.Score = 0  # Счет уровня
 
         self.isLadderTop = False
+        self.isDo = False
 
         self.keyCounter = 0
 
@@ -58,16 +59,13 @@ class PlatformSimple:  # Класс обычной платформы, масш�
             self.lastpart += 1
 
     def border(self):
-        bord = [self.coords[1] + 15, self.coords[2] - 15]
-        return bord
+        return [self.coords[1] + 15, self.coords[2] - 15]
 
     def touch_place(self):  # Массив точек касания верхней линии
-        touch = [self.coords[0], self.coords[1], self.coords[2]]
-        return touch
+        return [self.coords[0], self.coords[1], self.coords[2]]
 
     def touch_head(self):  # Массив точек касания нижней линии
-        head = [self.coords[0] + 30, self.coords[1], self.coords[2]]
-        return head
+        return [self.coords[0] + 30, self.coords[1], self.coords[2]]
 
 
 # Стена
@@ -78,7 +76,7 @@ class Wall:
         self.coords = coordsarray
         self.avaible = True
         self.centre = [self.coords[0] + 16, self.coords[1] + 32]
-        self.id = canvas.create_image(self.centre[0], self.centre[1], image=image, tag="wall")
+        self.id = canvas.create_image(self.centre[0], self.centre[1], image=random.choice(image), tag="wall")
 
     def actionzone(self):  # Зона активности (совершения действий)
         action_array = [self.centre[0] - 30, self.centre[0] + 30, self.centre[1] - 32, self.centre[1] + 32]
@@ -86,14 +84,14 @@ class Wall:
 
 
 # Лестница
-class Ladder:  # Класс лестницы, позволяет забираться на верх
+class Ladder:
     # Ширина 50, Высота 120
     def __init__(self, coordsarray, canvas, image):  # ax by (Верхний левый угол)
         self.canvas = canvas
         self.coords = coordsarray
         self.avaible = True
         self.centre = [self.coords[0] + 25, self.coords[1] + 60]
-        self.id = self.canvas.create_image(self.centre[0], self.centre[1], image=image, tag="ladder")
+        self.id = self.canvas.create_image(self.centre[0], self.centre[1], image=random.choice(image), tag="ladder")
         self.isLadderTop = False
 
     def actionzone(self):  # Зона активности (совершения действий)
@@ -254,8 +252,8 @@ class Savage:
 
 
 # Маска
-class Mask:  # Класс котика, которых мы спасаем
-    # Ширина 48, Высота 32
+class Mask:  
+    # Ширина 48, Высота 40
     def __init__(self, coordsarray, canvas, image, kind):  # ax by (Верхний левый угол)
         self.canvas = canvas
         self.coords = coordsarray
@@ -336,4 +334,7 @@ class Empty:
         pass
 
     def opening(self):
+        pass
+
+    def collect(self):
         pass
